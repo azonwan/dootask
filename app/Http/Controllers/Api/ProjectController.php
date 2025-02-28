@@ -941,7 +941,8 @@ class ProjectController extends AbstractController
      * @apiName task__lists
      *
      * @apiParam {Object} [keys]             搜索条件
-     * - keys.name: ID、任务名称
+     * - keys.name: ID、任务名称、任务描述
+     * - keys.tag: 标签名称
      *
      * @apiParam {Number} [project_id]       项目ID
      * @apiParam {Number} [parent_id]        主任务ID（project_id && parent_id ≤ 0 时 仅查询自己参与的任务）
@@ -994,8 +995,16 @@ class ProjectController extends AbstractController
             if (Base::isNumber($keys['name'])) {
                 $builder->where("project_tasks.id", intval($keys['name']));
             } else {
-                $builder->where("project_tasks.name", "like", "%{$keys['name']}%");
+                $builder->where(function ($query) use ($keys) {
+                    $query->where("project_tasks.name", "like", "%{$keys['name']}%");
+                    $query->orWhere("project_tasks.desc", "like", "%{$keys['name']}%");
+                });
             }
+        }
+        if ($keys['tag']) {
+            $builder->whereHas('taskTag', function ($query) use ($keys) {
+                $query->where('project_task_tags.name', $keys['tag']);
+            });
         }
         //
         $scopeAll = false;

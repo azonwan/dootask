@@ -13,7 +13,22 @@
                         {{$L("关键词")}}
                     </div>
                     <div class="search-content">
-                        <Input v-model="keys.name" :placeholder="$L('ID、任务名...')" clearable/>
+                        <Input v-model="keys.name" :placeholder="$L('ID、名称、描述...')" clearable/>
+                    </div>
+                </li>
+                <li v-if="tags.length > 0">
+                    <div class="search-label">
+                        {{$L("任务标签")}}
+                    </div>
+                    <div class="search-content">
+                        <Select v-model="keys.tag" :placeholder="$L('全部')">
+                            <Option value="">{{$L('全部')}}</Option>
+                            <Option v-for="tag in tags" :key="tag.id" :value="tag.name" :label="tag.name">
+                                <div class="tag-dot" :style="{'--bg-color': tag.color}">
+                                    {{tag.name}}
+                                </div>
+                            </Option>
+                        </Select>
                     </div>
                 </li>
                 <li class="search-button">
@@ -103,6 +118,23 @@ export default {
                     }
                 },
                 {
+                    title: this.$L('任务标签'),
+                    key: 'tags',
+                    minWidth: 100,
+                    render: (h, {row}) => {
+                        if (row.task_tag.length == 0) {
+                            return h('div', '-');
+                        }
+                        return h('AutoTip', {
+                            on: {
+                                'on-click': () => {
+                                    this.$store.dispatch("openTask", row);
+                                }
+                            }
+                        }, row.task_tag.map(({name}) => name).join('、'));
+                    }
+                },
+                {
                     title: this.$L('完成时间'),
                     key: 'complete_at',
                     width: 168,
@@ -139,7 +171,7 @@ export default {
                 {
                     title: this.$L('操作'),
                     align: 'center',
-                    width: 100,
+                    width: 120,
                     render: (h, params) => {
                         if (this.cacheTasks.find(task => task.id == params.row.id && !task.archived_at)) {
                             return h('div', {
@@ -211,14 +243,14 @@ export default {
                                             })
                                         }
                                     },
-                                }, 
-                                [ 
+                                },
+                                [
                                     params.row.__restorePoptipLoadIng ? h('Loading', {
                                         style: {
                                             width: '26px',
                                             height: '15px',
                                         },
-                                    }) : this.$L('还原') 
+                                    }) : this.$L('还原')
                                 ])
                             ]),
                             h('Poptip', {
@@ -253,6 +285,8 @@ export default {
             ],
             list: [],
 
+            tags: [],
+
             page: 1,
             pageSize: 20,
             total: 0,
@@ -260,7 +294,7 @@ export default {
         }
     },
     mounted() {
-
+        this.loadTags()
     },
     computed: {
         ...mapState(['cacheTasks'])
@@ -283,6 +317,23 @@ export default {
         onSearch() {
             this.page = 1;
             this.getLists();
+        },
+
+        async loadTags() {
+            let tags = [];
+            const project_id = this.projectId
+            try {
+                const {data} = await this.$store.dispatch("call", {
+                    url: 'project/tag/list',
+                    data: {project_id},
+                })
+                tags = data || []
+            } catch (e) {
+                tags = [];
+            }
+            if (project_id === this.projectId) {
+                this.tags = tags
+            }
         },
 
         getLists() {
