@@ -2595,7 +2595,7 @@ class ProjectController extends AbstractController
             $builder->with(['projectTask:id,parent_id,name'])->whereProjectId($project->id)->whereTaskOnly(0);
         }
         //
-        $list = $builder->orderByDesc('created_at')->paginate(Base::getPaginate(100, 20));
+        $list = $builder->orderByDesc('created_at')->orderByDesc('id')->paginate(Base::getPaginate(100, 20));
         $list->transform(function (ProjectLog $log) use ($task_id) {
             $timestamp = Carbon::parse($log->created_at)->timestamp;
             if ($task_id === 0) {
