@@ -771,6 +771,7 @@ class ProjectTask extends AbstractModel
             if (Arr::exists($data, 'times')) {
                 $oldAt = [Carbon::parse($this->start_at), Carbon::parse($this->end_at)];
                 $oldStringAt = $this->start_at ? ($oldAt[0]->toDateTimeString() . '~' . $oldAt[1]->toDateTimeString()) : '';
+                $isOverdue = $this->overdue;
                 $clearSubTaskTime = false;
                 $this->start_at = null;
                 $this->end_at = null;
@@ -836,7 +837,19 @@ class ProjectTask extends AbstractModel
                         }
                     });
                 }
-                $newStringAt = $this->start_at && !$clearSubTaskTime ? ($this->start_at->toDateTimeString() . '~' . $this->end_at->toDateTimeString()) : '';
+                $existAt = $this->start_at && !$clearSubTaskTime;
+                $newStringAt = $existAt ? ($this->start_at->toDateTimeString() . '~' . $this->end_at->toDateTimeString()) : '';
+                if ($isOverdue) {
+                    $this->addLog("{任务}超期未完成", [
+                        'cache' => [
+                            'task_at' => $oldStringAt,
+                            'change_at' => $newStringAt,
+                            'over_sec' => ($existAt ? $this->end_at : Carbon::now())->diffInSeconds($oldAt[1]),
+                            'owners' => $this->taskUser->where('owner', 1)->pluck('userid')->toArray(),
+                            'assists' => $this->taskUser->where('owner', 0)->pluck('userid')->toArray(),
+                        ]
+                    ]);
+                }
                 $newDesc = $desc ? "（备注：{$desc}）" : "";
                 $this->addLog("修改{任务}时间" . $newDesc, [
                     'change' => [$oldStringAt, $newStringAt]
@@ -1347,6 +1360,16 @@ class ProjectTask extends AbstractModel
                 }
                 if (!$this->hasOwner()) {
                     throw new ApiException('请先领取任务');
+                }
+                if ($this->overdue) {
+                    $this->addLog("{任务}超期未完成", [
+                        'cache' => [
+                            'task_at' => $this->start_at . '~' . $this->end_at,
+                            'over_sec' => Carbon::now()->diffInSeconds($this->end_at),
+                            'owners' => $this->taskUser->where('owner', 1)->pluck('userid')->toArray(),
+                            'assists' => $this->taskUser->where('owner', 0)->pluck('userid')->toArray(),
+                        ]
+                    ]);
                 }
                 if (empty($complete_name)) {
                     $complete_name = '已完成';
