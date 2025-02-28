@@ -28462,5 +28462,17 @@
         "fr": "Obtenir la liste des modèles locaux",
         "id": "Dapatkan daftar model lokal",
         "ru": "Получить список локальных моделей"
+    },
+    {
+        "key": "任务超期未完成",
+        "zh": "",
+        "zh-CHT": "任務超期未完成",
+        "en": "Task overdue and incomplete",
+        "ko": "작업 기한 초과 및 미완료",
+        "ja": "タスクが期限を超過して未完了",
+        "de": "Aufgabe überfällig und nicht abgeschlossen",
+        "fr": "Tâche en retard et incomplète",
+        "id": "Tugas terlambat dan belum selesai",
+        "ru": "Задача просрочена и не завершена"
     }
 ]
