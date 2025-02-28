@@ -12252,18 +12252,6 @@
         "ru": "Показать файлы"
     },
     {
-        "key": "ID、任务名...",
-        "zh": "",
-        "zh-CHT": "ID、任務名...",
-        "en": "ID, Task Name...",
-        "ko": "ID, 작업 이름...",
-        "ja": "ID、タスク名...",
-        "de": "ID, Aufgabenname...",
-        "fr": "ID, Nom de la tâche...",
-        "id": "ID, Nama Tugas...",
-        "ru": "ID, Название задачи..."
-    },
-    {
         "key": "仅显示我的",
         "zh": "",
         "zh-CHT": "僅顯示我的",

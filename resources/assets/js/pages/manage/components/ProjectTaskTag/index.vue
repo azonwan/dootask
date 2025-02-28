@@ -5,6 +5,7 @@
             <div class="title">
                 {{$L('任务标签')}}
                 <Loading v-if="loadIng > 0"/>
+                <template v-else-if="tags.length > 0">({{tags.length}})</template>
             </div>
             <div class="actions">
                 <Button type="primary" icon="md-add" @click="handleAdd(null)">
@@ -39,7 +40,7 @@
         </div>
 
         <!-- 标签添加/编辑 -->
-        <TaskTagAdd ref="addTag" :project-id="projectId" @on-save="loadTags"/>
+        <TaskTagAdd ref="addTag" :project-id="projectId" @on-save="loadTags" @on-save-error="loadTags"/>
     </div>
 </template>
 

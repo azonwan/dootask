@@ -60,7 +60,6 @@ export default {
     components: {Tags},
     props: {
         projectId: {
-            type: [Number, String],
             required: true
         }
     },
@@ -107,7 +106,7 @@ export default {
         getEmptyTag() {
             return {
                 id: null,
-                project_id: this.projectId,
+                project_id: $A.runNum(this.projectId),
                 name: '',
                 desc: '',
                 color: ''
@@ -140,6 +139,7 @@ export default {
                 this.showEditModal = false
                 this.$emit('on-save', results)
             } catch (error) {
+                this.$emit('on-save-error', error)
                 $A.messageError(error.msg || '保存失败')
             }
         },

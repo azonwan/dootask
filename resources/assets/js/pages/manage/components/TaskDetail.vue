@@ -97,7 +97,7 @@
                 </div>
             </div>
             <Scrollbar ref="scroller" class="scroller">
-                <Alert v-if="getOwner.length === 0" class="receive-box" type="warning">
+                <Alert v-if="taskDetail.task_user !== undefined && getOwner.length === 0" class="receive-box" type="warning">
                     <span class="receive-text">{{$L('该任务尚未被领取，点击这里')}}</span>
                     <EPopover
                         v-model="receiveShow"
