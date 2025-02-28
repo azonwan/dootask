@@ -738,7 +738,7 @@ export default {
                 if ($A.leftExists(flowInfo.value, "user:")) {
                     list = list.filter(({task_user}) => task_user.find(({userid, owner}) => userid === flowInfo.userid && owner));
                 } else if ($A.leftExists(flowInfo.value, "tag:")) {
-                    list = list.filter(({task_tag}) => task_tag.find(({id}) => id === flowInfo.tag_id));
+                    list = list.filter(({task_tag}) => task_tag.find(({name}) => name === flowInfo.tag_name));
                 } else if (flowInfo.value > 0) {
                     list = list.filter(({flow_item_id}) => flow_item_id === flowInfo.value);
                 } else if (flowInfo.value == -1) {
@@ -921,7 +921,7 @@ export default {
             const tags = [];
             this.allTask.forEach(({task_tag}) => {
                 task_tag.forEach(tag => {
-                    if (!tags.find(item => item.id === tag.id)) {
+                    if (!tags.find(item => item.name === tag.name)) {
                         tags.push(tag);
                     }
                 });
@@ -978,18 +978,18 @@ export default {
             }
             // 标签
             if (this.tagList.length > 0) {
-                const tagItems = this.tagList.map(({id, name, color}) => {
+                const tagItems = this.tagList.map(({name, color}) => {
                     const length = allTask.filter(({task_tag}) => {
-                        return task_tag.find(tag => tag.id === id);
+                        return task_tag.find(tag => tag.name === name);
                     }).length
                     return {
-                        value: `tag:${id}`,
+                        value: `tag:${name}`,
                         label: `${name} (${length})`,
                         status: 'tag-dot',
                         style: {
                             '--bg-color': color,
                         },
-                        tag_id: id,
+                        tag_name: name,
                         length,
                     }
                 })
@@ -1656,7 +1656,7 @@ export default {
         flowTask(task) {
             if ($A.leftExists(this.flowInfo.value, "user:") && !task.task_user.find(({userid, owner}) => userid === this.flowInfo.userid && owner)) {
                 return true;
-            } else if ($A.leftExists(this.flowInfo.value, "tag:") && !task.task_tag.find(({id}) => id === this.flowInfo.tag_id)) {
+            } else if ($A.leftExists(this.flowInfo.value, "tag:") && !task.task_tag.find(({name}) => name === this.flowInfo.tag_name)) {
                 return true;
             } else if (this.flowInfo.value > 0 && task.flow_item_id !== this.flowInfo.value) {
                 return true;
