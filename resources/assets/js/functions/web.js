@@ -348,7 +348,7 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
                         src: item.src,
                         width: item.width,
                         height: item.height,
-                        crops: {ratio: 3, percentage: '320x0'},
+                        crops: {ratio: 5, percentage: '320x0'},
                         scaleSize: item.original.indexOf("emoticon") > -1 ? 150 : 220,
                     })
                     const value = item.original

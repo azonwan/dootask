@@ -36,7 +36,7 @@ export default {
                 src: info.url,
                 width: info.width,
                 height: info.height,
-                crops: {ratio: 3, percentage: '320x0'},
+                crops: {ratio: 5, percentage: '320x0'},
                 scaleSize: 220,
             })
             return `<img src="${data.src}" width="${data.width}" height="${data.height}" />`
