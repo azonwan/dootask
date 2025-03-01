@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Module\Base;
 use App\Module\Timer;
 use App\Module\Extranet;
+use App\Module\ElasticSearch;
 use App\Module\TimeRange;
 use App\Module\MsgTool;
 use App\Module\Table\OnlineData;
@@ -171,28 +172,16 @@ class DialogController extends AbstractController
         }
         // 搜索消息会话
         if (count($list) < 20) {
-            $prefix = DB::getTablePrefix();
-            if (preg_match('/[+\-><()~*"@]/', $key)) {
-                $against = "\"{$key}\"";
-            } else {
-                $against = "*{$key}*";
+            $es = new ElasticSearch(ElasticSearch::DUM);
+            $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, 20 - count($list));
+            if ($searchResults) {
+                foreach ($searchResults as $item) {
+                    if ($dialog = WebSocketDialog::find($item['id'])) {
+                        $dialog = array_merge($dialog->toArray(), $item);
+                        $list[] = WebSocketDialog::synthesizeData($dialog, $user->userid);
+                    }
+                }
             }
-            $msgs = DB::table('web_socket_dialog_users as u')
-                ->select(['d.*', 'u.top_at', 'u.last_at', 'u.mark_unread', 'u.silence', 'u.hide', 'u.color', 'u.updated_at as user_at', 'm.id as search_msg_id'])
-                ->join('web_socket_dialogs as d', 'u.dialog_id', '=', 'd.id')
-                ->join('web_socket_dialog_msgs as m', 'm.dialog_id', '=', 'd.id')
-                ->where('u.userid', $user->userid)
-                ->where('m.bot', 0)
-                ->whereNull('d.deleted_at')
-                ->whereRaw("MATCH({$prefix}m.key) AGAINST('{$against}' IN BOOLEAN MODE)")
-                ->orderByDesc('m.id')
-                ->take(20 - count($list))
-                ->get()
-                ->map(function($item) use ($user) {
-                    return WebSocketDialog::synthesizeData($item, $user->userid);
-                })
-                ->all();
-            $list = array_merge($list, $msgs);
         }
         //
         return Base::retSuccess('success', $list);

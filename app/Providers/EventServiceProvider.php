@@ -7,11 +7,13 @@ use App\Models\ProjectTask;
 use App\Models\ProjectTaskUser;
 use App\Models\ProjectUser;
 use App\Models\WebSocketDialog;
+use App\Models\WebSocketDialogMsg;
 use App\Models\WebSocketDialogUser;
 use App\Observers\ProjectObserver;
 use App\Observers\ProjectTaskObserver;
 use App\Observers\ProjectTaskUserObserver;
 use App\Observers\ProjectUserObserver;
+use App\Observers\WebSocketDialogMsgObserver;
 use App\Observers\WebSocketDialogObserver;
 use App\Observers\WebSocketDialogUserObserver;
 use Illuminate\Auth\Events\Registered;
@@ -43,6 +45,7 @@ class EventServiceProvider extends ServiceProvider
         ProjectTaskUser::observe(ProjectTaskUserObserver::class);
         ProjectUser::observe(ProjectUserObserver::class);
         WebSocketDialog::observe(WebSocketDialogObserver::class);
+        WebSocketDialogMsg::observe(WebSocketDialogMsgObserver::class);
         WebSocketDialogUser::observe(WebSocketDialogUserObserver::class);
     }
 }

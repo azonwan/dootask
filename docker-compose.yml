@@ -228,6 +228,9 @@ services:
   es:
     container_name: "dootask-es-${APP_ID}"
     image: "elasticsearch:8.17.2"
+    volumes:
+      - ./docker/es/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./docker/es/data:/usr/share/elasticsearch/data
     environment:
       discovery.type: single-node
       xpack.security.enabled: false
