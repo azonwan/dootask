@@ -633,6 +633,10 @@ export default {
             this.loadInputDraft()
         },
 
+        quoteData() {
+            this.quoteChanged = true
+        },
+
         showMenu(val) {
             if (val) {
                 // this.showMenu = false;
@@ -1460,15 +1464,23 @@ export default {
                 this.$emit('input', '')
             } else if (this.quoteData) {
                 // 取消回复
-                if (this.$refs.editor.firstChild.querySelectorAll('img').length === 0) {
-                    const quoteDiv = document.createElement('div')
-                    quoteDiv.innerHTML = this.$refs.editor.firstChild.innerHTML
-                    quoteDiv.querySelectorAll("span.mention").forEach(span => {
-                        if (span.getAttribute("data-id") == this.quoteData.userid) {
-                            span.innerHTML = "";
+                const {firstChild} = this.$refs.editor;
+                if (firstChild && firstChild.querySelectorAll('img').length === 0) {
+                    const mentions = firstChild.querySelectorAll("span.mention");
+                    if (mentions.length === 1) {
+                        const element = mentions[0];
+                        if (element.getAttribute("data-id") == this.quoteData.userid) {
+                            const parent = element.parentNode;
+                            parent.normalize();
+                            const nodes = Array.from(parent.childNodes).filter(node => {
+                                return node.nodeType !== Node.TEXT_NODE || !/^\s*$/.test(node.textContent);
+                            })
+                            if (nodes.length === 1) {
+                                element.remove();
+                            }
                         }
-                    })
-                    if (!quoteDiv.innerText.replace(/\s/g, '')) {
+                    }
+                    if (!firstChild.innerText.replace(/\s/g, '')) {
                         this.$emit('input', '')
                     }
                 }
@@ -1476,26 +1488,31 @@ export default {
             this.setQuote(0)
         },
 
-        onQuoteUserResult(data) {
-            if (this.dialogData.type !== 'group') {
+        onQuoteUserResult(userData) {
+            if (!this.quoteChanged) {
                 return
             }
-            if (this.quoteUpdate || !this.quoteData || !this.replyMsgAutoMention) {
+            this.quoteChanged = false
+            // 基本判断
+            if (
+                this.dialogData.type !== 'group' ||         // 非群聊
+                this.quoteUpdate ||                         // 修改消息
+                !this.quoteData ||                          // 无引用消息
+                !this.replyMsgAutoMention ||                // 不自动@
+                this.userId === userData.userid ||          // 自己
+                this.quoteData.userid !== userData.userid   // 不同人
+            ) {
                 return
             }
-            if (data.bot && !$A.rightExists(data.email, '@bot.system')) {
+            // 判断是否已经@过
+            if (new RegExp(`<span[^>]+?class="mention"[^>]+?data-id="${userData.userid}"[^>]*?>`).test(this.$refs.editor.firstChild?.innerHTML)) {
                 return
             }
-            if (this.userId === data.userid || this.quoteData.userid !== data.userid) {
-                return
-            }
-            if (new RegExp(`<span[^>]+?class="mention"[^>]+?data-id="${data.userid}"[^>]*?>`).test(this.$refs.editor.firstChild.innerHTML)) {
-                return
-            }
+            // 添加@
             this.addMention({
                 denotationChar: "@",
-                id: data.userid,
-                value: data.nickname,
+                id: userData.userid,
+                value: userData.nickname,
             })
         },
 
