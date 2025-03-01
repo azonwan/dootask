@@ -58,7 +58,6 @@
             }
         }
         .management-department {
-            width: 239px;
             border-right: 1px solid #efefef;
             flex-shrink: 0;
             display: flex;
@@ -116,6 +115,9 @@
                 align-items: center;
                 justify-content: center;
             }
+        }
+        .management-resize {
+            width: 2px;
         }
         .management-user {
             flex: 1;

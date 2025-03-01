@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="management-box" :class="{'min-box':minBox}">
-            <div class="management-department">
+            <div class="management-department" :style="{width: departmentWidth + 'px'}">
                 <ul>
                     <li :class="[`level-1`, departmentSelect === 0 ? 'active' : '']" @click="onSelectDepartment(0)">
                         <i class="taskfont department-icon">&#xe766;</i>
@@ -64,6 +64,12 @@
                     <Button type="primary" icon="md-add" @click="onShowDepartment(null)">{{$L('新建部门')}}</Button>
                 </div>
             </div>
+            <ResizeLine
+                class="management-resize"
+                placement="right"
+                v-model="departmentWidth"
+                :min="100"
+                :max="900"/>
             <div class="management-user" :style="userStyle">
                 <div class="search-container lr">
                     <ul>
@@ -362,11 +368,12 @@
 import UserSelect from "../../../components/UserSelect.vue";
 import UserAvatarTip from "../../../components/UserAvatar/tip.vue";
 import ImgUpload from "../../../components/ImgUpload";
+import ResizeLine from "../../../components/ResizeLine.vue";
 import {mapState} from "vuex";
 
 export default {
     name: "TeamManagement",
-    components: {UserAvatarTip, UserSelect, ImgUpload},
+    components: {ResizeLine, UserAvatarTip, UserSelect, ImgUpload},
     props: {
         checkinMode: {
             type: Boolean,
@@ -763,6 +770,7 @@ export default {
             departmentEditShow: false,
             departmentEditLoading: 0,
             departmentEditData: {},
+            departmentWidth: $A.getStorageInt('management.departmentWidth', 239),
 
             disableShow: false,
             disableLoading: 0,
@@ -918,6 +926,9 @@ export default {
         },
         departmentSelect() {
             this.setPage(1)
+        },
+        departmentWidth(w) {
+            $A.setStorage('management.departmentWidth', w)
         },
         windowPortrait: {
             handler(v) {
