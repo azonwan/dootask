@@ -1064,7 +1064,10 @@ export default {
                 }
             }
         },
-        taskDialogWidth(w) {
+        taskDialogWidth(w, o) {
+            if (o === -1) {
+                return;
+            }
             $A.setStorage('task.dialogWidth', w);
         },
     },

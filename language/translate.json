@@ -19548,18 +19548,6 @@
         "ru": "Родительский отдел не существует или был удален"
     },
     {
-        "key": "上级部门层级错误",
-        "zh": "",
-        "zh-CHT": "上級部門層級錯誤",
-        "en": "Parent department hierarchy error",
-        "ko": "상위 부서 계층 오류",
-        "ja": "上位部門の階層エラー",
-        "de": "Fehler in der Hierarchie der übergeordneten Abteilung",
-        "fr": "Erreur de hiérarchie du département parent",
-        "id": "Kesalahan hierarki departemen induk",
-        "ru": "Ошибка иерархии родительского отдела"
-    },
-    {
         "key": "每个部门最多只能创建(%T1)个子部门",
         "zh": "",
         "zh-CHT": "每個部門最多只能創建(%T1)個子部門",
@@ -19570,18 +19558,6 @@
         "fr": "Un maximum de (%T1) sous-départements peuvent être créés dans chaque département",
         "id": "Maksimal (%T1) sub-departemen dapat dibuat di setiap departemen",
         "ru": "В каждом отделе можно создать не более (%T1) подотделов"
-    },
-    {
-        "key": "含有子部门无法修改上级部门",
-        "zh": "",
-        "zh-CHT": "含有子部門無法修改上級部門",
-        "en": "Cannot modify parent department when subdepartments exist",
-        "ko": "하위 부서가 있는 경우 상위 부서를 수정할 수 없습니다",
-        "ja": "子部門がある場合、上位部門を変更できません",
-        "de": "Übergeordnete Abteilung kann nicht geändert werden, wenn Unterabteilungen vorhanden sind",
-        "fr": "Impossible de modifier le département parent lorsqu'il existe des sous-départements",
-        "id": "Tidak dapat mengubah departemen induk ketika terdapat subdepartemen",
-        "ru": "Невозможно изменить родительский отдел при наличии подотделов"
     },
     {
         "key": "请选择正确的部门负责人",

@@ -25,8 +25,9 @@ services:
       extnetwork:
         ipv4_address: "${APP_IPPR}.2"
     depends_on:
-      - redis
       - mariadb
+      - redis
+      - es
     restart: unless-stopped
 
   nginx:
@@ -222,6 +223,17 @@ services:
     networks:
       extnetwork:
         ipv4_address: "${APP_IPPR}.14"
+    restart: unless-stopped
+
+  es:
+    container_name: "dootask-es-${APP_ID}"
+    image: "elasticsearch:8.17.2"
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: false
+    networks:
+      extnetwork:
+        ipv4_address: "${APP_IPPR}.15"
     restart: unless-stopped
 
 networks:
