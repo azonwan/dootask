@@ -2288,6 +2288,10 @@ body:not(.window-touch) {
                                                 }
                                             }
                                         }
+
+                                        .dialog-emoji {
+                                            display: none;
+                                        }
                                     }
 
                                     .dialog-foot {
