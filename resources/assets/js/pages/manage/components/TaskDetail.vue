@@ -431,6 +431,13 @@
             <TaskUpload ref="upload" class="upload" @on-select-file="onSelectFile"/>
         </div>
         <div v-show="taskDetail.id > 0" class="task-dialog" :style="dialogStyle">
+            <ResizeLine
+                class="task-resize"
+                placement="right"
+                v-model="taskDialogWidth"
+                :min="220"
+                :max="900"
+                :reverse="true"/>
             <template v-if="hasOpenDialog">
                 <DialogWrapper v-if="taskId > 0" ref="dialog" :dialog-id="taskDetail.dialog_id">
                     <div slot="head" class="head">
@@ -566,6 +573,7 @@ import TaskTag from "./ProjectTaskTag/tags.vue";
 import TaskTagSelect from "./ProjectTaskTag/select.vue";
 import TaskExistTips from "./TaskExistTips.vue";
 import TEditorTask from "../../../components/TEditorTask.vue";
+import ResizeLine from "../../../components/ResizeLine.vue";
 import TaskContentHistory from "./TaskContentHistory.vue";
 import TaskTagAdd from "./ProjectTaskTag/add.vue";
 import emitter from "../../../store/events";
@@ -573,6 +581,7 @@ import emitter from "../../../store/events";
 export default {
     name: "TaskDetail",
     components: {
+        ResizeLine,
         TaskTagAdd,
         TaskContentHistory,
         TEditorTask,
@@ -617,6 +626,7 @@ export default {
             ready: false,
 
             taskDetail: {},
+            taskDialogWidth: $A.getStorageInt('task.dialogWidth', -1),
 
             ownerData: {},
             ownerLoad: 0,
@@ -705,6 +715,9 @@ export default {
             data.time && this.$set(this.delayTaskForm, 'time', Math.round(data.time * 100) / 100);
             data.type && this.$set(this.delayTaskForm, 'type', data.type);
         });
+        if (this.taskDialogWidth === -1) {
+            this.taskDialogWidth = Math.min(450, Math.min(1200, this.windowWidth * 0.9) * 0.4)
+        }
     },
 
     mounted() {
@@ -795,7 +808,7 @@ export default {
         },
 
         dialogStyle() {
-            const {windowHeight, hasOpenDialog} = this;
+            const {windowHeight, taskDialogWidth, hasOpenDialog} = this;
             const height = Math.min(1100, windowHeight)
             if (!height) {
                 return {};
@@ -805,7 +818,8 @@ export default {
             }
             const factor = height > 900 ? 200 : 70;
             return {
-                minHeight: (height - factor - 48) + 'px'
+                minHeight: (height - factor - 48) + 'px',
+                width: taskDialogWidth + 'px',
             }
         },
 
@@ -1049,7 +1063,10 @@ export default {
                     this.updateData('tag', this.tagValue);
                 }
             }
-        }
+        },
+        taskDialogWidth(w) {
+            $A.setStorage('task.dialogWidth', w);
+        },
     },
 
     methods: {

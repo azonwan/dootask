@@ -1426,16 +1426,23 @@ const timezone = require("dayjs/plugin/timezone");
             return this.isJson(value) ? value : def;
         },
 
+        existsStorage(key) {
+            return this.__operationStorage(key) !== null;
+        },
+
         __operationStorage(key, value) {
             if (!key) {
                 return;
             }
             let keyName = '__state__';
-            if (key.substring(0, 5) === 'cache') {
-                keyName = '__state:' + key + '__';
+            const keyArr = key.split(".");
+            if (keyArr.length > 1) {
+                const stateName = keyArr.shift();
+                keyName = '__state:' + stateName + '__';
+                key = keyArr.join(".");
             }
             if (typeof value === 'undefined') {
-                return this.__loadFromlLocal(key, '', keyName);
+                return this.__loadFromlLocal(key, null, keyName);
             } else {
                 this.__savaToLocal(key, value, keyName);
             }
