@@ -44,7 +44,7 @@
                             @command="onOpDepartment">
                             <i @click.stop="" class="taskfont department-menu">&#xe6e9;</i>
                             <EDropdownMenu slot="dropdown">
-                                <EDropdownItem v-if="item.level <= 2" :command="`add_${item.id}`">
+                                <EDropdownItem v-if="item.level <= 3" :command="`add_${item.id}`">
                                     <div>{{$L('添加子部门')}}</div>
                                 </EDropdownItem>
                                 <EDropdownItem v-if="item.dialog_id" :command="`dialog_${item.dialog_id}`">
@@ -183,11 +183,19 @@
                     <Input type="text" v-model="departmentData.name" :placeholder="$L('请输入部门名称')"></Input>
                 </FormItem>
                 <FormItem prop="parent_id" :label="$L('上级部门')">
-                    <Select v-model="departmentData.parent_id" :disabled="departmentParentDisabled" :placeholder="$L('请选择上级部门')">
-                        <Option :value="0">{{ $L('默认部门') }}</Option>
-                        <Option v-for="(item, index) in departmentList" v-if="item.parent_id == 0 && item.id != departmentData.id" :value="item.id" :key="index" :label="item.name">&nbsp;&nbsp;&nbsp;&nbsp;{{ item.name }}</Option>
+                    <Select v-model="departmentData.parent_id" :placeholder="$L('请选择上级部门')">
+                        <Option :value="0">
+                            <div class="team-department-level-name level-1">{{ $L('默认部门') }}</div>
+                        </Option>
+                        <Option
+                            v-for="(item, index) in departmentList"
+                            :disabled="item.level > 3 || item.id == departmentData.id || item.parent_id == departmentData.id"
+                            :value="item.id"
+                            :key="index"
+                            :label="item.chains.join(' - ')">
+                            <div :class="`team-department-level-name level-${item.level}`">{{ item.name }}</div>
+                        </Option>
                     </Select>
-                    <div v-if="departmentParentDisabled" class="form-tip" style="margin-bottom:-16px">{{$L('含有子部门无法修改上级部门')}}</div>
                 </FormItem>
                 <FormItem prop="owner_userid" :label="$L('部门负责人')">
                     <UserSelect v-model="departmentData.owner_userid" :multiple-max="1" :title="$L('请选择部门负责人')"/>
@@ -286,8 +294,19 @@
             <Form :model="departmentEditData" v-bind="formOptions" @submit.native.prevent>
                 <Alert type="error" style="margin-bottom:18px">{{$L(`正在进行帐号【ID:${departmentEditData.userid}, ${departmentEditData.nickname}】部门修改。`)}}</Alert>
                 <FormItem :label="$L('修改部门')">
-                    <Select v-model="departmentEditData.department" multiple :multiple-max="10" :placeholder="$L('留空为默认部门')">
-                        <Option v-for="(item, index) in departmentList" :value="item.id" :key="index">{{ item.name }}</Option>
+                    <Select
+                        v-model="departmentEditData.department"
+                        multiple
+                        :multiple-max="10"
+                        :multiple-max-before="onMultipleMaxBefore"
+                        :placeholder="$L('留空为默认部门')">
+                        <Option
+                            v-for="(item, index) in departmentList"
+                            :value="item.id"
+                            :key="index"
+                            :label="item.chains.join(' - ')">
+                            <div :class="`team-department-level-name level-${item.level - 1}`">{{ item.name }}</div>
+                        </Option>
                     </Select>
                 </FormItem>
             </Form>
@@ -515,12 +534,19 @@ export default {
                     key: 'department',
                     minWidth: 80,
                     render: (h, {row}) => {
-                        let departments = []
+                        const departments = []
                         row.department.some(did => {
                             const data = this.departmentList.find(d => d.id == did)
                             if (data) {
-                                departments.push(data.name)
+                                departments.push({
+                                    id: data.id,
+                                    name: data.name,
+                                    chain: data.chains.join(' - ')
+                                })
                             }
+                        })
+                        departments.sort((a, b) => {
+                            return a.id - b.id
                         })
                         if (departments.length === 0) {
                             return h('AutoTip', this.$L('默认部门'));
@@ -528,21 +554,24 @@ export default {
                             const tmp = []
                             tmp.push(h('span', {
                                 domProps: {
-                                    title: departments[0]
+                                    title: departments[0].chain
                                 }
-                            }, departments[0]))
+                            }, departments[0].name))
                             if (departments.length > 1) {
-                                departments = departments.splice(1)
                                 tmp.push(h('ETooltip', [
-                                    h('div', {
+                                    h('ol', {
                                         slot: 'content',
+                                        style: {
+                                            lineHeight: '1.5',
+                                            paddingLeft: '18px'
+                                        },
                                         domProps: {
-                                            innerHTML: departments.join("<br/>")
+                                            innerHTML: departments.map(({chain}) => `<li>${chain}</li>`).join('')
                                         }
                                     }),
                                     h('div', {
                                         class: 'department-tag-num'
-                                    }, ` +${departments.length}`)
+                                    }, departments.length)
                                 ]))
                             }
                             return h('div', {
@@ -910,10 +939,6 @@ export default {
     computed: {
         ...mapState(['formOptions']),
 
-        departmentParentDisabled() {
-            return !!(this.departmentData.id > 0 && this.departmentList.find(({parent_id}) => parent_id == this.departmentData.id));
-        },
-
         userStyle({minWidth, windowPortrait}) {
             const style = {}
             if (minWidth > 0 && windowPortrait) {
@@ -1206,21 +1231,27 @@ export default {
                 url: 'users/department/list',
             }).then(({data}) => {
                 this.departmentList = []
-                this.generateDepartmentList(data, 0, 1)
+                this.generateDepartmentList(data, 0, 1, [])
             }).finally(_ => {
                 this.departmentLoading--;
             })
         },
 
-        generateDepartmentList(data, parent_id, level) {
+        generateDepartmentList(data, parent_id, level, chains = []) {
             data.some(item => {
                 if (item.parent_id == parent_id) {
                     this.departmentList.push(Object.assign(item, {
+                        chains: chains.concat([item.name]),
                         level: level + 1
                     }))
-                    this.generateDepartmentList(data, item.id, level + 1)
+                    this.generateDepartmentList(data, item.id, level + 1, chains.concat([item.name]))
                 }
             })
+        },
+
+        onMultipleMaxBefore(num) {
+            $A.messageError(`最多选择${num}个部门`)
+            return false
         },
 
         onShowDepartment(data) {

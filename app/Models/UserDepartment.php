@@ -35,6 +35,21 @@ use App\Exceptions\ApiException;
 class UserDepartment extends AbstractModel
 {
     /**
+     * 获取所有父级部门
+     * @return array
+     */
+    public function parents()
+    {
+        $parents = [];
+        $parent = $this;
+        while ($parent) {
+            $parents[] = $parent;
+            $parent = $parent->parent_id ? self::find($parent->parent_id) : null;
+        }
+        return $parents;
+    }
+
+    /**
      * 保存部门
      * @param $data
      * @param $dialogUseid
@@ -131,9 +146,7 @@ class UserDepartment extends AbstractModel
         });
         // 解散群组
         $dialog = WebSocketDialog::find($this->dialog_id);
-        if ($dialog) {
-            $dialog->deleteDialog();
-        }
+        $dialog?->deleteDialog();
         //
         $this->delete();
     }

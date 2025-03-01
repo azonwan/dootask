@@ -83,13 +83,13 @@
                         font-weight: 500;
                     }
                     &.level-2 {
-                        margin-left: 24px;
+                        margin-left: 18px;
                     }
                     &.level-3 {
-                        margin-left: 48px;
+                        margin-left: 36px;
                     }
                     &.level-4 {
-                        margin-left: 72px;
+                        margin-left: 54px;
                     }
                     .department-icon {
                         padding: 8px;
@@ -152,6 +152,18 @@
     .table-page-box {
         flex: 1;
         height: 0;
+    }
+}
+
+.team-department-level-name {
+    &.level-2 {
+        margin-left: 18px;
+    }
+    &.level-3 {
+        margin-left: 36px;
+    }
+    &.level-4 {
+        margin-left: 54px;
     }
 }
 

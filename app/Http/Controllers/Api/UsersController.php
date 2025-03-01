@@ -1653,18 +1653,21 @@ class UsersController extends AbstractController
             if (empty($parentDepartment)) {
                 return Base::retError('上级部门不存在或已被删除');
             }
-            if ($parentDepartment->parent_id > 0) {
-                return Base::retError('上级部门层级错误');
+            if (count($parentDepartment->parents()) > 2) {
+                return Base::retError('部门层级最多只能创建3级');
             }
-            if (UserDepartment::whereParentId($parent_id)->count() > 20) {
+            if ($id > 0 && UserDepartment::whereParentId($id)->whereId($parent_id)->exists()) {
+                return Base::retError('不能选择自己的子部门作为上级部门');
+            }
+            if (UserDepartment::whereParentId($parent_id)->count() >= 20) {
                 return Base::retError('每个部门最多只能创建20个子部门');
-            }
-            if ($id > 0 && UserDepartment::whereParentId($id)->exists()) {
-                return Base::retError('含有子部门无法修改上级部门');
             }
         }
         if (empty($owner_userid) || !User::whereUserid($owner_userid)->exists()) {
             return Base::retError('请选择正确的部门负责人');
+        }
+        if (UserDepartment::whereOwnerUserid($owner_userid)->count() >= 10) {
+            return Base::retError('每个用户最多只能负责10个部门');
         }
         //
         $userDepartment->saveDepartment([
@@ -1674,7 +1677,7 @@ class UsersController extends AbstractController
         ], $dialog_useid);
         Cache::forever("UserDepartment::rand", Base::generatePassword());
         //
-        return Base::retSuccess($parent_id > 0 ? '保存成功' : '新建成功');
+        return Base::retSuccess($id > 0 ? '保存成功' : '新建成功');
     }
 
     /**
@@ -1700,6 +1703,9 @@ class UsersController extends AbstractController
         $userDepartment = UserDepartment::find($id);
         if (empty($userDepartment)) {
             return Base::retError('部门不存在或已被删除');
+        }
+        if (UserDepartment::whereParentId($id)->exists()) {
+            return Base::retError('含有子部门无法删除');
         }
         $userDepartment->deleteDepartment();
         Cache::forever("UserDepartment::rand", Base::generatePassword());
