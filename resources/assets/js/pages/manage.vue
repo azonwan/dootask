@@ -299,7 +299,7 @@
             v-model="allUserShow"
             placement="right"
             :size="1380">
-            <TeamManagement v-if="allUserShow"/>
+            <TeamManagement v-if="allUserShow" @on-close="allUserShow=false"/>
         </DrawerOverlay>
 
         <!--查看所有项目-->

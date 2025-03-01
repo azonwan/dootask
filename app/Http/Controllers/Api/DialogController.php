@@ -259,6 +259,9 @@ class DialogController extends AbstractController
             ->where('d.id', $dialog_id)
             ->whereNull('d.deleted_at')
             ->first();
+        if (empty($item)) {
+            return Base::retError('不在成员列表内');
+        }
         return Base::retSuccess('success', WebSocketDialog::synthesizeData($item, $user->userid));
     }
 

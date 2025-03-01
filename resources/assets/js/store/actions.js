@@ -2919,7 +2919,7 @@ export default {
      * @returns {Promise<unknown>}
      */
     openDialog({state, dispatch}, dialog_id) {
-        return new Promise(async resolve => {
+        return new Promise(async (resolve, reject) => {
             let search_msg_id;
             let dialog_msg_id;
             if ($A.isJson(dialog_id)) {
@@ -2933,7 +2933,8 @@ export default {
                 try {
                     await dispatch("getDialogOne", dialog_id)
                 } catch (e) {
-                    console.warn(e);
+                    reject(e);
+                    return;
                 } finally {
                     dispatch("hiddenSpinner")
                 }

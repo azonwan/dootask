@@ -31,7 +31,7 @@
                     <li
                         v-for="item in departmentList"
                         :key="item.id"
-                        :class="[`level-${item.level}`, departmentSelect === item.id ? 'active' : '']"
+                        :class="[`level-${item.level}`, departmentSelect === item.id || departmentOperation === item.id ? 'active' : '']"
                         @click="onSelectDepartment(item.id)">
                         <UserAvatarTip :userid="item.owner_userid" :size="20" class="department-icon">
                             <p><strong>{{$L('部门负责人')}}</strong></p>
@@ -40,11 +40,15 @@
                         <EDropdown
                             size="medium"
                             trigger="click"
+                            @visible-change="onVcDepartment($event, item.id)"
                             @command="onOpDepartment">
                             <i @click.stop="" class="taskfont department-menu">&#xe6e9;</i>
                             <EDropdownMenu slot="dropdown">
                                 <EDropdownItem v-if="item.level <= 2" :command="`add_${item.id}`">
                                     <div>{{$L('添加子部门')}}</div>
+                                </EDropdownItem>
+                                <EDropdownItem v-if="item.dialog_id" :command="`dialog_${item.dialog_id}`">
+                                    <div>{{$L('打开部门群')}}</div>
                                 </EDropdownItem>
                                 <EDropdownItem :command="`edit_${item.id}`">
                                     <div>{{$L('编辑')}}</div>
@@ -795,6 +799,7 @@ export default {
                 dialog_useid: 0
             },
             departmentList: [],
+            departmentOperation: 0,
 
             dialogLoad: false,
             dialogList: [],
@@ -1259,17 +1264,38 @@ export default {
             this.departmentSelect = id
         },
 
+        onVcDepartment(visible, id) {
+            this.departmentOperation = visible ? id : 0;
+        },
+
         onOpDepartment(val) {
             if ($A.leftExists(val, 'add_')) {
                 this.onShowDepartment({
                     parent_id: parseInt(val.substr(4))
                 })
-            } else if ($A.leftExists(val, 'edit_')) {
+                return
+            }
+
+            if ($A.leftExists(val, 'edit_')) {
                 const editItem = this.departmentList.find(({id}) => id === parseInt(val.substr(5)))
                 if (editItem) {
                     this.onShowDepartment(editItem)
                 }
-            } else if ($A.leftExists(val, 'del_')) {
+                return;
+            }
+
+            if ($A.leftExists(val, 'dialog_')) {
+                const dialogId = parseInt(val.substr(7))
+                this.$store.dispatch("openDialog", dialogId).then(() => {
+                    this.goForward({name: 'manage-messenger'})
+                    this.$emit('on-close')
+                }).catch(({msg}) => {
+                    $A.modalError(msg || this.$L('打开会话失败'))
+                })
+                return;
+            }
+
+            if ($A.leftExists(val, 'del_')) {
                 const delItem = this.departmentList.find(({id}) => id === parseInt(val.substr(4)))
                 if (delItem) {
                     $A.modalConfirm({
