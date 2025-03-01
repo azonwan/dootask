@@ -77,7 +77,7 @@ class ElasticSearch
     public function indexExists()
     {
         $params = ['index' => $this->index];
-        return (bool)$this->client->indices()->exists($params);
+        return $this->client->indices()->exists($params)->asBool();
     }
 
     /**
@@ -405,35 +405,52 @@ class ElasticSearch
     const DUM = "dialog_user_msg";
 
     /**
+     * 会话用户 - 生成文档ID
+     * @param WebSocketDialogUser $dialogUser
+     * @return string
+     */
+    public static function generateDialogUserDicId(WebSocketDialogUser $dialogUser)
+    {
+        return "user_{$dialogUser->userid}_dialog_{$dialogUser->dialog_id}";
+    }
+
+
+    /**
+     * 会话用户 - 生成文档格式
+     * @param WebSocketDialogUser $dialogUser
+     * @return array
+     */
+    public static function generateDialogUserFormat(WebSocketDialogUser $dialogUser)
+    {
+        return [
+            'dialog_id' => $dialogUser->dialog_id,
+            'created_at' => $dialogUser->created_at,
+            'updated_at' => $dialogUser->updated_at,
+
+            'userid' => $dialogUser->userid,
+            'top_at' => $dialogUser->top_at,
+            'last_at' => $dialogUser->last_at,
+            'mark_unread' => $dialogUser->mark_unread ? 1 : 0,
+            'silence' => $dialogUser->silence ? 1 : 0,
+            'hide' => $dialogUser->hide ? 1 : 0,
+            'color' => $dialogUser->color,
+
+            'relationship' => [
+                'name' => 'dialog_user'
+            ]
+        ];
+    }
+
+    /**
      * 会话用户 - 同步到Elasticsearch
+     * @param WebSocketDialogUser $dialogUser
+     * @return void
      */
     public static function syncDialogUserToElasticSearch(WebSocketDialogUser $dialogUser)
     {
         try {
             $es = new self(self::DUM);
-
-            $docId = "user_{$dialogUser->userid}_dialog_{$dialogUser->dialog_id}";
-
-            $document = [
-                'dialog_id' => $dialogUser->dialog_id,
-                'created_at' => $dialogUser->created_at,
-                'updated_at' => $dialogUser->updated_at,
-
-                'userid' => $dialogUser->userid,
-                'top_at' => $dialogUser->top_at,
-                'last_at' => $dialogUser->last_at,
-                'mark_unread' => $dialogUser->mark_unread ? 1 : 0,
-                'silence' => $dialogUser->silence ? 1 : 0,
-                'hide' => $dialogUser->hide ? 1 : 0,
-                'color' => $dialogUser->color,
-
-                'relationship' => [
-                    'name' => 'dialog_user'
-                ]
-            ];
-
-            $es->indexDocument($document, $docId);
-
+            $es->indexDocument(self::generateDialogUserFormat($dialogUser), self::generateDialogUserDicId($dialogUser));
         } catch (\Exception $e) {
             Log::error('syncDialogUserToElasticSearch: ' . $e->getMessage());
         }
@@ -461,6 +478,58 @@ class ElasticSearch
         }
     }
 
+    /** ******************************************************************************************************** */
+    /** ******************************************************************************************************** */
+    /** ******************************************************************************************************** */
+
+    /**
+     * 会话消息 - 生成父文档ID
+     * @param WebSocketDialogMsg $dialogMsg
+     * @param $userid
+     * @return string
+     */
+    public static function generateDialogMsgParentId(WebSocketDialogMsg $dialogMsg, $userid)
+    {
+        return "user_{$userid}_dialog_{$dialogMsg->dialog_id}";
+    }
+
+    /**
+     * 会话消息 - 生成文档ID
+     * @param WebSocketDialogMsg $dialogMsg
+     * @param $userid
+     * @return string
+     */
+    public static function generateDialogMsgDicId(WebSocketDialogMsg $dialogMsg, $userid)
+    {
+        return "msg_{$dialogMsg->id}_user_{$userid}";
+    }
+
+    /**
+     * 会话消息 - 生成文档格式
+     * @param WebSocketDialogMsg $dialogMsg
+     * @param $userid
+     * @return array
+     */
+    public static function generateDialogMsgFormat(WebSocketDialogMsg $dialogMsg, $userid)
+    {
+        return [
+            'dialog_id' => $dialogMsg->dialog_id,
+            'created_at' => $dialogMsg->created_at,
+            'updated_at' => $dialogMsg->updated_at,
+
+            'msg_id' => $dialogMsg->id,
+            'sender_userid' => $dialogMsg->userid,
+            'msg_type' => $dialogMsg->type,
+            'key' => $dialogMsg->key,
+            'bot' => $dialogMsg->bot ? 1 : 0,
+
+            'relationship' => [
+                'name' => 'dialog_msg',
+                'parent' => self::generateDialogMsgParentId($dialogMsg, $userid)
+            ]
+        ];
+    }
+
     /**
      * 会话消息 - 同步到Elasticsearch
      */
@@ -479,33 +548,14 @@ class ElasticSearch
             $params = ['body' => []];
 
             foreach ($dialogUsers as $dialogUser) {
-                $parentId = "user_{$dialogUser->userid}_dialog_{$dialogMsg->dialog_id}";
-                $docId = "msg_{$dialogMsg->id}_user_{$dialogUser->userid}";
-
                 $params['body'][] = [
                     'index' => [
                         '_index' => self::DUM,
-                        '_id' => $docId,
-                        'routing' => $parentId
+                        '_id' => self::generateDialogMsgDicId($dialogMsg, $dialogUser->userid),
+                        'routing' => self::generateDialogMsgParentId($dialogMsg, $dialogUser->userid)
                     ]
                 ];
-
-                $params['body'][] = [
-                    'dialog_id' => $dialogMsg->dialog_id,
-                    'created_at' => $dialogMsg->created_at,
-                    'updated_at' => $dialogMsg->updated_at,
-
-                    'msg_id' => $dialogMsg->id,
-                    'sender_userid' => $dialogMsg->userid,
-                    'msg_type' => $dialogMsg->type,
-                    'key' => $dialogMsg->key,
-                    'bot' => $dialogMsg->bot ? 1 : 0,
-
-                    'relationship' => [
-                        'name' => 'dialog_msg',
-                        'parent' => $parentId
-                    ]
-                ];
+                $params['body'][] = self::generateDialogMsgFormat($dialogMsg, $dialogUser->userid);
             }
 
             if (!empty($params['body'])) {
@@ -534,14 +584,11 @@ class ElasticSearch
             $params = ['body' => []];
 
             foreach ($dialogUsers as $dialogUser) {
-                $docId = "msg_{$dialogMsg->id}_user_{$dialogUser->userid}";
-                $parentId = "user_{$dialogUser->userid}_dialog_{$dialogMsg->dialog_id}";
-
                 $params['body'][] = [
                     'delete' => [
                         '_index' => self::DUM,
-                        '_id' => $docId,
-                        'routing' => $parentId
+                        '_id' => self::generateDialogMsgDicId($dialogMsg, $dialogUser->userid),
+                        'routing' => self::generateDialogMsgParentId($dialogMsg, $dialogUser->userid)
                     ]
                 ];
             }
