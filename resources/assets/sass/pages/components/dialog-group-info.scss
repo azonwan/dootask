@@ -6,6 +6,7 @@
     left: 0;
     right: 0;
     bottom: 0;
+    overflow: auto;
 
     .group-info-title {
         color: #b7b1b1;
@@ -32,24 +33,15 @@
     }
 
     .group-info-search {
+        background: #fff;
         margin: 24px 24px 0;
-    }
-
-    .group-info-button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 18px 24px;
-        cursor: pointer;
-
-        > button {
-            margin: 0 8px;
-        }
+        position: sticky;
+        top: 0;
+        z-index: 9;
     }
 
     .group-info-user {
         flex: 1;
-        overflow: auto;
         margin-top: 12px;
         padding: 0 12px;
 
@@ -146,6 +138,18 @@
                     }
                 }
             }
+        }
+    }
+
+    .group-info-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 18px 24px;
+        cursor: pointer;
+
+        > button {
+            margin: 0 8px;
         }
     }
 }

@@ -5,6 +5,9 @@
             <QuickEdit :value="dialogData.name" :disabled="dialogData.owner_id != userId" @on-update="updateName">{{dialogData.name}}</QuickEdit>
         </div>
 
+        <div class="group-info-title">{{$L('群组 ID')}}</div>
+        <div class="group-info-value">{{ dialogId }}</div>
+
         <div class="group-info-title">{{$L('群类型')}}</div>
         <div class="group-info-value">{{ $L(groupType) }}</div>
 

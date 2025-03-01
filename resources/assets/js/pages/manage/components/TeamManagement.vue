@@ -210,6 +210,7 @@
                             <Option v-for="(option, index) in dialogList" :value="option.id" :label="option.name" :key="index">
                                 <div class="team-department-add-dialog-group">
                                     <div class="dialog-name">{{option.name}}</div>
+                                    <div class="dialog-id">ID: {{option.id}}</div>
                                     <UserAvatar :userid="option.owner_id" :size="20"/>
                                 </div>
                             </Option>

@@ -166,6 +166,12 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    .dialog-id {
+        flex-shrink: 0;
+        padding-right: 6px;
+        opacity: 0.6;
+        font-size: 13px;
+    }
 }
 
 .team-department-checkin-item {
