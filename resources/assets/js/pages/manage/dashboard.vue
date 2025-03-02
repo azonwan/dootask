@@ -5,7 +5,12 @@
             <span @click="goForward({name: 'manage-setting-license'})">{{warningMsg}}</span>
         </Alert>
         <div class="dashboard-wrapper" :style="wrapperStyle">
-            <div class="dashboard-hello">{{dashboardHello}}</div>
+            <div class="dashboard-hello">
+                <h2>{{dashboardHello}}</h2>
+                <div class="dashboard-search" @click="openSearch">
+                    <i class="taskfont">&#xe6f8;</i>
+                </div>
+            </div>
             <div v-if="systemConfig.timezoneDifference" class="dashboard-time">
                 <span>{{$L('服务器时间')}}:</span>
                 <span>{{$A.daytz().format('YYYY-MM-DD HH:mm:ss')}}</span>
@@ -101,6 +106,7 @@
 <script>
 import {mapGetters, mapState} from "vuex";
 import TaskMenu from "./components/TaskMenu";
+import emitter from "../../store/events";
 
 const hiddenCaches = []
 export default {
@@ -246,6 +252,10 @@ export default {
                 this.hiddenColumns = this.hiddenColumns.filter(item => item !== type)
             }
             $A.IDBSave("dashboardHiddenColumns", this.hiddenColumns)
+        },
+
+        openSearch() {
+            emitter.emit('openSearch', null);
         },
 
         openTask(task) {

@@ -628,6 +628,28 @@ body.dark-mode-reverse {
         }
     }
 
+    .common-search-box-modal {
+        .ivu-modal {
+            .ivu-modal-content {
+                .ivu-modal-body {
+                    .search-body {
+                        border-top-color: #e9e9e9;
+
+                        .search-list {
+                            ul {
+                                > li {
+                                    .icon-avatar {
+                                        color: #1c1917;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     .task-add {
         .task-add-template {
             > li {

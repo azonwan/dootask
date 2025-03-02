@@ -713,6 +713,44 @@ class DialogController extends AbstractController
     }
 
     /**
+     * @api {get} api/dialog/msg/esearch          14. 搜索消息
+     *
+     * @apiDescription 需要token身份
+     * @apiVersion 1.0.0
+     * @apiGroup dialog
+     * @apiName msg__esearch
+     *
+     * @apiParam {String} key                   搜索关键词
+     * @apiParam {Number} [pagesize]            每页显示数量，默认:20，最大:50
+     *
+     * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
+     * @apiSuccess {String} msg     返回信息（错误描述）
+     * @apiSuccess {Object} data    返回数据
+     */
+    public function msg__esearch()
+    {
+        $user = User::auth();
+        //
+        $key = trim(Request::input('key'));
+        $list = [];
+        //
+        $es = new ElasticSearch(ElasticSearch::DUM);
+        $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, Base::getPaginate(50, 20));
+        if ($searchResults) {
+            foreach ($searchResults as $item) {
+                if ($dialog = WebSocketDialog::find($item['id'])) {
+                    $dialog = array_merge($dialog->toArray(), $item);
+                    $list[] = WebSocketDialog::synthesizeData($dialog, $user->userid);
+                }
+            }
+        }
+        //
+        return Base::retSuccess('success', [
+            'data' => $list,
+        ]);
+    }
+
+    /**
      * @api {get} api/dialog/msg/one          15. 获取单条消息
      *
      * @apiDescription 需要token身份
