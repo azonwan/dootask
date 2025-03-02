@@ -34,18 +34,24 @@
             <div v-else class="search-list">
                 <ul v-for="(items, type) in list" :key="type">
                     <li class="item-label">{{typeLabel(type)}}</li>
-                    <li v-for="item in items.slice(0, 10)" :key="item.id" @click="onClick(item)">
+                    <li v-for="item in items" :key="item.id" @click="onClick(item)">
                         <div class="item-icon">
-                            <EAvatar v-if="item.icon[0]==='avatar'" class="img-avatar" :src="item.icon[1]" :size="38"/>
-                            <i v-else-if="item.icon[0]==='department'" class="taskfont icon-avatar department">&#xe75c;</i>
-                            <i v-else-if="item.icon[0]==='project'" class="taskfont icon-avatar project">&#xe6f9;</i>
-                            <i v-else-if="item.icon[0]==='task'" class="taskfont icon-avatar task">&#xe6f4;</i>
-                            <UserAvatarTip v-else-if="item.icon[0]==='user'" :userid="item.icon[1]" :size="38"/>
-                            <Icon v-else-if="item.icon[0]==='people'" class="icon-avatar" type="ios-people" />
+                            <EAvatar v-if="item.icons[0]==='avatar'" class="img-avatar" :src="item.icons[1]" :size="38"/>
+                            <i v-else-if="item.icons[0]==='department'" class="taskfont icon-avatar department">&#xe75c;</i>
+                            <i v-else-if="item.icons[0]==='project'" class="taskfont icon-avatar project">&#xe6f9;</i>
+                            <i v-else-if="item.icons[0]==='task'" class="taskfont icon-avatar task">&#xe6f4;</i>
+                            <UserAvatar v-else-if="item.icons[0]==='user'" class="user-avatar" :userid="item.icons[1]" :size="38"/>
+                            <Icon v-else-if="item.icons[0]==='people'" class="icon-avatar" type="ios-people" />
                             <Icon v-else class="icon-avatar" type="md-person" />
                         </div>
                         <div class="item-content">
-                            <div class="item-title">{{item.title}}</div>
+                            <div class="item-title">
+                                <div class="title-text">{{item.title}}</div>
+                                <div
+                                    v-if="item.activity"
+                                    class="title-activity"
+                                    :title="item.activity">{{activityFormat(item.activity)}}</div>
+                            </div>
                             <div class="item-desc">
                                 <span
                                     class="desc-tag no-dark-content"
@@ -55,7 +61,6 @@
                                 <span class="desc-text" v-html="item.desc"></span>
                             </div>
                         </div>
-                        <div v-if="item.action" class="item-action" :title="item.action">{{$A.timeFormat(item.action)}}</div>
                     </li>
                 </ul>
             </div>
@@ -66,12 +71,10 @@
 
 <script>
 import {mapState} from "vuex";
-import UserAvatarTip from "./UserAvatar/tip.vue";
 import emitter from "../store/events";
 
 export default {
     name: 'SearchBox',
-    components: {UserAvatarTip},
     props: {
         //
     },
@@ -126,9 +129,12 @@ export default {
         list({searchKey, searchResults}) {
             const items = searchResults.filter(item => item.key === searchKey)
             const groups = {}
-            items.forEach(item => {
+            items.some(item => {
                 if (!groups[item.type]) {
                     groups[item.type] = []
+                }
+                if (groups[item.type].length > 10) {
+                    return true
                 }
                 groups[item.type].push(item)
             })
@@ -162,15 +168,16 @@ export default {
             return type;
         },
 
-        within24Hours(date) {
-            return ($A.dayjs(date).unix() - $A.dayjs().unix()) < 86400
-        },
-
-        showProfessionDesc(dialog_user) {
-            if (dialog_user && dialog_user.profession) {
-                return `[${dialog_user.profession}]`
+        activityFormat(date) {
+            const local = $A.daytz(),
+                time = $A.dayjs(date);
+            if (local.format("YYYY/MM/DD") === time.format("YYYY/MM/DD")) {
+                return time.format("HH:mm")
             }
-            return ''
+            if (local.year() === time.year()) {
+                return time.format("MM/DD")
+            }
+            return time.format("YYYY/MM/DD") || '';
         },
 
         onClick(item) {
@@ -205,6 +212,7 @@ export default {
                     pagesize: 10,
                 },
             }).then(({data}) => {
+                const nowTime = $A.dayjs().unix()
                 const items = data.data.map(item => {
                     const tags = [];
                     if (item.complete_at) {
@@ -215,24 +223,24 @@ export default {
                     } else if (item.overdue) {
                         tags.push({
                             name: this.$L('超期'),
-                            style: 'background-color:red;color:#ddd',
+                            style: 'background-color:#f00;color:#ddd',
                         })
-                    } else if (this.within24Hours(item.end_at)) {
+                    } else if ($A.dayjs(item.end_at).unix() - nowTime < 86400) {
                         tags.push({
                             name: this.$L('即将到期'),
-                            style: 'background-color:orange;color:#ddd',
+                            style: 'background-color:#f80;color:#ddd',
                         })
                     }
                     return {
                         key,
                         type: 'task',
-                        icon: ['task', null],
+                        icons: ['task', null],
                         tags,
 
                         id: item.id,
                         title: item.name,
                         desc: item.desc,
-                        action: item.end_at,
+                        activity: item.end_at,
 
                         rawData: item,
                     };
@@ -261,11 +269,11 @@ export default {
             }).then(({data}) => {
                 const items = data.data.map(item => {
                     let icon = 'person';
-                    let ival = null;
+                    let desc = null;
                     if (item.type == 'group') {
                         if (item.avatar) {
                             icon = 'avatar';
-                            ival = item.avatar;
+                            desc = item.avatar;
                         } else if (item.group_type == 'department') {
                             icon = 'department';
                         } else if (item.group_type == 'project') {
@@ -277,18 +285,18 @@ export default {
                         }
                     } else if (item.dialog_user) {
                         icon = 'user';
-                        ival = item.dialog_user.userid
+                        desc = item.dialog_user.userid
                     }
                     return {
                         key,
                         type: 'message',
-                        icon: [icon, ival],
+                        icons: [icon, desc],
                         tags: [],
 
                         id: item.id,
                         title: item.name,
-                        desc: $A.getMsgSimpleDesc(item.last_msg) || this.showProfessionDesc(item.dialog_user),
-                        action: item.last_at,
+                        desc: $A.getMsgSimpleDesc(item.last_msg),
+                        activity: item.last_at,
 
                         rawData: item,
                     };
@@ -319,13 +327,13 @@ export default {
                     return {
                         key,
                         type: 'contact',
-                        icon: ['user', item.userid],
+                        icons: ['user', item.userid],
                         tags: [],
 
                         id: item.userid,
                         title: item.nickname,
-                        desc: this.showProfessionDesc(item),
-                        action: item.line_at,
+                        desc: item?.profession || '',
+                        activity: item.line_at,
 
                         rawData: item,
                     };

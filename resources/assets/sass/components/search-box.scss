@@ -207,23 +207,36 @@
                                     width: 0;
                                     margin-left: 12px;
 
-                                    .item-title,
+                                    .item-title {
+                                        display: flex;
+                                        align-items: center;
+                                        justify-content: space-between;
+
+                                        .title-text {
+                                            flex: 1;
+                                            width: 0;
+                                            font-weight: 500;
+                                            overflow: hidden;
+                                            text-overflow: ellipsis;
+                                            white-space: nowrap;
+                                        }
+
+                                        .title-activity {
+                                            flex-shrink: 0;
+                                            padding-left: 24px;
+                                            color: rgba($primary-desc-color, 0.7);
+                                        }
+                                    }
+
                                     .item-desc {
+                                        padding-top: 2px;
+                                        max-width: 100%;
                                         word-break: break-all;
                                         text-overflow: ellipsis;
                                         overflow: hidden;
                                         display: -webkit-box;
                                         -webkit-line-clamp: 2;
                                         -webkit-box-orient: vertical;
-                                    }
-
-                                    .item-title {
-                                        font-weight: 500;
-                                    }
-
-                                    .item-desc {
-                                        padding-top: 2px;
-                                        max-width: 100%;
 
                                         .desc-tag {
                                             padding: 2px 4px;
@@ -236,14 +249,10 @@
                                         }
 
                                         .desc-text {
-                                            opacity: 0.8;
+                                            font-size: 13px;
+                                            color: rgba($primary-desc-color, 0.7);
                                         }
                                     }
-                                }
-
-                                .item-action {
-                                    margin-left: 12px;
-                                    opacity: 0.8;
                                 }
                             }
                         }
