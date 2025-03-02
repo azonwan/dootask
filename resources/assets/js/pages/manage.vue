@@ -976,6 +976,11 @@ export default {
                         this.onAddShow()
                         break;
 
+                    case 70: // F - 搜索
+                        e.preventDefault();
+                        this.$refs.searchBox.onShow();
+                        break;
+
                     case 75:
                     case 78: // K/N - 新建任务
                         e.preventDefault();

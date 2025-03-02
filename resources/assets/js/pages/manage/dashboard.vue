@@ -7,8 +7,9 @@
         <div class="dashboard-wrapper" :style="wrapperStyle">
             <div class="dashboard-hello">
                 <h2>{{dashboardHello}}</h2>
-                <div class="dashboard-search" @click="openSearch">
-                    <i class="taskfont">&#xe6f8;</i>
+                <div class="dashboard-search" :class="{'min-search': windowPortrait}" @click="openSearch">
+                    <Icon type="ios-search"/>
+                    <span>{{$L('搜索')}} ({{mateName}}+F)</span>
                 </div>
             </div>
             <div v-if="systemConfig.timezoneDifference" class="dashboard-time">
@@ -120,6 +121,8 @@ export default {
 
             loadIng: 0,
             dashboard: 'today',
+
+            mateName: /macintosh|mac os x/i.test(navigator.userAgent) ? '⌘' : 'Ctrl',
 
             warningMsg: '',
 

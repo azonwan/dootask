@@ -36,11 +36,12 @@
                     <li class="item-label">{{typeLabel(type)}}</li>
                     <li v-for="item in items" :key="item.id" @click="onClick(item)">
                         <div class="item-icon">
-                            <EAvatar v-if="item.icons[0]==='avatar'" class="img-avatar" :src="item.icons[1]" :size="38"/>
+                            <div v-if="item.icons[0]==='file'" :class="`no-dark-content file-icon ${item.icons[1]}`"></div>
                             <i v-else-if="item.icons[0]==='department'" class="taskfont icon-avatar department">&#xe75c;</i>
                             <i v-else-if="item.icons[0]==='project'" class="taskfont icon-avatar project">&#xe6f9;</i>
                             <i v-else-if="item.icons[0]==='task'" class="taskfont icon-avatar task">&#xe6f4;</i>
                             <UserAvatar v-else-if="item.icons[0]==='user'" class="user-avatar" :userid="item.icons[1]" :size="38"/>
+                            <EAvatar v-else-if="item.icons[0]==='avatar'" class="img-avatar" :src="item.icons[1]" :size="38"/>
                             <Icon v-else-if="item.icons[0]==='people'" class="icon-avatar" type="ios-people" />
                             <Icon v-else class="icon-avatar" type="md-person" />
                         </div>
@@ -54,7 +55,7 @@
                             </div>
                             <div class="item-desc">
                                 <span
-                                    class="desc-tag no-dark-content"
+                                    class="desc-tag"
                                     v-if="item.tags"
                                     v-for="tag in item.tags"
                                     :style="tag.style">{{tag.name}}</span>
@@ -84,6 +85,7 @@ export default {
             loadIng: 0,
             searchKey: '',
             searchResults: [],
+            searchTimer: null,
 
             showModal: false,
         }
@@ -129,14 +131,13 @@ export default {
         list({searchKey, searchResults}) {
             const items = searchResults.filter(item => item.key === searchKey)
             const groups = {}
-            items.some(item => {
+            items.forEach(item => {
                 if (!groups[item.type]) {
                     groups[item.type] = []
                 }
-                if (groups[item.type].length > 10) {
-                    return true
+                if (groups[item.type].length < 10) {
+                    groups[item.type].push(item)
                 }
-                groups[item.type].push(item)
             })
             return groups
         },
@@ -197,9 +198,21 @@ export default {
 
         onSearch() {
             this.searchTask(this.searchKey)
+            this.searchProject(this.searchKey)
             this.searchMessage(this.searchKey)
             this.searchContact(this.searchKey)
-            // todo searchFile、searchProject
+            this.searchFile(this.searchKey)
+        },
+
+        pushResults(items) {
+            items.forEach(item => {
+                const index = this.searchResults.findIndex(({id, type}) => id === item.id && type === item.type)
+                if (index > -1) {
+                    this.searchResults.splice(index, 1, item)
+                } else {
+                    this.searchResults.push(item)
+                }
+            })
         },
 
         searchTask(key) {
@@ -218,17 +231,17 @@ export default {
                     if (item.complete_at) {
                         tags.push({
                             name: this.$L('已完成'),
-                            style: 'background-color:#666;color:#ddd',
+                            style: 'background-color:#ccc',
                         })
                     } else if (item.overdue) {
                         tags.push({
                             name: this.$L('超期'),
-                            style: 'background-color:#f00;color:#ddd',
+                            style: 'background-color:#f00',
                         })
                     } else if ($A.dayjs(item.end_at).unix() - nowTime < 86400) {
                         tags.push({
                             name: this.$L('即将到期'),
-                            style: 'background-color:#f80;color:#ddd',
+                            style: 'background-color:#f80',
                         })
                     }
                     return {
@@ -245,14 +258,53 @@ export default {
                         rawData: item,
                     };
                 });
-                items.forEach(item => {
-                    const index = this.searchResults.findIndex(it => it.id === item.id && it.type === 'task')
-                    if (index > -1) {
-                        this.searchResults.splice(index, 1, item)
-                    } else {
-                        this.searchResults.push(item)
+                this.pushResults(items)
+            }).finally(_ => {
+                this.loadIng--;
+            })
+        },
+
+        searchProject(key) {
+            this.loadIng++;
+            this.$store.dispatch("call", {
+                url: 'project/lists',
+                data: {
+                    keys: {
+                        name: key
+                    },
+                    archived: 'all',
+                    pagesize: 10,
+                },
+            }).then(({data}) => {
+                const items = data.data.map(item => {
+                    const tags = [];
+                    if (item.owner) {
+                        tags.push({
+                            name: this.$L('负责人'),
+                            style: 'background-color:#0bc037',
+                        })
                     }
+                    if (item.archived_at) {
+                        tags.push({
+                            name: this.$L('已归档'),
+                            style: 'background-color:#ccc',
+                        })
+                    }
+                    return {
+                        key,
+                        type: 'project',
+                        icons: ['project', null],
+                        tags,
+
+                        id: item.id,
+                        title: item.name,
+                        desc: item.desc || '',
+                        activity: item.updated_at,
+
+                        rawData: item,
+                    };
                 })
+                this.pushResults(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -301,14 +353,7 @@ export default {
                         rawData: item,
                     };
                 })
-                items.forEach(item => {
-                    const index = this.searchResults.findIndex(it => it.id === item.id && it.type === 'task')
-                    if (index > -1) {
-                        this.searchResults.splice(index, 1, item)
-                    } else {
-                        this.searchResults.push(item)
-                    }
-                })
+                this.pushResults(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -332,24 +377,51 @@ export default {
 
                         id: item.userid,
                         title: item.nickname,
-                        desc: item?.profession || '',
+                        desc: item.profession || '',
                         activity: item.line_at,
 
                         rawData: item,
                     };
                 })
-                items.forEach(item => {
-                    const index = this.searchResults.findIndex(it => it.id === item.id && it.type === 'contact')
-                    if (index > -1) {
-                        this.searchResults.splice(index, 1, item)
-                    } else {
-                        this.searchResults.push(item)
-                    }
-                })
+                this.pushResults(items)
             }).finally(_ => {
                 this.loadIng--;
             })
         },
+
+        searchFile(key) {
+            this.loadIng++;
+            this.$store.dispatch("call", {
+                url: 'file/search',
+                data: {key},
+            }).then(({data}) => {
+                const items = data.map(item => {
+                    const tags = [];
+                    if (item.share) {
+                        tags.push({
+                            name: this.$L(item.userid == this.userId ? '已共享' : '共享'),
+                            style: 'background-color:#0bc037',
+                        })
+                    }
+                    return {
+                        key,
+                        type: 'file',
+                        icons: ['file', item.type],
+                        tags,
+
+                        id: item.id,
+                        title: item.name,
+                        desc: item.type === 'folder' ? '' : $A.bytesToSize(item.size),
+                        activity: item.updated_at,
+
+                        rawData: item,
+                    };
+                })
+                this.pushResults(items)
+            }).finally(_ => {
+                this.loadIng--;
+            })
+        }
     }
 };
 </script>

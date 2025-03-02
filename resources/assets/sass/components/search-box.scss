@@ -159,6 +159,7 @@
                                     background-color: #ffffff !important;
                                 }
 
+                                .file-icon,
                                 .img-avatar,
                                 .user-avatar,
                                 .icon-avatar {
@@ -167,6 +168,14 @@
                                     margin: 2px;
                                     flex-grow: 0;
                                     flex-shrink: 0;
+                                }
+
+                                .file-icon {
+                                    display: flex;
+                                    &:before {
+                                        width: 100%;
+                                        height: 100%;
+                                    }
                                 }
 
                                 .img-avatar {
@@ -243,8 +252,8 @@
                                             border-radius: 4px;
                                             font-size: 12px;
                                             margin-right: 6px;
-                                            background-color: #f0f0f0;
-                                            color: #303133;
+                                            background-color: #cccccc;
+                                            color: #ffffff;
                                             word-break: keep-all;
                                         }
 
