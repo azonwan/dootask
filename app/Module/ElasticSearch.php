@@ -343,7 +343,7 @@ class ElasticSearch
                                 'bool' => [
                                     'must' => [
                                         [
-                                            'match' => [
+                                            'match_phrase' => [
                                                 'key' => $keyword
                                             ]
                                         ],
