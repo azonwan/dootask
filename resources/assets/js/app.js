@@ -269,12 +269,33 @@ const $init = async () => {
 }
 
 const $preload = async () => {
+    if ($A.isEEUiApp) {
+        const requireTime = new Date().getTime();
+        while (typeof requireModuleJs !== "function") {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            if (new Date().getTime() - requireTime > 15 * 1000) {
+                break
+            }
+        }
+        if (typeof requireModuleJs !== "function") {
+            const errorTip = $A.L("加载失败，请重启软件")
+            const errorView = document.querySelector(".app-view-loading")
+            if (errorView) {
+                errorView.innerHTML = `<span style="color:#f00;font-size:18px;">${errorTip}</span>`
+            } else {
+                alert(errorTip)
+            }
+            return
+        }
+    }
+
     await store.dispatch("preload");
     const hash = (window.location[routeMode === 'history' ? 'pathname' : 'hash']).replace(/^[#\/\s]/, '');
     if (hash !== 'preload') {
         $init().catch(_ => {})
         return
     }
+
     window.__initializeApp = (route) => {
         if (/^https?:\/\//.test(route)) {
             if ($A.getDomain(route) !== $A.getDomain($A.mainUrl())) {

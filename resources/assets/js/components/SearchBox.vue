@@ -124,6 +124,10 @@ export default {
                 }, 500)
             },
             immediate: true
+        },
+
+        showModal(v) {
+            $A.eeuiAppSetScrollEnabled(!v)
         }
     },
 

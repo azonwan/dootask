@@ -323,14 +323,15 @@ export default {
             immediate: true
         },
 
-        showModal(value) {
-            if (value) {
+        showModal(v) {
+            if (v) {
                 this.searchBefore()
                 this.upTitleWidth()
             } else {
                 this.searchKey = ""
             }
-            this.$emit("on-show-change", value)
+            this.$emit("on-show-change", v)
+            $A.eeuiAppSetScrollEnabled(!v)
         },
 
         searchKey() {
