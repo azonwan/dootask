@@ -98,13 +98,52 @@
                     flex-direction: column;
                     border-top: 1px solid #f0f0f0;
 
+                    .search-tags {
+                        flex-shrink: 0;
+                        display: flex;
+                        gap: 12px;
+                        overflow-x: auto;
+                        overflow-y: hidden;
+                        scroll-behavior: smooth;
+                        -webkit-overflow-scrolling: touch;
+                        padding: 16px 20px 0;
+
+                        &::-webkit-scrollbar {
+                            display: none;
+                        }
+
+                        .tag-item {
+                            flex-shrink: 0;
+                            border: 1px solid #d5d5d5;
+                            border-radius: 8px;
+                            padding: 3px 12px;
+                            line-height: 24px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 8px;
+                            cursor: pointer;
+                            transition: all 0.2s ease;
+
+                            .tag-close {
+                                font-size: 13px;
+                            }
+
+                            &.action {
+                                background-color: #8bcf70;
+                                border-color: #8bcf70;
+                                color: #fff;
+                            }
+                        }
+                    }
+
                     .search-empty {
-                        height: 248px;
+                        height: 268px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         flex-direction: column;
-                        padding: 24px;
+                        padding: 16px 24px 48px;
 
                         > i {
                             font-size: 44px;
@@ -128,11 +167,11 @@
 
                     .search-list {
                         overflow: auto;
-                        max-height: calc(100vh - 255px);
+                        max-height: calc(100vh - 305px);
                         overscroll-behavior: contain;
 
                         @media (max-height: 900px) {
-                            max-height: calc(100vh - 125px);
+                            max-height: calc(100vh - 175px);
                         }
 
                         > ul {
@@ -151,7 +190,7 @@
                                 }
 
                                 &.item-label {
-                                    padding: 8px 10px;
+                                    padding: 8px 12px;
                                     position: sticky;
                                     top: 0;
                                     z-index: 9;
@@ -173,6 +212,7 @@
 
                                 .file-icon {
                                     display: flex;
+
                                     &:before {
                                         width: 100%;
                                         height: 100%;

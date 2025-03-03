@@ -14,12 +14,24 @@
                     <Loading v-if="loadIng > 0"/>
                     <Icon v-else type="ios-search" />
                 </div>
-                <Input ref="searchKey" v-model="searchKey" :placeholder="$L('请输入关键字')"/>
+                <Input ref="searchKey" v-model="searchKey" :placeholder="$L('请输入关键字')" type="search" @on-enter="onEnter"/>
             </div>
             <i class="taskfont search-close" @click="onHide">&#xe6e5;</i>
         </div>
 
         <div class="search-body" @touchstart="onTouchstart">
+            <div class="search-tags">
+                <div
+                    v-for="tag in tags"
+                    :key="tag.type"
+                    class="tag-item"
+                    :class="{action: tag.type === action}"
+                    @click="onTag(tag.type, $event)">
+                    <i class="taskfont" v-html="tag.icon"></i>
+                    <span>{{$L(tag.name)}}</span>
+                    <i v-if="tag.type === action" class="taskfont tag-close">&#xe747;</i>
+                </div>
+            </div>
             <template v-if="listLength === 0">
                 <div v-if="loadIng > 0 || !searchKey.trim()" class="search-empty">
                     <i class="taskfont">&#xe60b;</i>
@@ -33,7 +45,7 @@
             </template>
             <div v-else class="search-list">
                 <ul v-for="(items, type) in list" :key="type">
-                    <li class="item-label">{{typeLabel(type)}}</li>
+                    <li v-if="!action" class="item-label">{{typeLabel(type)}}</li>
                     <li v-for="item in items" :key="item.id" @click="onClick(item)">
                         <div class="item-icon">
                             <div v-if="item.icons[0]==='file'" :class="`no-dark-content file-icon ${item.icons[1]}`"></div>
@@ -92,6 +104,15 @@ export default {
             searchTimer: null,
 
             showModal: false,
+
+            tags: [
+                {type: 'task', name: '任务', icon: '&#xe6f4;'},
+                {type: 'project', name: '项目', icon: '&#xe6f9;'},
+                {type: 'message', name: '消息', icon: '&#xe6eb;'},
+                {type: 'contact', name: '联系人', icon: '&#xe6b2;'},
+                {type: 'file', name: '文件', icon: '&#xe6f3;'},
+            ],
+            action: '',
         }
     },
 
@@ -104,26 +125,12 @@ export default {
     },
 
     watch: {
-        searchKey: {
-            handler: function () {
-                if (!this.searchKey.trim()) {
-                    return;
-                }
-                if (this.searchTimer) {
-                    clearTimeout(this.searchTimer)
-                    this.searchTimer = null;
-                    this.loadIng--;
-                }
-                this.loadIng++;
-                this.searchTimer = setTimeout(() => {
-                    if (this.searchKey.trim()) {
-                        this.onSearch()
-                    }
-                    this.searchTimer = null;
-                    this.loadIng--;
-                }, 500)
-            },
-            immediate: true
+        searchKey() {
+            this.preSearch()
+        },
+
+        action() {
+            this.preSearch()
         },
 
         showModal(v) {
@@ -137,22 +144,22 @@ export default {
             'keyboardType'
         ]),
 
-        list({searchKey, searchResults}) {
-            const items = searchResults.filter(item => item.key === searchKey)
+        list({searchKey, searchResults, action}) {
+            const items = searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
             const groups = {}
             items.forEach(item => {
                 if (!groups[item.type]) {
                     groups[item.type] = []
                 }
-                if (groups[item.type].length < 10) {
+                if (groups[item.type].length < 10 || action) {
                     groups[item.type].push(item)
                 }
             })
             return groups
         },
 
-        listLength({searchKey, searchResults}) {
-            const items = searchResults.filter(item => item.key === searchKey)
+        listLength({searchKey, searchResults, action}) {
+            const items = searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
             return items.length
         },
 
@@ -163,17 +170,9 @@ export default {
 
     methods: {
         typeLabel(type) {
-            switch (type) {
-                case 'task':
-                    return this.$L('任务')
-                case 'project':
-                    return this.$L('项目')
-                case 'message':
-                    return this.$L('消息')
-                case 'contact':
-                    return this.$L('联系人')
-                case 'file':
-                    return this.$L('文件')
+            const tag = this.tags.find(item => item.type === type);
+            if (tag) {
+                return this.$L(tag.name);
             }
             return type;
         },
@@ -238,6 +237,15 @@ export default {
             }
         },
 
+        onTag(type, e) {
+            this.action = this.action !== type ? type : '';
+            $A.scrollToView(e.target, {
+                block: 'nearest',
+                inline: 'nearest',
+                behavior: 'smooth'
+            })
+        },
+
         onShow() {
             this.showModal = true
             this.$nextTick(() => {
@@ -258,15 +266,48 @@ export default {
             this.showModal = false
         },
 
-        onSearch() {
-            this.searchTask(this.searchKey)
-            this.searchProject(this.searchKey)
-            this.searchMessage(this.searchKey)
-            this.searchContact(this.searchKey)
-            this.searchFile(this.searchKey)
+        onEnter() {
+            this.preSearch();
+            $A.eeuiAppKeyboardHide();
         },
 
-        pushResults(items) {
+        preSearch() {
+            if (!this.searchKey.trim()) {
+                return;
+            }
+            if (this.searchTimer) {
+                clearTimeout(this.searchTimer)
+                this.searchTimer = null;
+                this.loadIng--;
+            }
+            this.loadIng++;
+            this.searchTimer = setTimeout(() => {
+                if (this.searchKey.trim()) {
+                    this.onSearch()
+                }
+                this.searchTimer = null;
+                this.loadIng--;
+            }, 500)
+        },
+
+        onSearch() {
+            if (this.action) {
+                this.distSearch(this.action)
+                return;
+            }
+            this.tags.forEach(({type}) => this.distSearch(type))
+        },
+
+        distSearch(type) {
+            const func = this[`search${type.charAt(0).toUpperCase()}${type.slice(1)}`]
+            if (typeof func === 'function') {
+                func(this.searchKey)
+                return true
+            }
+            return false
+        },
+
+        echoSearch(items) {
             items.forEach(item => {
                 const index = this.searchResults.findIndex(({id, type}) => id === item.id && type === item.type)
                 if (index > -1) {
@@ -284,7 +325,7 @@ export default {
                 data: {
                     keys: {name: key},
                     archived: 'all',
-                    pagesize: 10,
+                    pagesize: this.action ? 50 : 10,
                 },
             }).then(({data}) => {
                 const nowTime = $A.dayjs().unix()
@@ -320,7 +361,7 @@ export default {
                         rawData: item,
                     };
                 });
-                this.pushResults(items)
+                this.echoSearch(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -335,7 +376,7 @@ export default {
                         name: key
                     },
                     archived: 'all',
-                    pagesize: 10,
+                    pagesize: this.action ? 50 : 10,
                 },
             }).then(({data}) => {
                 const items = data.data.map(item => {
@@ -366,7 +407,7 @@ export default {
                         rawData: item,
                     };
                 })
-                this.pushResults(items)
+                this.echoSearch(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -378,7 +419,7 @@ export default {
                 url: 'dialog/msg/esearch',
                 data: {
                     key,
-                    pagesize: 10,
+                    pagesize: this.action ? 50 : 10,
                 },
             }).then(({data}) => {
                 const items = data.data.map(item => {
@@ -415,7 +456,7 @@ export default {
                         rawData: item,
                     };
                 })
-                this.pushResults(items)
+                this.echoSearch(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -427,7 +468,7 @@ export default {
                 url: 'users/search',
                 data: {
                     keys: {key},
-                    pagesize: 10,
+                    pagesize: this.action ? 50 : 10,
                 },
             }).then(({data}) => {
                 const items = data.map(item => {
@@ -445,7 +486,7 @@ export default {
                         rawData: item,
                     };
                 })
-                this.pushResults(items)
+                this.echoSearch(items)
             }).finally(_ => {
                 this.loadIng--;
             })
@@ -455,7 +496,10 @@ export default {
             this.loadIng++;
             this.$store.dispatch("call", {
                 url: 'file/search',
-                data: {key},
+                data: {
+                    key,
+                    take: this.action ? 50 : 10,
+                },
             }).then(({data}) => {
                 const items = data.map(item => {
                     const tags = [];
@@ -479,7 +523,7 @@ export default {
                         rawData: item,
                     };
                 })
-                this.pushResults(items)
+                this.echoSearch(items)
             }).finally(_ => {
                 this.loadIng--;
             })

@@ -106,6 +106,7 @@ class FileController extends AbstractController
      *
      * @apiParam {String} [link]        通过分享地址搜索（如：https://t.hitosea.com/single/file/ODcwOCwzOSxpa0JBS2lmVQ==）
      * @apiParam {String} [key]         关键词
+     * @apiParam {Number} [take]        获取数量（默认：50，最大：100）
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -118,7 +119,7 @@ class FileController extends AbstractController
         $link = trim(Request::input('link'));
         $key = trim(Request::input('key'));
         $id = 0;
-        $take = 50;
+        $take = Base::getPaginate(100, 50, 'take');
         if (preg_match("/\/single\/file\/(.*?)$/i", $link, $match)) {
             $id = intval(FileLink::whereCode($match[1])->value('file_id'));
             $take = 1;
