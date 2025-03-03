@@ -6,7 +6,7 @@
         :fullscreen="isFullscreen"
         :mask-closable="false"
         :footer-hide="true"
-        width="640">
+        width="768">
 
         <div class="search-header">
             <div class="search-input">
