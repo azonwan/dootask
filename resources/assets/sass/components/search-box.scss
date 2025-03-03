@@ -129,6 +129,7 @@
                     .search-list {
                         overflow: auto;
                         max-height: calc(100vh - 255px);
+                        overscroll-behavior: contain;
 
                         @media (max-height: 900px) {
                             max-height: calc(100vh - 125px);

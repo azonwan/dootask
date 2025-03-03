@@ -19,7 +19,7 @@
             <i class="taskfont search-close" @click="onHide">&#xe6e5;</i>
         </div>
 
-        <div class="search-body">
+        <div class="search-body" @touchstart="onTouchstart">
             <template v-if="listLength === 0">
                 <div v-if="loadIng > 0 || !searchKey.trim()" class="search-empty">
                     <i class="taskfont">&#xe60b;</i>
@@ -130,6 +130,7 @@ export default {
     computed: {
         ...mapState([
             'themeName',
+            'keyboardType'
         ]),
 
         list({searchKey, searchResults}) {
@@ -221,16 +222,31 @@ export default {
                     this.$store.state.fileShakeId = item.id
                     setTimeout(() => {
                         this.$store.state.fileShakeId = 0
-                    }, 1000)
+                    }, 600)
                     this.onHide()
                     break;
+            }
+        },
+
+        onTouchstart() {
+            if (this.keyboardType === "show") {
+                $A.eeuiAppKeyboardHide();
             }
         },
 
         onShow() {
             this.showModal = true
             this.$nextTick(() => {
-                this.$refs.searchKey?.focus()
+                const $el = this.$refs.searchKey?.$refs?.input;
+                if ($el) {
+                    $el.style.caretColor = 'transparent';
+                    $el.focus()
+                    const len = $el.value.length;
+                    $el.setSelectionRange(len, len);
+                    setTimeout(() => {
+                        $el.style.caretColor = null
+                    }, 300)
+                }
             })
         },
 
