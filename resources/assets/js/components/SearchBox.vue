@@ -14,7 +14,9 @@
                     <Loading v-if="loadIng > 0"/>
                     <Icon v-else type="ios-search" />
                 </div>
-                <Input ref="searchKey" v-model="searchKey" :placeholder="$L('请输入关键字')" type="search" @on-enter="onEnter"/>
+                <Form class="search-form" action="javascript:void(0)" @submit.native.prevent="$A.eeuiAppKeyboardHide">
+                    <Input type="search" ref="searchKey" v-model="searchKey" :placeholder="$L('请输入关键字')"/>
+                </Form>
             </div>
             <i class="taskfont search-close" @click="onHide">&#xe6e5;</i>
         </div>
@@ -249,9 +251,9 @@ export default {
                 if ($el) {
                     $el.style.caretColor = 'transparent';
                     $el.focus()
-                    const len = $el.value.length;
-                    $el.setSelectionRange(len, len);
                     setTimeout(() => {
+                        const len = $el.value.length;
+                        $el.setSelectionRange(len, len);
                         $el.style.caretColor = null
                     }, 300)
                 }

@@ -7,7 +7,9 @@
                     <Loading v-if="loadProjects > 0"/>
                     <Icon v-else type="ios-search" />
                 </div>
-                <Input v-model="projectKeyValue" :placeholder="$L(loadProjects > 0 ? '更新中...' : '搜索')" clearable/>
+                <Form class="search-form" action="javascript:void(0)" @submit.native.prevent="$A.eeuiAppKeyboardHide">
+                    <Input type="search" v-model="projectKeyValue" :placeholder="$L(loadProjects > 0 ? '更新中...' : '搜索')" clearable/>
+                </Form>
             </div>
         </div>
         <ul @touchstart="onTouchStart" @scroll="onScroll">

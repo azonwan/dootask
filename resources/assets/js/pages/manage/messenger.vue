@@ -9,20 +9,24 @@
                             <Loading v-if="searchLoading"/>
                             <Icon v-else type="ios-search" />
                         </div>
-                        <Input
-                            v-if="tabActive==='dialog'"
-                            v-model="dialogSearchKey"
-                            ref="searchInput"
-                            :placeholder="$L(loadDialogs > 0 ? '更新中...' : '搜索')"
-                            @on-keydown="onKeydown"
-                            clearable/>
-                        <Input
-                            v-else
-                            v-model="contactsKey"
-                            ref="contactInput"
-                            :placeholder="$L('搜索')"
-                            @on-keydown="onKeydown"
-                            clearable/>
+                        <Form class="search-form" action="javascript:void(0)" @submit.native.prevent="$A.eeuiAppKeyboardHide">
+                            <Input
+                                v-if="tabActive==='dialog'"
+                                type="search"
+                                v-model="dialogSearchKey"
+                                ref="searchInput"
+                                :placeholder="$L(loadDialogs > 0 ? '更新中...' : '搜索')"
+                                @on-keydown="onKeydown"
+                                clearable/>
+                            <Input
+                                v-else
+                                type="search"
+                                v-model="contactsKey"
+                                ref="contactInput"
+                                :placeholder="$L('搜索')"
+                                @on-keydown="onKeydown"
+                                clearable/>
+                        </Form>
                     </div>
                 </div>
                 <div v-if="tabActive==='dialog' && !dialogSearchKey" class="messenger-nav">

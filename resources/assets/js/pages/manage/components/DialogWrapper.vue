@@ -143,8 +143,10 @@
                                 <Loading v-if="searchLoad > 0"/>
                                 <Icon v-else type="ios-search" />
                             </div>
-                            <Input ref="searchInput" v-model="searchKey" :placeholder="$L('搜索消息')" @on-keyup="onSearchKeyup" clearable/>
-                            <div v-if="searchLoad === 0 && searchResult.length > 0" class="search-total">{{searchLocation}}/{{searchResult.length}}</div>
+                            <Form class="search-form" action="javascript:void(0)" @submit.native.prevent="$A.eeuiAppKeyboardHide">
+                                <Input type="search" ref="searchInput" v-model="searchKey" :placeholder="$L('搜索消息')" @on-keyup="onSearchKeyup" clearable/>
+                                <div v-if="searchLoad === 0 && searchResult.length > 0" class="search-total">{{searchLocation}}/{{searchResult.length}}</div>
+                            </Form>
                         </div>
                         <div class="search-cancel" @click="onSearchKeyup(null)">{{$L('取消')}}</div>
                     </div>

@@ -59,7 +59,9 @@
                         <Loading v-if="loadIng > 0"/>
                         <Icon v-else type="ios-search" />
                     </div>
-                    <Input v-model="searchKey" :placeholder="localPlaceholder" clearable/>
+                    <Form class="search-form" action="javascript:void(0)" @submit.native.prevent="$A.eeuiAppKeyboardHide">
+                        <Input type="search" v-model="searchKey" :placeholder="localPlaceholder" clearable/>
+                    </Form>
                 </div>
             </div>
 

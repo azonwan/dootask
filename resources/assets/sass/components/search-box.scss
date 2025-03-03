@@ -68,13 +68,17 @@
                             }
                         }
 
-                        .ivu-input {
-                            border-color: transparent;
-                            background-color: transparent;
+                        .search-form {
+                            flex: 1;
 
-                            &:hover,
-                            &:focus {
-                                box-shadow: none;
+                            .ivu-input {
+                                border-color: transparent;
+                                background-color: transparent;
+
+                                &:hover,
+                                &:focus {
+                                    box-shadow: none;
+                                }
                             }
                         }
                     }
