@@ -2,7 +2,7 @@ services:
   php:
     container_name: "dootask-php-${APP_ID}"
     image: "kuaifan/php:swoole-8.0.rc18"
-    shm_size: "2gb"
+    shm_size: 2G
     ulimits:
       core:
         soft: 0
@@ -234,6 +234,7 @@ services:
     environment:
       discovery.type: single-node
       xpack.security.enabled: false
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
     networks:
       extnetwork:
         ipv4_address: "${APP_IPPR}.15"
