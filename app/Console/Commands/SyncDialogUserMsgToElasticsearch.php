@@ -22,7 +22,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
 
     protected $signature = 'elasticsearch:sync-dialog-user-msg {--f} {--i} {--c} {--batch=500}';
     protected $description = '同步聊天会话用户和消息到Elasticsearch';
-    protected $elasticsearch;
+    protected $es;
 
     /**
      * SyncDialogUserMsgToElasticsearch constructor.
@@ -30,7 +30,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->elasticsearch = new ElasticSearch(ElasticSearch::DUM);
+        $this->es = new ElasticSearch(ElasticSearch::DUM);
     }
 
     /**
@@ -44,11 +44,12 @@ class SyncDialogUserMsgToElasticsearch extends Command
         // 清除索引
         if ($this->option('c')) {
             $this->info('清除索引...');
-            if (!$this->elasticsearch->indexExists()) {
+            if (!$this->es->indexExists()) {
+                $this->saveLastId(true);
                 $this->info('索引不存在');
                 return 0;
             }
-            $result = $this->elasticsearch->deleteIndex();
+            $result = $this->es->deleteIndex();
             if (isset($result['error'])) {
                 $this->error('删除索引失败: ' . $result['error']);
                 return 1;
@@ -59,13 +60,14 @@ class SyncDialogUserMsgToElasticsearch extends Command
         }
 
         // 判断创建索引
-        if (!$this->elasticsearch->indexExists()) {
+        if (!$this->es->indexExists()) {
             $this->info('创建索引...');
-            $result = $this->elasticsearch->createDialogUserMsgIndex();
+            $result = $this->es->createDialogUserMsgIndex();
             if (isset($result['error'])) {
                 $this->error('创建索引失败: ' . $result['error']);
                 return 1;
             }
+            $this->saveLastId(true);
             $this->info('索引创建成功');
         }
 
@@ -151,7 +153,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
             }
 
             if ($params['body']) {
-                $result = $this->elasticsearch->bulk($params);
+                $result = $this->es->bulk($params);
                 if (isset($result['errors']) && $result['errors']) {
                     $this->error('批量索引用户数据部分失败');
                     Log::error('Elasticsearch批量索引失败: ' . json_encode($result['items']));
@@ -230,7 +232,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
                 $chunks = array_chunk($params['body'], 1000);
                 foreach ($chunks as $chunk) {
                     $chunkParams = ['body' => $chunk];
-                    $result = $this->elasticsearch->bulk($chunkParams);
+                    $result = $this->es->bulk($chunkParams);
                     if (isset($result['errors']) && $result['errors']) {
                         $this->error('批量索引消息数据部分失败');
                         Log::error('Elasticsearch批量索引失败: ' . json_encode($result['items']));

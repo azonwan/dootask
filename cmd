@@ -416,10 +416,30 @@ if [ $# -gt 0 ]; then
             rm -rf vendor
             rm -rf composer.lock
         fi
-        mkdir -p "${cur_path}/docker/log/supervisor"
-        mkdir -p "${cur_path}/docker/mysql/data"
-        chmod -R 775 "${cur_path}/docker/log/supervisor"
-        chmod -R 775 "${cur_path}/docker/mysql/data"
+        # 目录权限
+        volumes=(
+            "docker/log/supervisor"
+            "docker/mysql/data"
+            "docker/office/logs"
+            "docker/office/data"
+            "docker/es/data"
+        )
+        cmda=""
+        cmdb=""
+        for vol in "${volumes[@]}"; do
+            mkdir -p "${cur_path}/${vol}"
+            chmod -R 775 "${cur_path}/${vol}"
+            rm -f "${cur_path}/${vol}/dootask.lock"
+            cmda="${cmda} -v ./${vol}:/usr/share/${vol}"
+            cmdb="${cmdb} touch /usr/share/${vol}/dootask.lock &&"
+        done
+        docker run --rm ${cmda} nginx:alpine sh -c "${cmdb} touch /usr/share/docker/dootask.lock"
+        for vol in "${volumes[@]}"; do
+            if [ ! -f "${cur_path}/${vol}/dootask.lock" ]; then
+                error "目录【${vol}】权限不足！"
+                exit 1
+            fi
+        done
         # 启动容器
         [[ "$(arg_get port)" -gt 0 ]] && env_set APP_PORT "$(arg_get port)"
         $COMPOSE up php -d
