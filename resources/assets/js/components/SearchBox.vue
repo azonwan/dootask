@@ -84,16 +84,12 @@
 
 <script>
 import {mapState} from "vuex";
-import ModalAlive from "view-design-hi/src/components/modal/modal-alive";
 import emitter from "../store/events";
 
 export default {
     name: 'SearchBox',
     props: {
         //
-    },
-    components: {
-        ModalAlive,
     },
 
     data() {
@@ -267,7 +263,6 @@ export default {
         },
 
         onEnter() {
-            this.preSearch();
             $A.eeuiAppKeyboardHide();
         },
 
