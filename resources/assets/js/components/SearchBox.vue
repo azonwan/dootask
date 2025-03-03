@@ -157,14 +157,14 @@ export default {
             switch (type) {
                 case 'task':
                     return this.$L('任务')
+                case 'project':
+                    return this.$L('项目')
                 case 'message':
                     return this.$L('消息')
                 case 'contact':
                     return this.$L('联系人')
                 case 'file':
                     return this.$L('文件')
-                case 'project':
-                    return this.$L('项目')
             }
             return type;
         },
@@ -182,7 +182,45 @@ export default {
         },
 
         onClick(item) {
-            console.log(item);
+            switch (item.type) {
+                case 'task':
+                    this.$store.dispatch('openTask', item.rawData)
+                    this.onHide()
+                    break;
+
+                case 'project':
+                    this.goForward({name: 'manage-project', params: {projectId: item.id}})
+                    this.onHide()
+                    break;
+
+                case 'message':
+                    this.$store.dispatch("openDialog", item.id).then(() => {
+                        this.onHide()
+                        this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
+                        this.$store.state.dialogSearchMsgId = /^\d+$/.test(item.rawData.search_msg_id) ? item.rawData.search_msg_id : 0
+                    }).catch(({msg}) => {
+                        $A.modalError(msg || this.$L('打开会话失败'))
+                    })
+                    break;
+
+                case 'contact':
+                    this.$store.dispatch("openDialogUserid", item.id).then(_ => {
+                        this.onHide()
+                        this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
+                    }).catch(({msg}) => {
+                        $A.modalError(msg || this.$L('打开会话失败'))
+                    });
+                    break;
+
+                case 'file':
+                    this.goForward({name: 'manage-file', params: {folderId: item.rawData.pid, fileId: null, shakeId: item.id}})
+                    this.$store.state.fileShakeId = item.id
+                    setTimeout(() => {
+                        this.$store.state.fileShakeId = 0
+                    }, 1000)
+                    this.onHide()
+                    break;
+            }
         },
 
         onShow() {

@@ -976,13 +976,14 @@ export default {
                         this.onAddShow()
                         break;
 
-                    case 70: // F - 搜索
+                    case 70:
+                    case 191: // F、/ - 搜索
                         e.preventDefault();
                         this.$refs.searchBox.onShow();
                         break;
 
                     case 75:
-                    case 78: // K/N - 新建任务
+                    case 78: // K、N - 新建任务
                         e.preventDefault();
                         this.onAddMenu('task')
                         break;

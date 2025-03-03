@@ -761,7 +761,7 @@ export default {
     },
 
     computed: {
-        ...mapState(['systemConfig', 'userIsAdmin', 'userInfo', 'fileLists', 'wsOpenNum', 'windowWidth', 'filePackLists']),
+        ...mapState(['systemConfig', 'userIsAdmin', 'userInfo', 'fileLists', 'wsOpenNum', 'windowWidth', 'filePackLists', 'fileShakeId']),
 
         pid() {
             const {folderId} = this.$route.params;
@@ -959,6 +959,10 @@ export default {
             },
             deep: true
         },
+
+        fileShakeId(shakeId) {
+            shakeId && this.shakeFile(shakeId)
+        }
     },
 
     methods: {

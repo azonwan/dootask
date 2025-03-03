@@ -138,6 +138,7 @@ export default {
     fileLists: [],
     fileLinks: [],
     filePackLists: [],
+    fileShakeId: 0,
 
     // 项目任务
     projectId: 0,
