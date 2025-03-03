@@ -1310,6 +1310,7 @@ export default {
         onSort(field) {
             this.sortField = field;
             this.sortType = this.sortType == 'desc' ? 'asc' : 'desc';
+            this.handleColumnDebounce();
         },
 
         onSetting() {
