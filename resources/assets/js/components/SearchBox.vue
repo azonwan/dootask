@@ -6,6 +6,7 @@
         :fullscreen="isFullscreen"
         :mask-closable="false"
         :footer-hide="true"
+        :content-alive="true"
         width="640">
 
         <div class="search-header">
