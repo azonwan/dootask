@@ -163,7 +163,14 @@ function createMainWindow() {
         if (!willQuitApp) {
             utils.onBeforeUnload(event, mainWindow).then(() => {
                 if (['darwin', 'win32'].includes(process.platform)) {
-                    mainWindow.hide();
+                    if (mainWindow.isFullScreen()) {
+                        mainWindow.once('leave-full-screen', () => {
+                            mainWindow.hide();
+                        })
+                        mainWindow.setFullScreen(false)
+                    } else {
+                        mainWindow.hide();
+                    }
                 } else {
                     app.quit();
                 }
@@ -497,8 +504,15 @@ function createMediaWindow(args, type = 'image') {
         mediaWindow.addListener('close', event => {
             if (!willQuitApp) {
                 event.preventDefault()
-                mediaWindow.webContents.send('on-close');
-                mediaWindow.hide();
+                if (mediaWindow.isFullScreen()) {
+                    mediaWindow.once('leave-full-screen', () => {
+                        mediaWindow.hide();
+                    })
+                    mediaWindow.setFullScreen(false)
+                } else {
+                    mediaWindow.webContents.send('on-close');
+                    mediaWindow.hide();
+                }
             }
         })
 
