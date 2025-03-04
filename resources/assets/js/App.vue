@@ -576,6 +576,7 @@ export default {
                 this.$store.state.keyboardType = event.keyboardType;
                 this.$store.state.keyboardHeight = event.keyboardHeight;
                 this.$store.state.safeAreaBottom = event.safeAreaBottom;
+                $A.eeuiAppShakeToEditEnabled(this.$store.state.keyboardType === 'show')
             }
             // 通知权限
             window.__onNotificationPermissionStatus = (ret) => {

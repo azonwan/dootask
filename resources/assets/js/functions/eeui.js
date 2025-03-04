@@ -249,6 +249,18 @@
                 obj.setScrollEnabled(enabled);
             })
         },
+
+        // 设置应用程序级别的摇动撤销
+        eeuiAppShakeToEditEnabled(enabled) {
+            if (!$A.isEEUiApp) return;
+            $A.eeuiModule("eeui").then(obj => {
+                if (enabled) {
+                    obj.shakeToEditOn();
+                } else {
+                    obj.shakeToEditOff();
+                }
+            })
+        },
     });
 
     window.$A = $;
