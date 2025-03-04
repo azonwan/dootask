@@ -1349,6 +1349,55 @@ class DialogController extends AbstractController
     }
 
     /**
+     * @api {post} api/dialog/msg/convertrecord          25. 录音转文字
+     *
+     * @apiDescription 需要token身份
+     * @apiVersion 1.0.0
+     * @apiGroup dialog
+     * @apiName msg__convertrecord
+     *
+     * @apiParam {Number} dialog_id             对话ID
+     * @apiParam {String} base64                语音base64
+     * @apiParam {Number} duration              语音时长（毫秒）
+     *
+     * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
+     * @apiSuccess {String} msg     返回信息（错误描述）
+     * @apiSuccess {Object} data    返回数据
+     */
+    public function msg__convertrecord()
+    {
+        $user = User::auth();
+        $user->checkChatInformation();
+        //
+        $dialog_id = intval(Request::input('dialog_id'));
+        //
+        WebSocketDialog::checkDialog($dialog_id);
+        //
+        $path = "uploads/tmp/chat/" . date("Ym") . "/" . $dialog_id . "/";
+        $base64 = Request::input('base64');
+        $duration = intval(Request::input('duration'));
+        if ($duration < 600) {
+            return Base::retError('说话时间太短');
+        }
+        $data = Base::record64save([
+            "base64" => $base64,
+            "path" => $path,
+        ]);
+        if (Base::isError($data)) {
+            return Base::retError($data['msg']);
+        }
+        $recordData = $data['data'];
+        $res = Extranet::openAItranscriptions($recordData['file']);
+        if (Base::isError($res)) {
+            return $res;
+        }
+        if (strlen($res['data']) < 1) {
+            return Base::retError('转文字失败');
+        }
+        return $res;
+    }
+
+    /**
      * @api {post} api/dialog/msg/sendfile          26. 文件上传
      *
      * @apiDescription 需要token身份

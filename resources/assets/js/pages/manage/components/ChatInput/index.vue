@@ -188,14 +188,52 @@
                 v-transfer-dom
                 :data-transfer="true"
                 class="chat-input-record-transfer"
-                :class="{cancel: touchLimitY}"
+                :class="recordClassName"
                 :style="recordTransferStyle"
                 @click="stopRecord">
                 <div v-if="recordDuration > 0" class="record-duration">{{recordFormatDuration}}</div>
                 <div v-else class="record-loading"><Loading type="pure"/></div>
-                <div class="record-cancel" @click.stop="stopRecord(true)">{{$L(touchLimitY ? '松开取消' : '向上滑动取消')}}</div>
+                <div class="record-cancel" @click.stop="stopRecord(true)">{{$L(recordFormatTip)}}</div>
             </div>
         </transition>
+
+        <!-- 录音转文字 -->
+        <transition name="fade">
+            <div
+                v-if="recordConvertIng"
+                v-transfer-dom
+                :data-transfer="true"
+                class="chat-input-convert-transfer"
+                :style="recordTransferStyle">
+                <div class="convert-box">
+                    <div class="convert-content">
+                        <Input
+                            type="textarea"
+                            class="convert-result"
+                            v-model="recordConvertResult"
+                            :rows="1"
+                            :autosize="{minRows: 1, maxRows: 5}"
+                            :placeholder="recordConvertStatus === 0 ? '...' : ''"/>
+                    </div>
+                    <ul class="convert-footer">
+                        <li @click="recordConvertIng=false">
+                            <i class="taskfont">&#xe637;</i>
+                            <span>{{$L('取消')}}</span>
+                        </li>
+                        <li @click="convertSend('voice')">
+                            <i class="taskfont voice">&#xe793;</i>
+                            <span>{{$L('发送原语音')}}</span>
+                        </li>
+                        <li @click="convertSend('result')">
+                            <i v-if="recordConvertStatus === 0" class="send"><Loading/></i>
+                            <i v-else-if="recordConvertStatus === 2" class="taskfont error">&#xe665;</i>
+                            <i v-else class="taskfont send">&#xe684;</i>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </transition>
+
 
         <Modal
             v-model="fullInput"
@@ -335,6 +373,9 @@ export default {
             recordInter: null,
             recordState: "stop",
             recordDuration: 0,
+            recordConvertIng: false,
+            recordConvertStatus: 0,     // 0: 转换中 1: 转换成功 2: 转换失败
+            recordConvertResult: '',
 
             touchStart: {},
             touchFocus: false,
@@ -453,6 +494,9 @@ export default {
         if (this.recordRec) {
             this.recordRec = null
         }
+        if (this.recordConvertIng) {
+            this.recordConvertIng = false
+        }
         if (this.recordInter) {
             clearInterval(this.recordInter)
         }
@@ -561,6 +605,24 @@ export default {
             if (minute < 10) minute = `0${minute}`
             if (seconds < 10) seconds = `0${seconds}`
             return `${minute}:${seconds}″${millisecond}`
+        },
+
+        recordClassName({touchLimitX, touchLimitY}) {
+            if (touchLimitY) {
+                return 'cancel'
+            } else if (touchLimitX) {
+                return 'convert'
+            }
+            return ''
+        },
+
+        recordFormatTip({touchLimitX, touchLimitY}) {
+            if (touchLimitY) {
+                return '松开取消'
+            } else if (touchLimitX) {
+                return '转文字'
+            }
+            return '向上滑动取消'
         },
 
         dialogData() {
@@ -1140,7 +1202,7 @@ export default {
                     if (this.showMenu) {
                         return;
                     }
-                    if (this.stopRecord(this.touchLimitY)) {
+                    if (this.stopRecord(this.touchLimitY, this.touchLimitX)) {
                         return;
                     }
                     if (this.touchLimitY || this.touchLimitX) {
@@ -1222,7 +1284,7 @@ export default {
             }
         },
 
-        stopRecord(isCancel) {
+        stopRecord(isCancel, isConvert = false) {
             switch (this.recordState) {
                 case "ing":
                     this.recordState = "stop";
@@ -1235,7 +1297,12 @@ export default {
                             $A.messageWarning("说话时间太短") // 小于 600ms 不发送
                         } else {
                             this.recordBlob = blob;
-                            this.uploadRecord(duration);
+                            this.recordDuration = duration;
+                            if (isConvert === true) {
+                                this.convertRecord();
+                            } else {
+                                this.uploadRecord();
+                            }
                         }
                     }, (msg) => {
                         this.recordRec.close();
@@ -1270,7 +1337,54 @@ export default {
             })
         },
 
-        uploadRecord(duration) {
+        convertRecord() {
+            if (this.recordBlob === null) {
+                this.recordConvertIng = false
+                return;
+            }
+            this.recordConvertResult = ''
+            this.recordConvertStatus = 0
+            this.recordConvertIng = true
+            //
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                this.$store.dispatch("call", {
+                    url: 'dialog/msg/convertrecord',
+                    data: {
+                        dialog_id: this.dialogId,
+                        base64: reader.result,
+                        duration: this.recordDuration,
+                    },
+                    method: 'post',
+                }).then(({data}) => {
+                    this.recordConvertStatus = data ? 1 : 2
+                    this.recordConvertResult = data || this.$L('转文字失败')
+                }).catch(({msg}) => {
+                    this.recordConvertStatus = 2
+                    this.recordConvertResult = msg
+                });
+            };
+            reader.readAsDataURL(this.recordBlob);
+        },
+
+        convertSend(type) {
+            if (!this.recordConvertIng) {
+                return;
+            }
+            if (type === 'voice') {
+                this.uploadRecord();
+                this.recordConvertIng = false
+            } else {
+                if (this.recordConvertStatus === 1) {
+                    this.$emit('on-send', this.recordConvertResult)
+                    this.recordConvertIng = false
+                } else if (this.recordConvertStatus === 2) {
+                    this.convertRecord()
+                }
+            }
+        },
+
+        uploadRecord() {
             if (this.recordBlob === null) {
                 return;
             }
@@ -1279,7 +1393,7 @@ export default {
                 this.$emit('on-record', {
                     type: this.recordBlob.type,
                     base64: reader.result,
-                    duration,
+                    duration: this.recordDuration,
                 })
             };
             reader.readAsDataURL(this.recordBlob);

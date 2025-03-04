@@ -571,6 +571,7 @@ body.dark-mode-reverse {
     }
 
     .chat-input-record-transfer {
+        &.convert,
         &.cancel {
             color: #000000;
         }
