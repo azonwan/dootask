@@ -512,12 +512,12 @@ export default {
                 return this.showDialog || dialog.type === 'user'
             }).sort((a, b) => {
                 if (a.top_at || b.top_at) {
-                    return $A.dayjs(b.top_at) - $A.dayjs(a.top_at);
+                    return $A.sortDay(b.top_at, a.top_at);
                 }
                 if (a.todo_num > 0 || b.todo_num > 0) {
-                    return b.todo_num - a.todo_num;
+                    return $A.sortFloat(b.todo_num, a.todo_num);
                 }
-                return $A.dayjs(b.last_at) - $A.dayjs(a.last_at);
+                return $A.sortDay(b.last_at, a.last_at);
             }).map(({id, name, pinyin, email, type, group_type, avatar, dialog_user}) => {
                 return {
                     name,

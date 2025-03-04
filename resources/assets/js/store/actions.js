@@ -1324,7 +1324,7 @@ export default {
         if (ids.includes(state.projectId)) {
             const project = $A.cloneJSON(state.cacheProjects).sort((a, b) => {
                 if (a.top_at || b.top_at) {
-                    return $A.dayjs(b.top_at) - $A.dayjs(a.top_at);
+                    return $A.sortDay(b.top_at, a.top_at);
                 }
                 return b.id - a.id;
             }).find(({id}) => id && id != project_id);
@@ -2809,7 +2809,7 @@ export default {
             return state.cacheDialogs
                 .filter(func)
                 .sort((a, b) => {
-                    return $A.dayjs(a.last_at) - $A.dayjs(b.last_at);
+                    return $A.sortDay(a.last_at, b.last_at);
                 })
                 .find(({id}) => id > 0)
         }

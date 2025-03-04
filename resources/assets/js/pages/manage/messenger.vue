@@ -731,18 +731,18 @@ export default {
         dialogSort(a, b) {
             // 根据置顶时间排序
             if (a.top_at || b.top_at) {
-                return $A.dayjs(b.top_at) - $A.dayjs(a.top_at);
+                return $A.sortDay(b.top_at, a.top_at);
             }
             // 根据未读数排序
             if (a.todo_num > 0 || b.todo_num > 0) {
-                return b.todo_num - a.todo_num;
+                return $A.sortFloat(b.todo_num, a.todo_num);
             }
             // 根据草稿排序
             if (a.extra_draft_has || b.extra_draft_has) {
-                return b.extra_draft_has - a.extra_draft_has;
+                return $A.sortFloat(b.extra_draft_has, a.extra_draft_has);
             }
             // 根据最后会话时间排序
-            return $A.dayjs(b.last_at) - $A.dayjs(a.last_at);
+            return $A.sortDay(b.last_at, a.last_at);
         },
 
         userClass(user) {

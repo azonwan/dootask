@@ -527,7 +527,7 @@ class BaiduMapPicker {
         // 按距离排序（如果有距离信息）
         pois.sort((a, b) => {
             if (a.distance_current && b.distance_current) {
-                return a.distance_current - b.distance_current;
+                return $A.sortFloat(a.distance_current, b.distance_current);
             }
             return 0;
         });

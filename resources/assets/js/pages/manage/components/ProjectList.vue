@@ -96,7 +96,7 @@ export default {
             const {projectKeyValue, cacheProjects} = this;
             const data = $A.cloneJSON(cacheProjects).sort((a, b) => {
                 if (a.top_at || b.top_at) {
-                    return $A.dayjs(b.top_at) - $A.dayjs(a.top_at);
+                    return $A.sortDay(b.top_at, a.top_at);
                 }
                 return b.id - a.id;
             });

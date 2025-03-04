@@ -240,7 +240,7 @@ export default {
                 return project_id == projectId
             }).sort((a, b) => {
                 if (a.sort != b.sort) {
-                    return a.sort - b.sort;
+                    return $A.sortFloat(a.sort, b.sort);
                 }
                 return a.id - b.id;
             }).map(item => {

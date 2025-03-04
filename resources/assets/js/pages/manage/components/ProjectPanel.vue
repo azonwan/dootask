@@ -785,7 +785,7 @@ export default {
                 return project_id == projectId
             }).sort((a, b) => {
                 if (a.sort != b.sort) {
-                    return a.sort - b.sort;
+                    return $A.sortFloat(a.sort, b.sort);
                 }
                 return a.id - b.id;
             });
@@ -794,10 +794,10 @@ export default {
                     return task.column_id == column.id;
                 })).sort((a, b) => {
                     if (a.complete_at || b.complete_at) {
-                        return $A.dayjs(a.complete_at) - $A.dayjs(b.complete_at);
+                        return $A.sortDay(a.complete_at, b.complete_at);
                     }
                     if (a.sort != b.sort) {
-                        return a.sort - b.sort;
+                        return $A.sortFloat(a.sort, b.sort);
                     }
                     return a.id - b.id;
                 });
@@ -820,12 +820,12 @@ export default {
                     [a, b] = [b, a];
                 }
                 if (sortField == 'level') {
-                    return a.p_level - b.p_level;
+                    return $A.sortFloat(a.p_level, b.p_level)
                 } else if (sortField == 'end_at') {
                     if (a.end_at == b.end_at) {
-                        return a.p_level - b.p_level;
+                        return $A.sortFloat(a.p_level, b.p_level)
                     }
-                    return $A.dayjs(a.end_at || "2099-12-31 23:59:59") - $A.dayjs(b.end_at || "2099-12-31 23:59:59");
+                    return $A.sortDay(a.end_at || "2099-12-31 23:59:59", b.end_at || "2099-12-31 23:59:59");
                 }
             });
         },
@@ -845,12 +845,12 @@ export default {
                     [a, b] = [b, a];
                 }
                 if (sortField == 'level') {
-                    return a.p_level - b.p_level;
+                    return $A.sortFloat(a.p_level, b.p_level)
                 } else if (sortField == 'end_at') {
                     if (a.end_at == b.end_at) {
-                        return a.p_level - b.p_level;
+                        return $A.sortFloat(a.p_level, b.p_level)
                     }
-                    return $A.dayjs(a.end_at || "2099-12-31 23:59:59") - $A.dayjs(b.end_at || "2099-12-31 23:59:59");
+                    return $A.sortDay(a.end_at || "2099-12-31 23:59:59", b.end_at || "2099-12-31 23:59:59");
                 }
             });
         },
@@ -876,12 +876,12 @@ export default {
                     [a, b] = [b, a];
                 }
                 if (sortField == 'level') {
-                    return a.p_level - b.p_level;
+                    return $A.sortFloat(a.p_level, b.p_level)
                 } else if (sortField == 'end_at') {
                     if (a.end_at == b.end_at) {
-                        return a.p_level - b.p_level;
+                        return $A.sortFloat(a.p_level, b.p_level)
                     }
-                    return $A.dayjs(a.end_at || "2099-12-31 23:59:59") - $A.dayjs(b.end_at || "2099-12-31 23:59:59");
+                    return $A.sortDay(a.end_at || "2099-12-31 23:59:59", b.end_at || "2099-12-31 23:59:59");
                 }
             });
         },
@@ -903,7 +903,7 @@ export default {
                 return task.complete_at;
             });
             return array.sort((a, b) => {
-                return $A.dayjs(b.complete_at) - $A.dayjs(a.complete_at);
+                return $A.sortDay(b.complete_at, a.complete_at);
             });
         },
 

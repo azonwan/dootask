@@ -138,7 +138,7 @@ export default {
                 const baseUrl = $A.mainUrl("images/emoticon")
                 if ($A.isArray(window.emojiData)) {
                     this.emojiData = window.emojiData.sort(function (a, b) {
-                        return a.emoji_order - b.emoji_order;
+                        return $A.sortFloat(a.emoji_order, b.emoji_order);
                     }).map(item => {
                         return {
                             type: 'emoji',

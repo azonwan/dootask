@@ -2178,5 +2178,34 @@ const timezone = require("dayjs/plugin/timezone");
         },
     });
 
+    /**
+     * =============================================================================
+     * ***********************************   time   ********************************
+     * =============================================================================
+     */
+    $.extend({
+        /**
+         * 计算排序值 （日期格式）
+         * @param v1
+         * @param v2
+         * @returns {number}
+         */
+        sortDay(v1, v2) {
+            if (v1 === v2) return 0;
+            return ($A.dayjs(v1).valueOf() || 0) - ($A.dayjs(v2).valueOf() || 0);
+        },
+
+        /**
+         * 计算排序值 （数字格式）
+         * @param v1
+         * @param v2
+         * @returns {number}
+         */
+        sortFloat(v1, v2) {
+            if (v1 === v2) return 0;
+            return (parseFloat(v1) || 0) - (parseFloat(v2) || 0);
+        }
+    });
+
     window.$A = $;
 })(window, window.$ = window.jQuery = require('jquery'));

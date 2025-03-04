@@ -166,7 +166,7 @@ export default {
                     hidden: hiddenColumns.includes(type),
                     count: dashboardTask[`${type}_count`],
                     list: data.sort((a, b) => {
-                        return $A.dayjs(a.end_at || "2099-12-31 23:59:59") - $A.dayjs(b.end_at || "2099-12-31 23:59:59");
+                        return $A.sortDay(a.end_at || "2099-12-31 23:59:59", b.end_at || "2099-12-31 23:59:59");
                     })
                 })
             })
@@ -176,7 +176,7 @@ export default {
                 hidden: hiddenColumns.includes('assist'),
                 count: assistTask.length,
                 list: assistTask.sort((a, b) => {
-                    return $A.dayjs(a.end_at || "2099-12-31 23:59:59") - $A.dayjs(b.end_at || "2099-12-31 23:59:59");
+                    return $A.sortDay(a.end_at || "2099-12-31 23:59:59", b.end_at || "2099-12-31 23:59:59");
                 })
             })
             return list;
