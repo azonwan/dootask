@@ -46,9 +46,9 @@
                 </div>
             </template>
             <div v-else class="search-list">
-                <ul v-for="(items, type) in list" :key="type">
-                    <li v-if="!action" class="item-label">{{typeLabel(type)}}</li>
-                    <li v-for="item in items" :key="item.id" @click="onClick(item)">
+                <ul v-for="data in list" :key="data.type">
+                    <li v-if="!action" class="item-label">{{$L(data.name)}}</li>
+                    <li v-for="item in data.items" :key="item.id" @click="onClick(item)">
                         <div class="item-icon">
                             <div v-if="item.icons[0]==='file'" :class="`no-dark-content file-icon ${item.icons[1]}`"></div>
                             <i v-else-if="item.icons[0]==='department'" class="taskfont icon-avatar department">&#xe75c;</i>
@@ -144,39 +144,47 @@ export default {
             'keyboardType'
         ]),
 
-        list({searchKey, searchResults, action}) {
-            const items = searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
-            const groups = {}
-            items.forEach(item => {
-                if (!groups[item.type]) {
-                    groups[item.type] = []
-                }
-                if (groups[item.type].length < 10 || action) {
-                    groups[item.type].push(item)
-                }
-            })
-            return groups
-        },
-
-        total({searchKey, searchResults, action}) {
-            const items = searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
-            return items.length
-        },
-
         isFullscreen({windowWidth}) {
             return windowWidth < 576
+        },
+
+        items({searchKey, searchResults, action}) {
+            return searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
+        },
+
+        total() {
+            return this.items.length
+        },
+
+        list({action, tags}) {
+            const groups = new Map();
+            const maxItems = action ? Infinity : 10;
+
+            for (let i = 0; i < this.items.length; i++) {
+                const item = this.items[i];
+                const type = item.type;
+                if (!groups.has(type)) {
+                    groups.set(type, []);
+                }
+                const group = groups.get(type);
+                if (group.length < maxItems) {
+                    group.push(item);
+                }
+            }
+
+            return tags.reduce((result, tag) => {
+                if (groups.has(tag.type)) {
+                    result.push({
+                        ...tag,
+                        items: groups.get(tag.type)
+                    });
+                }
+                return result;
+            }, []);
         },
     },
 
     methods: {
-        typeLabel(type) {
-            const tag = this.tags.find(item => item.type === type);
-            if (tag) {
-                return this.$L(tag.name);
-            }
-            return type;
-        },
-
         activityFormat(date) {
             const local = $A.daytz(),
                 time = $A.dayjs(date);
