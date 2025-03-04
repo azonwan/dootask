@@ -6,9 +6,6 @@
             max-width: none;
 
             .ivu-modal-content {
-                margin-top: 46px;
-                border-top-left-radius: 18px !important;
-                border-top-right-radius: 18px !important;
 
                 .ivu-modal-body {
 
@@ -84,13 +81,23 @@
                     }
 
                     .search-close {
-                        font-size: 16px;
-                        color: #808695;
                         cursor: pointer;
                         padding: 0 16px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+
+                        > i {
+                            color: #808695;
+                            font-size: 16px;
+                            transition: transform 0.3s;
+                        }
 
                         &:hover {
-                            color: #303133;
+                            > i {
+                                color: #303133;
+                                transform: rotate(-90deg);
+                            }
                         }
                     }
                 }

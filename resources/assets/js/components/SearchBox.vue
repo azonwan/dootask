@@ -18,7 +18,9 @@
                     <Input type="search" ref="searchKey" v-model="searchKey" :placeholder="$L('请输入关键字')"/>
                 </Form>
             </div>
-            <i class="taskfont search-close" @click="onHide">&#xe6e5;</i>
+            <div class="search-close" @click="onHide">
+                <i class="taskfont">&#xe6e5;</i>
+            </div>
         </div>
 
         <div class="search-body" @touchstart="onTouchstart">

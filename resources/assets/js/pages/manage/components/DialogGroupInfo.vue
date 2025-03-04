@@ -1,8 +1,10 @@
 <template>
     <div class="dialog-group-info">
-        <div class="group-info-title">{{$L('群名')}}</div>
-        <div class="group-info-value">
-            <QuickEdit :value="dialogData.name" :disabled="dialogData.owner_id != userId" @on-update="updateName">{{dialogData.name}}</QuickEdit>
+        <div class="dialog-group-head">
+            <div class="group-info-title">{{$L('群名')}}</div>
+            <div class="group-info-value">
+                <QuickEdit :value="dialogData.name" :disabled="dialogData.owner_id != userId" @on-update="updateName">{{dialogData.name}}</QuickEdit>
+            </div>
         </div>
 
         <div class="group-info-title">{{$L('群组 ID')}}</div>
