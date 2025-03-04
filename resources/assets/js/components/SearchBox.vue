@@ -258,6 +258,9 @@ export default {
 
         onShow() {
             this.showModal = true
+            if (this.total > 0) {
+                return
+            }
             this.$nextTick(() => {
                 const $el = this.$refs.searchKey?.$refs?.input;
                 if ($el) {

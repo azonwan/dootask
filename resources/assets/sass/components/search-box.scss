@@ -6,6 +6,9 @@
             max-width: none;
 
             .ivu-modal-content {
+                margin-top: 46px;
+                border-top-left-radius: 18px !important;
+                border-top-right-radius: 18px !important;
 
                 .ivu-modal-body {
 
@@ -69,6 +72,7 @@
                             flex: 1;
 
                             .ivu-input {
+                                font-size: 15px;
                                 border-color: transparent;
                                 background-color: transparent;
 
