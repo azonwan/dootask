@@ -6,7 +6,7 @@
         :footer-hide="true"
         :transition-names="['mobile-dialog', '']"
         :beforeClose="onBeforeClose"
-        class-name="dialog-modal"
+        :class-name="`dialog-modal${closIng > 0 ? ' dialog-closing' : ''}`"
         fullscreen>
         <DialogWrapper v-if="windowPortrait && dialogId > 0" :dialogId="dialogId" :beforeBack="onBeforeClose" location="modal"/>
     </Modal>
@@ -39,6 +39,11 @@ body {
                 }
             }
         }
+        &.dialog-closing {
+            .ql-editor {
+                caret-color: transparent;
+            }
+        }
     }
 }
 </style>
@@ -54,6 +59,7 @@ export default {
     data() {
         return {
             timer: null,
+            closIng: false,
         }
     },
 
@@ -73,8 +79,12 @@ export default {
 
     methods: {
         onBeforeClose() {
-            return new Promise(_ => {
-                this.$store.dispatch("openDialog", 0)
+            return new Promise(async _ => {
+                this.closIng++
+                await this.$store.dispatch("openDialog", 0)
+                setTimeout(() => {
+                    this.closIng--
+                }, 300)
             })
         },
     }

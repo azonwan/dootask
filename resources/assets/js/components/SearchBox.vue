@@ -266,10 +266,6 @@ export default {
             this.showModal = false
         },
 
-        onEnter() {
-            $A.eeuiAppKeyboardHide();
-        },
-
         preSearch() {
             if (!this.searchKey.trim()) {
                 return;
