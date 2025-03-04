@@ -206,14 +206,16 @@
                 class="chat-input-convert-transfer"
                 :style="recordTransferStyle">
                 <div class="convert-box">
-                    <div class="convert-content">
-                        <Input
-                            type="textarea"
-                            class="convert-result"
-                            v-model="recordConvertResult"
-                            :rows="1"
-                            :autosize="{minRows: 1, maxRows: 5}"
-                            :placeholder="recordConvertStatus === 0 ? '...' : ''"/>
+                    <div class="convert-body">
+                        <div class="convert-content">
+                            <Input
+                                type="textarea"
+                                class="convert-result"
+                                v-model="recordConvertResult"
+                                :rows="1"
+                                :autosize="{minRows: 1, maxRows: 5}"
+                                :placeholder="recordConvertStatus === 0 ? '...' : ''"/>
+                        </div>
                     </div>
                     <ul class="convert-footer">
                         <li @click="recordConvertIng=false">
