@@ -1053,7 +1053,7 @@ export default {
             this.handleColumnDebounce();
         },
         searchText() {
-            this.handleColumnDebounce();
+            this.handleColumnDebounce(true);
         },
         windowWidth() {
             this.handleColumnDebounce(100);
@@ -1579,7 +1579,13 @@ export default {
 
         flowChange(_, data) {
             this.flowInfo = data.pop() || {};
-            this.handleColumnDebounce();
+
+            // 判断查看 "已完成流程" 但是没有显示已完成时切换显示已完成
+            if (this.flowInfo.status === 'end' && !this.projectData.cacheParameter.completedTask) {
+                this.toggleParameter('completedTask')
+            }
+
+            this.handleColumnDebounce(true);
         },
 
         inviteCopy() {
@@ -1738,7 +1744,11 @@ export default {
             return style;
         },
 
-        handleColumnDebounce(wait = 10) {
+        handleColumnDebounce(wait = 10, needView = false) {
+            if (typeof wait === "boolean") {
+                needView = wait
+                wait = 10
+            }
             if (this.columnDebounceWait !== wait) {
                 this.columnDebounceWait = wait;
                 if (this.columnDebounceInvoke) {
@@ -1747,11 +1757,20 @@ export default {
                 }
             }
             if (!this.columnDebounceInvoke) {
-                this.columnDebounceInvoke = debounce(_ => {
+                this.columnDebounceInvoke = debounce(needView => {
                     this.$nextTick(_ => {
                         switch (this.tabTypeActive) {
                             case 'column':
                                 this.handleColumnScroll()
+                                if (needView === true) {
+                                    // 滚动到第一个可见任务
+                                    requestAnimationFrame(() => {
+                                        const mainContainer = this.$refs.projectColumn;
+                                        if (mainContainer && !mainContainer.querySelector('.task-head')) {
+                                            $A.scrollIntoViewIfNeeded(mainContainer.querySelector('.task-draggable:not(.hidden)'))
+                                        }
+                                    })
+                                }
                                 break;
                             case 'table':
                                 this.handleTaskScroll({target: this.$refs.projectTableScroll?.$el})
@@ -1760,7 +1779,7 @@ export default {
                     })
                 }, wait);
             }
-            this.columnDebounceInvoke();
+            this.columnDebounceInvoke(needView);
         },
 
         handleColumnScroll() {
