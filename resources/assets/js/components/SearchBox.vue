@@ -34,10 +34,10 @@
                     <i v-if="tag.type === action" class="taskfont tag-close">&#xe747;</i>
                 </div>
             </div>
-            <template v-if="listLength === 0">
-                <div v-if="loadIng > 0 || !searchKey.trim()" class="search-empty">
+            <template v-if="total === 0">
+                <div v-if="(loadIng + loadPre) > 0 || !searchKey.trim()" class="search-empty">
                     <i class="taskfont">&#xe60b;</i>
-                    <span>{{ $L(loadIng > 0 ? '正在拼命搜索...' : '请输入关键字搜索') }}</span>
+                    <span>{{ $L((loadIng + loadPre) > 0 ? '正在拼命搜索...' : '请输入关键字搜索') }}</span>
                 </div>
                 <div v-else class="search-empty">
                     <i class="taskfont">&#xe60b;</i>
@@ -96,7 +96,9 @@ export default {
 
     data() {
         return {
+            loadPre: 0,
             loadIng: 0,
+
             searchKey: '',
             searchResults: [],
             searchTimer: null,
@@ -156,7 +158,7 @@ export default {
             return groups
         },
 
-        listLength({searchKey, searchResults, action}) {
+        total({searchKey, searchResults, action}) {
             const items = searchResults.filter(item => item.key === searchKey && (!action || item.type === action))
             return items.length
         },
@@ -275,15 +277,15 @@ export default {
             if (this.searchTimer) {
                 clearTimeout(this.searchTimer)
                 this.searchTimer = null;
-                this.loadIng--;
+                this.loadPre--;
             }
-            this.loadIng++;
+            this.loadPre++;
             this.searchTimer = setTimeout(() => {
                 if (this.searchKey.trim()) {
                     this.onSearch()
                 }
                 this.searchTimer = null;
-                this.loadIng--;
+                this.loadPre--;
             }, 500)
         },
 
