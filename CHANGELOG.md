@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.43.73]
+
+### Bug Fixes
+
+- 全屏预览图片关闭窗口
+- 点击排序导致任务不显示的情况
+
+### Performance
+
+- 新增录音转文字
+- 优化数据排序
+
 ## [0.43.49]
 
 ### Performance

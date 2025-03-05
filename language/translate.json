@@ -28618,5 +28618,41 @@
         "fr": "Vous ne pouvez pas sélectionner votre propre sous-département comme département supérieur",
         "id": "Tidak dapat memilih subdepartemen sendiri sebagai departemen atasan",
         "ru": "Невозможно выбрать собственный подотдел в качестве вышестоящего"
+    },
+    {
+        "key": "加载失败，请重启软件",
+        "zh": "",
+        "zh-CHT": "加載失敗，請重啟軟體",
+        "en": "Loading failed, please restart the software",
+        "ko": "로드 실패, 소프트웨어를 재시작해 주세요",
+        "ja": "読み込みに失敗しました。ソフトウェアを再起動してください",
+        "de": "Laden fehlgeschlagen, bitte starten Sie die Software neu",
+        "fr": "Échec du chargement, veuillez redémarrer le logiciel",
+        "id": "Memuat gagal, silakan nyalakan ulang perangkat lunak",
+        "ru": "Ошибка загрузки, пожалуйста, перезапустите программное обеспечение"
+    },
+    {
+        "key": "发送原语音",
+        "zh": "",
+        "zh-CHT": "發送原語音",
+        "en": "Send original voice",
+        "ko": "원본 음성 보내기",
+        "ja": "元の音声を送信",
+        "de": "Ursprüngliche Stimme senden",
+        "fr": "Envoyer la voix originale",
+        "id": "Kirim suara asli",
+        "ru": "Отправить оригинальный голос"
+    },
+    {
+        "key": "转文字失败",
+        "zh": "",
+        "zh-CHT": "轉文字失敗",
+        "en": "Failed to convert to text",
+        "ko": "텍스트로 변환하지 못했습니다",
+        "ja": "テキストへの変換に失敗しました",
+        "de": "Konvertierung in Text fehlgeschlagen",
+        "fr": "Échec de la conversion en texte",
+        "id": "Gagal mengonversi ke teks",
+        "ru": "Ошибка преобразования в текст"
     }
 ]
