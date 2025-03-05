@@ -1356,7 +1356,6 @@ class DialogController extends AbstractController
      * @apiGroup dialog
      * @apiName msg__convertrecord
      *
-     * @apiParam {Number} dialog_id             对话ID
      * @apiParam {String} base64                语音base64
      * @apiParam {Number} duration              语音时长（毫秒）
      *
@@ -1369,11 +1368,7 @@ class DialogController extends AbstractController
         $user = User::auth();
         $user->checkChatInformation();
         //
-        $dialog_id = intval(Request::input('dialog_id'));
-        //
-        WebSocketDialog::checkDialog($dialog_id);
-        //
-        $path = "uploads/tmp/chat/" . date("Ym") . "/" . $dialog_id . "/";
+        $path = "uploads/tmp/chat/" . date("Ym") . "/" . $user->userid . "/";
         $base64 = Request::input('base64');
         $duration = intval(Request::input('duration'));
         if ($duration < 600) {
