@@ -1,6 +1,6 @@
 {
     "name": "DooTask",
-    "version": "0.43.73",
+    "version": "1.0.0",
     "description": "DooTask is task management system.",
     "main": "electron.js",
     "license": "MIT",
@@ -66,10 +66,10 @@
     },
     "build": {
         "appId": "com.dootask.task",
-        "artifactName": "DooTask-v${version}-${os}-${arch}.${ext}",
+        "artifactName": "${productName}-v${version}-${os}-${arch}.${ext}",
         "asar": true,
         "directories": {
-            "output": "dist/com-dootask-task/build-mac-generic"
+            "output": "dist"
         },
         "files": [
             "render/**/*",
@@ -83,32 +83,34 @@
             {
                 "from": "updater/${os}/${arch}",
                 "to": "Resources/updater",
-                "filter": [
-                    "**/*"
-                ]
+                "filter": ["**/*"]
             }
         ],
         "npmRebuild": false,
         "publish": {
-            "provider": "generic",
-            "url": "https://www.dootask.com/desktop/publish"
+            "provider": "generic"
         },
-        "releaseInfo": {
-            "releaseNotes": "## [0.43.73-Silence]\n\n### Bug Fixes\n\n- 全屏预览图片关闭窗口\n- 点击排序导致任务不显示的情况\n\n### Performance\n\n- 新增录音转文字\n- 优化数据排序\n\n## [0.43.49]\n\n### Performance\n\n- 添加全局搜索功能\n- 优化消息搜索\n- 团队管理支持调整部门区域尺寸\n- 任务详情支持调整聊天区域尺寸\n- 优化团队部门支持3级部门\n- 可见群组ID\n- 支持在团队管理打开群聊\n- 优化回复消息自动@逻辑\n- 转发预览隐藏表情回应部分\n- 优化任务日志\n- 已删除任务支持按标签搜索\n- 归档任务支持按标签搜索\n- 项目面板添加按标签筛选\n- 优化 AI 提示词\n- 优化 AI 设置\n\n## [0.43.18]\n\n### Bug Fixes\n\n- 首次跟ai聊天没有记录的问题\n\n### Performance\n\n- 工作报告支持查看仅未读\n- AI 支持引用文件\n- 优化图文消息\n- 优化文本信息复制\n- 优化样式\n- 无法再AI机器人页面看到模型的问题\n\n## [0.43.7]\n\n### Features\n\n- 添加 Grok AI、Ollama AI\n\n### Performance\n\n- 优化MD消息过长处理\n- 优化AI支持分析指定文件\n- 支持在AI对话中直接引用任务提问\n- 优化 AI 参数\n- 优化 Ollama AI\n- 优化设置\n- 优化AI设置\n- 优化AI消息\n\n## [0.42.85]\n\n### Bug Fixes\n\n- 撤回消息是消息列表不更新的情况\n\n### Performance\n\n- 表情回复时更新对话列表\n- Onlyoffice 支持打开超过100m的文件\n- 优化点击上传列表效果\n- AI支持自定义模型列表\n\n"
-        },
+        "releaseInfo": {},
         "mac": {
             "icon": "../resources/assets/statics/public/images/logo-app.png",
             "entitlements": "entitlements.plist",
             "entitlementsInherit": "entitlements.plist",
+            "hardenedRuntime": true,
+            "identity": null,
             "category": "public.app-category.productivity",
             "target": [
                 {
                     "target": "zip",
-                    "arch": []
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
                 },
                 {
                     "target": "dmg",
                     "arch": [
+                        "x64",
+                        "arm64",
                         "universal"
                     ]
                 },
@@ -125,17 +127,19 @@
             "target": [
                 {
                     "target": "nsis",
-                    "arch": []
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
                 }
             ],
             "verifyUpdateCodeSignature": false
         },
         "nsis": {
             "oneClick": false,
-            "artifactName": "DooTask-v${version}-${os}-${arch}.${ext}",
+            "artifactName": "${productName}-v${version}-${os}-${arch}.${ext}",
             "allowToChangeInstallationDirectory": true
-        },
-        "afterSign": "./notarize.js"
+        }
     },
     "config": {
         "forge": {
@@ -163,6 +167,5 @@
                 }
             ]
         }
-    },
-    "appId": "com.dootask.task"
+    }
 }

@@ -492,7 +492,7 @@ async function startBuild(data) {
         console.log("版本:", config.version + ` (${config.codeVerson})`);
         console.log("系统:", platform.replace('build-', '').toUpperCase());
         console.log("架构:", archs.map(arch => arch.toUpperCase()).join(', '));
-        console.log("发布:", publish ? `是（${release ? '升级提示' : '静默升级'}）` : '否');
+        console.log("发布:", publish ? `是（${release ? '提示升级' : '静默升级'}）` : '否');
         if (platform === 'build-mac') {
             console.log("公证:", notarize ? '是' : '否');
         }
@@ -750,7 +750,7 @@ if (["dev"].includes(argv[2])) {
         {
             type: 'list',
             name: 'publish',
-            message: "选择是否要发布",
+            message: "选择是否发布",
             choices: [{
                 name: "否",
                 value: false
@@ -775,7 +775,7 @@ if (["dev"].includes(argv[2])) {
         {
             type: 'list',
             name: 'notarize',
-            message: ({platform}) => platform.length > 1 ? "选择是否需要公证应用（仅MacOS）" : "选择是否需要公证应用",
+            message: ({platform}) => platform.length > 1 ? "选择是否公证（仅MacOS）" : "选择是否公证",
             when: ({platform}) => platform.find(item => item === 'build-mac'),
             choices: [{
                 name: "否",
@@ -807,7 +807,7 @@ if (["dev"].includes(argv[2])) {
             // 公证判断环境变量
             if (answers.notarize === true) {
                 if (!APPLEID || !APPLEIDPASS) {
-                    console.error("公证MacOS应用需要 Apple ID 和 Apple ID 密码, 请检查环境变量!");
+                    console.error("公证需要 Apple ID 和 Apple ID 密码, 请检查环境变量!");
                     process.exit()
                 }
             }
