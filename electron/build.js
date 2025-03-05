@@ -492,12 +492,9 @@ async function startBuild(data) {
         console.log("版本:", config.version + ` (${config.codeVerson})`);
         console.log("系统:", platform.replace('build-', '').toUpperCase());
         console.log("架构:", archs.map(arch => arch.toUpperCase()).join(', '));
-        console.log("发布:", publish ? '是' : '否');
-        if (publish) {
-            console.log("升级提示:", release ? '是' : '否');
-            if (platform === 'build-mac') {
-                console.log("公证:", notarize ? '是' : '否');
-            }
+        console.log("发布:", publish ? `是（${release ? '升级提示' : '静默升级'}）` : '否');
+        if (platform === 'build-mac') {
+            console.log("公证:", notarize ? '是' : '否');
         }
         console.log("===============\n");
         // drawio
@@ -707,14 +704,13 @@ if (["dev"].includes(argv[2])) {
                 {
                     name: "MacOS",
                     value: platforms[0],
-                    checked: true
                 },
                 {
                     name: "Windows",
                     value: platforms[1]
                 }
             ],
-            validate: function(answer) {
+            validate: (answer) => {
                 if (answer.length < 1) {
                     return '请至少选择一个系统';
                 }
@@ -725,18 +721,26 @@ if (["dev"].includes(argv[2])) {
             type: 'checkbox',
             name: 'arch',
             message: "选择系统架构",
-            choices: [
-                {
-                    name: "arm64",
-                    value: architectures[0],
-                    checked: true
-                },
-                {
-                    name: "x64",
-                    value: architectures[1]
+            choices: ({platform}) => {
+                const array = [
+                    {
+                        name: "arm64",
+                        value: architectures[0],
+                    },
+                    {
+                        name: "x64",
+                        value: architectures[1]
+                    }
+                ]
+                if (platform.find(item => item === 'build-mac')) {
+                    array.push({
+                        name: "通用" + (platform.length > 1 ? " (仅MacOS)" : ""),
+                        value: 'universal'
+                    })
                 }
-            ],
-            validate: function(answer) {
+                return array;
+            },
+            validate: (answer) => {
                 if (answer.length < 1) {
                     return '请至少选择一个架构';
                 }
@@ -754,28 +758,25 @@ if (["dev"].includes(argv[2])) {
                 name: "是",
                 value: true
             }]
-        }
-    ];
-
-    // 根据publish选项动态添加后续问题
-    const publishQuestions = [
+        },
         {
             type: 'list',
             name: 'release',
-            message: "选择是否弹出升级提示框",
+            message: "选择升级方式",
+            when: ({publish}) => publish,
             choices: [{
-                name: "是",
+                name: "弹出提示",
                 value: true
             }, {
-                name: "否",
+                name: "静默",
                 value: false
             }]
         },
         {
             type: 'list',
             name: 'notarize',
-            message: "选择是否需要公证MacOS应用",
-            when: (answers) => answers.platform === 'build-mac', // 只在MacOS时显示
+            message: ({platform}) => platform.length > 1 ? "选择是否需要公证应用（仅MacOS）" : "选择是否需要公证应用",
+            when: ({platform}) => platform.find(item => item === 'build-mac'),
             choices: [{
                 name: "否",
                 value: false
@@ -786,42 +787,44 @@ if (["dev"].includes(argv[2])) {
         }
     ];
 
-    // 先询问基本问题
-    inquirer.prompt(questions).then(async answers => {
-        // 如果选择发布，继续询问发布相关问题
-        if (answers.publish) {
-            const publishAnswers = await inquirer.prompt(publishQuestions);
-            Object.assign(answers, publishAnswers);
+    // 开始提问
+    const prompt = inquirer.createPromptModule();
+    prompt(questions)
+        .then(async answers => {
+            answers = Object.assign({
+                release: false,
+                notarize: false
+            }, answers);
 
-            if (!PUBLISH_KEY && (!GITHUB_TOKEN || !utils.strExists(GITHUB_REPOSITORY, "/"))) {
-                console.error("发布需要 PUBLISH_KEY 或 GitHub Token 和 Repository, 请检查环境变量!");
-                process.exit()
+            // 发布判断环境变量
+            if (answers.publish) {
+                if (!PUBLISH_KEY && (!GITHUB_TOKEN || !utils.strExists(GITHUB_REPOSITORY, "/"))) {
+                    console.error("发布需要 PUBLISH_KEY 或 GitHub Token 和 Repository, 请检查环境变量!");
+                    process.exit()
+                }
             }
 
+            // 公证判断环境变量
             if (answers.notarize === true) {
                 if (!APPLEID || !APPLEIDPASS) {
                     console.error("公证MacOS应用需要 Apple ID 和 Apple ID 密码, 请检查环境变量!");
                     process.exit()
                 }
             }
-        } else {
-            // 如果不发布，设置默认值
-            answers.release = false;
-            answers.notarize = false;
-        }
 
-        // 开始构建
-        for (const platform of answers.platform) {
-            for (const data of config.app) {
-                data.configure = {
-                    platform,
-                    archs: answers.arch,
-                    publish: answers.publish,
-                    release: answers.release,
-                    notarize: answers.notarize
-                };
-                await startBuild(data);
+            // 开始构建
+            for (const platform of answers.platform) {
+                for (const data of config.app) {
+                    data.configure = {
+                        platform,
+                        archs: answers.arch,
+                        publish: answers.publish,
+                        release: answers.release,
+                        notarize: answers.notarize
+                    };
+                    await startBuild(data);
+                }
             }
-        }
-    });
+        })
+        .catch(_ => { });
 }
