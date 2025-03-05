@@ -586,8 +586,10 @@ body.dark-mode-reverse {
                     > i {
                         &.send,
                         &.error {
-                            color: #0a7600;
                             background: #000000;
+                        }
+                        &.send {
+                            color: #0a7600;
                         }
                     }
                 }

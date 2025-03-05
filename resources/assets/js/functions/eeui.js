@@ -250,7 +250,7 @@
             })
         },
 
-        // 设置应用程序级别的摇动撤销
+        // 设置应用程序级别的摇动撤销（仅支持iOS、android无效）
         eeuiAppShakeToEditEnabled(enabled) {
             if (!$A.isEEUiApp) return;
             $A.eeuiModule("eeui").then(obj => {

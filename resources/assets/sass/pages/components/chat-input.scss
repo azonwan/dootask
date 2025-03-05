@@ -767,7 +767,7 @@
                 width: 88%;
                 padding: 18px;
                 border-radius: 14px;
-                transform: translateY(24px);
+                transform: translateY(12px);
                 &:before {
                     content: "";
                     position: absolute;
@@ -827,13 +827,15 @@
                         display: flex;
                         justify-content: center;
                         align-items: center;
-                        color: #3fc433;
                         background: #ffffff;
                         font-weight: 600;
                         .common-loading {
                             width: 26px;
                             height: 26px;
                         }
+                    }
+                    &.send {
+                        color: #3fc433;
                     }
                     &.error {
                         color: #ff0000;
