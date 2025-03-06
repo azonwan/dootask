@@ -1411,15 +1411,17 @@ ipcMain.handle('getStore', (event, args) => {
 //================================================================
 
 let autoUpdating = 0
-autoUpdater.logger = loger
-autoUpdater.autoDownload = false
-autoUpdater.autoInstallOnAppQuit = true
-autoUpdater.on('update-available', info => {
-    mainWindow.webContents.send("updateAvailable", info)
-})
-autoUpdater.on('update-downloaded', info => {
-    mainWindow.webContents.send("updateDownloaded", info)
-})
+if (autoUpdater) {
+    autoUpdater.logger = loger
+    autoUpdater.autoDownload = false
+    autoUpdater.autoInstallOnAppQuit = true
+    autoUpdater.on('update-available', info => {
+        mainWindow.webContents.send("updateAvailable", info)
+    })
+    autoUpdater.on('update-downloaded', info => {
+        mainWindow.webContents.send("updateDownloaded", info)
+    })
+}
 
 /**
  * 检查更新
@@ -1428,6 +1430,9 @@ ipcMain.on('updateCheckAndDownload', (event, args) => {
     event.returnValue = "ok"
     if (autoUpdating + 3600 > utils.dayjs().unix()) {
         return  // 限制1小时仅执行一次
+    }
+    if (!autoUpdater) {
+        return
     }
     if (args.provider) {
         autoUpdater.setFeedURL(args)
@@ -1494,7 +1499,7 @@ ipcMain.on('updateQuitAndInstall', (event, args) => {
     // 退出并安装更新
     setTimeout(_ => {
         mainWindow.hide()
-        autoUpdater.quitAndInstall(true, true)
+        autoUpdater?.quitAndInstall(true, true)
     }, 600)
 })
 
