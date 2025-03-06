@@ -30,7 +30,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->es = new ElasticSearch(ElasticSearch::DUM);
+        $this->es = new ElasticSearch(ElasticSearch::DUMIndex());
     }
 
     /**
@@ -145,7 +145,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
             foreach ($dialogUsers as $dialogUser) {
                 $params['body'][] = [
                     'index' => [
-                        '_index' => ElasticSearch::DUM,
+                        '_index' => ElasticSearch::DUMIndex(),
                         '_id' => ElasticSearch::generateDialogUserDicId($dialogUser),
                     ]
                 ];
@@ -217,7 +217,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
                 foreach ($userDialogMap[$dialogMsg->dialog_id] as $userid) {
                     $params['body'][] = [
                         'index' => [
-                            '_index' => ElasticSearch::DUM,
+                            '_index' => ElasticSearch::DUMIndex(),
                             '_id' => ElasticSearch::generateDialogMsgDicId($dialogMsg, $userid),
                             'routing' => ElasticSearch::generateDialogMsgParentId($dialogMsg, $userid) // 路由到父文档
                         ]

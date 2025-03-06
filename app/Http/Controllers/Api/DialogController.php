@@ -172,7 +172,7 @@ class DialogController extends AbstractController
         }
         // 搜索消息会话
         if (count($list) < 20) {
-            $es = new ElasticSearch(ElasticSearch::DUM);
+            $es = new ElasticSearch(ElasticSearch::DUMIndex());
             $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, 20 - count($list));
             if ($searchResults) {
                 foreach ($searchResults as $item) {
@@ -734,7 +734,7 @@ class DialogController extends AbstractController
         $key = trim(Request::input('key'));
         $list = [];
         //
-        $es = new ElasticSearch(ElasticSearch::DUM);
+        $es = new ElasticSearch(ElasticSearch::DUMIndex());
         $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, Base::getPaginate(50, 20));
         if ($searchResults) {
             foreach ($searchResults as $item) {

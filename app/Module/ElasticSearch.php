@@ -50,7 +50,7 @@ class ElasticSearch
         if (!empty($user)) {
             $config['basicAuthentication'] = [$user, $pass];
         }
-        
+
         $config['SSLVerification'] = $verifi;
         if ($verifi) {
             $config['SSLCert'] = $cert;
@@ -61,7 +61,7 @@ class ElasticSearch
         $this->client = ClientBuilder::fromConfig($config);
 
         if ($index) {
-            $this->index = $index . env("ES_INDEX_SUFFIX", "");
+            $this->index = $index;
         }
     }
 
@@ -411,7 +411,14 @@ class ElasticSearch
     /** ******************************************************************************************************** */
     /** ******************************************************************************************************** */
 
-    const DUM = "dialog_user_msg";
+    /**
+     * DialogUserMsg 索引名称
+     * @return string
+     */
+    public static function DUMIndex()
+    {
+        return "dialog_user_msg" . env("ES_INDEX_SUFFIX", "");
+    }
 
     /**
      * 会话用户 - 生成文档ID
@@ -458,7 +465,7 @@ class ElasticSearch
     public static function syncDialogUserToElasticSearch(WebSocketDialogUser $dialogUser)
     {
         try {
-            $es = new self(self::DUM);
+            $es = new self(self::DUMIndex());
             $es->indexDocument(self::generateDialogUserFormat($dialogUser), self::generateDialogUserDicId($dialogUser));
         } catch (\Exception $e) {
             Log::error('syncDialogUserToElasticSearch: ' . $e->getMessage());
@@ -471,7 +478,7 @@ class ElasticSearch
     public static function deleteDialogUserFromElasticSearch(WebSocketDialogUser $dialogUser)
     {
         try {
-            $es = new self(self::DUM);
+            $es = new self(self::DUMIndex());
 
             $docId = "user_{$dialogUser->userid}_dialog_{$dialogUser->dialog_id}";
 
@@ -545,7 +552,7 @@ class ElasticSearch
     public static function syncDialogToElasticSearch(WebSocketDialogMsg $dialogMsg)
     {
         try {
-            $es = new self(self::DUM);
+            $es = new self(self::DUMIndex());
 
             // 获取此会话的所有用户
             $dialogUsers = WebSocketDialogUser::whereDialogId($dialogMsg->dialog_id)->get();
@@ -559,7 +566,7 @@ class ElasticSearch
             foreach ($dialogUsers as $dialogUser) {
                 $params['body'][] = [
                     'index' => [
-                        '_index' => self::DUM,
+                        '_index' => self::DUMIndex(),
                         '_id' => self::generateDialogMsgDicId($dialogMsg, $dialogUser->userid),
                         'routing' => self::generateDialogMsgParentId($dialogMsg, $dialogUser->userid)
                     ]
@@ -581,7 +588,7 @@ class ElasticSearch
     public static function deleteDialogFromElasticSearch(WebSocketDialogMsg $dialogMsg)
     {
         try {
-            $es = new self(self::DUM);
+            $es = new self(self::DUMIndex());
 
             // 获取此会话的所有用户
             $dialogUsers = WebSocketDialogUser::whereDialogId($dialogMsg->dialog_id)->get();
@@ -595,7 +602,7 @@ class ElasticSearch
             foreach ($dialogUsers as $dialogUser) {
                 $params['body'][] = [
                     'delete' => [
-                        '_index' => self::DUM,
+                        '_index' => self::DUMIndex(),
                         '_id' => self::generateDialogMsgDicId($dialogMsg, $dialogUser->userid),
                         'routing' => self::generateDialogMsgParentId($dialogMsg, $dialogUser->userid)
                     ]
