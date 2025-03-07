@@ -261,7 +261,10 @@ export function MarkdownConver(text) {
     }
     if (MarkdownUtils.mdi === null) {
         MarkdownUtils.mdi = new MarkdownIt({
-            linkify: true,
+            html: true,
+            breaks: true,
+            linkify: false,
+            typographer: true,
             highlight(code, language) {
                 const validLang = !!(language && hljs.getLanguage(language))
                 if (validLang) {
