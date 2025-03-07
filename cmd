@@ -156,9 +156,9 @@ run_electron() {
         npm install
     fi
     if [ ! -d "./electron/node_modules" ]; then
-        pushd electron
+        pushd electron || exit
         npm install
-        popd
+        popd || exit
     fi
     #
     if [ -d "./electron/dist" ]; then
@@ -178,8 +178,9 @@ run_electron() {
 
 run_exec() {
     local container=$1
-    local cmd=$2
-    local name=`docker_name $container`
+    shift 1
+    local cmd=$@
+    local name=$(docker_name "$container")
     if [ -z "$name" ]; then
         error "没有找到 $container 容器!"
         exit 1
@@ -561,7 +562,7 @@ if [ $# -gt 0 ]; then
         success "修改成功"
     elif [[ "$1" == "repassword" ]]; then
         shift 1
-        run_exec mariadb "sh /etc/mysql/repassword.sh \"$@\""
+        run_exec mariadb "sh /etc/mysql/repassword.sh $@"
     elif [[ "$1" == "serve" ]] || [[ "$1" == "dev" ]] || [[ "$1" == "development" ]]; then
         shift 1
         run_compile dev
