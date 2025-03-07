@@ -133,7 +133,7 @@ jobs:
           tools: composer:v2
 
       - name: Install Dependencies
-        run: composer install --no-dev --optimize-autoloader
+        run: composer install
 
       - name: Create Vendor Archive
         run: tar -czf vendor.tar.gz vendor/
