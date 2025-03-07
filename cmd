@@ -427,17 +427,34 @@ if [ $# -gt 0 ]; then
         cmda=""
         cmdb=""
         for vol in "${volumes[@]}"; do
-            mkdir -p "${cur_path}/${vol}"
-            chmod -R 775 "${cur_path}/${vol}"
-            rm -f "${cur_path}/${vol}/dootask.lock"
-            cmda="${cmda} -v ./${vol}:/usr/share/${vol}"
+            tmp_path="${cur_path}/${vol}"
+            mkdir -p "${tmp_path}"
+            chmod -R 775 "${tmp_path}"
+            rm -f "${tmp_path}/dootask.lock"
+            cmda="${cmda} -v ${tmp_path}:/usr/share/${vol}"
             cmdb="${cmdb} touch /usr/share/${vol}/dootask.lock &&"
         done
-        docker run --rm ${cmda} nginx:alpine sh -c "${cmdb} touch /usr/share/docker/dootask.lock"
-        for vol in "${volumes[@]}"; do
-            if [ ! -f "${cur_path}/${vol}/dootask.lock" ]; then
-                error "目录【${vol}】权限不足！"
-                exit 1
+        # 目录权限检测
+        remaining=10
+        while true; do
+            ((remaining=$remaining-1))
+            writable="yes"
+            docker run --rm ${cmda} nginx:alpine sh -c "${cmdb} touch /usr/share/docker/dootask.lock" &> /dev/null
+            for vol in "${volumes[@]}"; do
+                if [ ! -f "${vol}/dootask.lock" ]; then
+                    if [ $remaining -lt 0 ]; then
+                        error "目录【${vol}】权限不足！"
+                        exit 1
+                    else
+                        writable="no"
+                        break
+                    fi
+                fi
+            done
+            if [ "$writable" == "yes" ]; then
+                break
+            else
+                sleep 3
             fi
         done
         # 设置ES索引后缀
@@ -459,7 +476,7 @@ if [ $# -gt 0 ]; then
         [[ -z "$(env_get APP_KEY)" ]] && run_exec php "php artisan key:generate"
         switch_debug "false"
         # 检查数据库
-        remaining=20
+        remaining=10
         while [ ! -f "${cur_path}/docker/mysql/data/$(env_get DB_DATABASE)/db.opt" ]; do
             ((remaining=$remaining-1))
             if [ $remaining -lt 0 ]; then
@@ -467,10 +484,9 @@ if [ $# -gt 0 ]; then
                 exit 1
             fi
             sleep 3
-            chmod -R 775 "${cur_path}/docker/mysql/data"
         done
         # 数据库迁移
-        remaining=20
+        remaining=10
         while [ ! -f "${cur_path}/docker/mysql/data/$(env_get DB_DATABASE)/$(env_get DB_PREFIX)migrations.ibd" ]; do
             ((remaining=$remaining-1))
             if [ $remaining -lt 0 ]; then
@@ -481,12 +497,10 @@ if [ $# -gt 0 ]; then
             run_exec php "php artisan migrate --seed"
         done
         # 设置初始化密码
-        res=`run_exec mariadb "sh /etc/mysql/repassword.sh"`
         $COMPOSE up -d
-        restart_php
         success "安装完成"
         info "地址: http://${GreenBG}127.0.0.1:$(env_get APP_PORT)${Font}"
-        info "$res"
+        run_exec mariadb "sh /etc/mysql/repassword.sh"
     elif [[ "$1" == "update" ]]; then
         shift 1
         if [[ "$@" != "nobackup" ]]; then
