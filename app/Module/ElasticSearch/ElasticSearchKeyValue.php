@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Log;
  */
 class ElasticSearchKeyValue extends ElasticSearchBase
 {
+    const indexName = 'key_value_store';
+
     /**
      * 构造函数
      * @return ElasticSearchBase
@@ -26,15 +28,6 @@ class ElasticSearchKeyValue extends ElasticSearchBase
     /** ******************************************************************************************************** */
     /** *********************************** 键值存储方法 ******************************************************** */
     /** ******************************************************************************************************** */
-
-    /**
-     * 键值存储索引名称
-     * @return string
-     */
-    public static function indexName()
-    {
-        return "key_value_store" . env("ES_INDEX_SUFFIX", "");
-    }
 
     /**
      * 创建键值存储索引
@@ -55,8 +48,8 @@ class ElasticSearchKeyValue extends ElasticSearchBase
                 'properties' => [
                     'key' => ['type' => 'keyword'],
                     'value' => ['type' => 'text', 'fields' => ['keyword' => ['type' => 'keyword']]],
-                    'created_at' => ['type' => 'date'],
-                    'updated_at' => ['type' => 'date']
+                    'created_at' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis'],
+                    'updated_at' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis']
                 ]
             ];
 
@@ -97,8 +90,8 @@ class ElasticSearchKeyValue extends ElasticSearchBase
                 'key' => $key,
                 'value' => is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value,
                 'namespace' => $namespace,
-                'created_at' => date('Y-m-d H:i:s'),
-                'updated_at' => date('Y-m-d H:i:s')
+                'created_at' => date('Y-m-d\TH:i:s\Z', strtotime(date('Y-m-d H:i:s'))),
+                'updated_at' => date('Y-m-d\TH:i:s\Z', strtotime(date('Y-m-d H:i:s')))
             ];
 
             // 索引文档

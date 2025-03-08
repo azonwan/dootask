@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Log;
  */
 class ElasticSearchUserMsg extends ElasticSearchBase
 {
+    const indexName = 'dialog_user_msg';
+
     /**
      * 构造函数
      * @return ElasticSearchBase
@@ -27,15 +29,6 @@ class ElasticSearchUserMsg extends ElasticSearchBase
     /** ******************************************************************************************************** */
     /** *********************************************** 基础 ************************************************** */
     /** ******************************************************************************************************** */
-
-    /**
-     * 索引名称
-     * @return string
-     */
-    public static function indexName()
-    {
-        return "dialog_user_msg" . env("ES_INDEX_SUFFIX", "");
-    }
 
     /**
      * 创建聊天系统索引 - 使用父子关系

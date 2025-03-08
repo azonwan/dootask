@@ -19,7 +19,7 @@ class ElasticSearchBase
      *
      * @var \Elastic\Elasticsearch\Client
      */
-    public $client;
+    protected $client;
 
     /**
      * 当前操作的索引名称
@@ -278,5 +278,31 @@ class ElasticSearchBase
             Log::error('搜索失败: ' . $e->getMessage());
             return ['error' => $e->getMessage(), 'hits' => ['total' => ['value' => 0], 'hits' => []]];
         }
+    }
+
+    /**
+     * 索引名称
+     */
+    const indexName = 'default';
+
+    /**
+     * 获取索引名称
+     * @param string $index 索引名称
+     * @param string|null $prefix 索引前缀
+     * @param string|null $subfix 索引后缀
+     * @return string
+     */
+    public static function indexName($index = '', $prefix = '', $subfix = '')
+    {
+        $index = $index ?: static::indexName;
+        $prefix = $prefix ?: env('ES_INDEX_PREFIX', '');
+        $subfix = $subfix ?: env('ES_INDEX_SUFFIX', '');
+        if ($prefix) {
+            $index = rtrim($prefix, '_') . '_' . $index;
+        }
+        if ($subfix) {
+            $index = $index . '_' . ltrim($subfix, '_');
+        }
+        return $index;
     }
 }
