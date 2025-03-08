@@ -39,6 +39,9 @@ export default {
     keyboardHeight: 0,  // 键盘高度
     safeAreaBottom: 0,  // 安全区域底部高度
 
+    // 是否按下Ctrl/Command键
+    isModKey: false,
+
     // App通知权限
     appNotificationPermission: true,
 

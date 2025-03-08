@@ -516,6 +516,8 @@ export default {
             'dialogMsgs',
 
             'cacheKeyboard',
+
+            'isModKey',
         ]),
 
         isEnterSend({cacheKeyboard}) {
@@ -1419,7 +1421,7 @@ export default {
             if (item.type === 'emoji') {
                 this.quill.insertText(this.rangeIndex, item.text);
                 this.rangeIndex += item.text.length
-                if (this.windowLandscape) {
+                if (this.windowLandscape && !this.isModKey) {
                     this.showEmoji = false;
                 }
             } else if (item.type === 'emoticon') {
@@ -1427,7 +1429,7 @@ export default {
                 if (item.asset === "emosearch") {
                     this.$emit('input', "")
                 }
-                if (this.windowLandscape) {
+                if (this.windowLandscape && !this.isModKey) {
                     this.showEmoji = false;
                 }
             }

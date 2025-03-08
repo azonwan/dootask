@@ -164,6 +164,13 @@ export default {
             immediate: true
         },
 
+        isCtrlCommandPressed: {
+            handler(status) {
+                this.$store.state.isModKey = status
+            },
+            immediate: true
+        },
+
         windowActive(active) {
             if (!active) {
                 this.$store.dispatch("audioStop", true)
