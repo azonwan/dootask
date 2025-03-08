@@ -2,10 +2,10 @@
 
 namespace App\Console\Commands;
 
-use App\Module\Base;
-use App\Module\ElasticSearch;
 use App\Models\WebSocketDialogMsg;
 use App\Models\WebSocketDialogUser;
+use App\Module\ElasticSearch\ElasticSearchKeyValue;
+use App\Module\ElasticSearch\ElasticSearchUserMsg;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
@@ -30,7 +30,12 @@ class SyncDialogUserMsgToElasticsearch extends Command
     public function __construct()
     {
         parent::__construct();
-        $this->es = new ElasticSearch(ElasticSearch::DUMIndex());
+        try {
+            $this->es = new ElasticSearchUserMsg();
+        } catch (\Exception $e) {
+            $this->error('Elasticsearch连接失败: ' . $e->getMessage());
+            exit(1);
+        }
     }
 
     /**
@@ -62,7 +67,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
         // 判断创建索引
         if (!$this->es->indexExists()) {
             $this->info('创建索引...');
-            $result = $this->es->createDialogUserMsgIndex();
+            $result = ElasticSearchUserMsg::generateIndex();
             if (isset($result['error'])) {
                 $this->error('创建索引失败: ' . $result['error']);
                 return 1;
@@ -92,10 +97,10 @@ class SyncDialogUserMsgToElasticsearch extends Command
         if ($type === true) {
             $setting = [];
         } else {
-            $setting = Base::setting('elasticSearch:sync');
+            $setting = ElasticSearchKeyValue::getArray('elasticSearch:sync');
             $setting[$type] = $lastId;
         }
-        Base::setting('elasticSearch:sync', $setting);
+        ElasticSearchKeyValue::save('elasticSearch:sync', $setting);
     }
 
     /**
@@ -106,7 +111,7 @@ class SyncDialogUserMsgToElasticsearch extends Command
     private function getLastId($type)
     {
         if ($this->option('i')) {
-            $setting = Base::setting('elasticSearch:sync');
+            $setting = ElasticSearchKeyValue::getArray('elasticSearch:sync');
             return intval($setting[$type] ?? 0);
         }
         return 0;
@@ -145,11 +150,11 @@ class SyncDialogUserMsgToElasticsearch extends Command
             foreach ($dialogUsers as $dialogUser) {
                 $params['body'][] = [
                     'index' => [
-                        '_index' => ElasticSearch::DUMIndex(),
-                        '_id' => ElasticSearch::generateDialogUserDicId($dialogUser),
+                        '_index' => ElasticSearchUserMsg::indexName(),
+                        '_id' => ElasticSearchUserMsg::generateUserDicId($dialogUser),
                     ]
                 ];
-                $params['body'][] = ElasticSearch::generateDialogUserFormat($dialogUser);
+                $params['body'][] = ElasticSearchUserMsg::generateUserFormat($dialogUser);
             }
 
             if ($params['body']) {
@@ -217,13 +222,13 @@ class SyncDialogUserMsgToElasticsearch extends Command
                 foreach ($userDialogMap[$dialogMsg->dialog_id] as $userid) {
                     $params['body'][] = [
                         'index' => [
-                            '_index' => ElasticSearch::DUMIndex(),
-                            '_id' => ElasticSearch::generateDialogMsgDicId($dialogMsg, $userid),
-                            'routing' => ElasticSearch::generateDialogMsgParentId($dialogMsg, $userid) // 路由到父文档
+                            '_index' => ElasticSearchUserMsg::indexName(),
+                            '_id' => ElasticSearchUserMsg::generateMsgDicId($dialogMsg, $userid),
+                            'routing' => ElasticSearchUserMsg::generateMsgParentId($dialogMsg, $userid) // 路由到父文档
                         ]
                     ];
 
-                    $params['body'][] = ElasticSearch::generateDialogMsgFormat($dialogMsg, $userid);
+                    $params['body'][] = ElasticSearchUserMsg::generateMsgFormat($dialogMsg, $userid);
                 }
             }
 

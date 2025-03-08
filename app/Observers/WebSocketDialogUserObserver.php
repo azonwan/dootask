@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Models\Deleted;
 use App\Models\WebSocketDialogUser;
-use App\Module\ElasticSearch;
+use App\Module\ElasticSearch\ElasticSearchUserMsg;
 use Carbon\Carbon;
 
 class WebSocketDialogUserObserver
@@ -30,7 +30,7 @@ class WebSocketDialogUserObserver
             }
         }
         Deleted::forget('dialog', $webSocketDialogUser->dialog_id, $webSocketDialogUser->userid);
-        ElasticSearch::syncDialogUserToElasticSearch($webSocketDialogUser);
+        ElasticSearchUserMsg::syncUser($webSocketDialogUser);
     }
 
     /**
@@ -41,7 +41,7 @@ class WebSocketDialogUserObserver
      */
     public function updated(WebSocketDialogUser $webSocketDialogUser)
     {
-        ElasticSearch::syncDialogUserToElasticSearch($webSocketDialogUser);
+        ElasticSearchUserMsg::syncUser($webSocketDialogUser);
     }
 
     /**
@@ -53,7 +53,7 @@ class WebSocketDialogUserObserver
     public function deleted(WebSocketDialogUser $webSocketDialogUser)
     {
         Deleted::record('dialog', $webSocketDialogUser->dialog_id, $webSocketDialogUser->userid);
-        ElasticSearch::deleteDialogUserFromElasticSearch($webSocketDialogUser);
+        ElasticSearchUserMsg::deleteUser($webSocketDialogUser);
     }
 
     /**

@@ -3,7 +3,7 @@
 namespace App\Observers;
 
 use App\Models\WebSocketDialogMsg;
-use App\Module\ElasticSearch;
+use App\Module\ElasticSearch\ElasticSearchUserMsg;
 
 class WebSocketDialogMsgObserver
 {
@@ -15,7 +15,7 @@ class WebSocketDialogMsgObserver
      */
     public function created(WebSocketDialogMsg $webSocketDialogMsg)
     {
-        ElasticSearch::syncDialogToElasticSearch($webSocketDialogMsg);
+        ElasticSearchUserMsg::syncMsg($webSocketDialogMsg);
     }
 
     /**
@@ -26,7 +26,7 @@ class WebSocketDialogMsgObserver
      */
     public function updated(WebSocketDialogMsg $webSocketDialogMsg)
     {
-        ElasticSearch::syncDialogToElasticSearch($webSocketDialogMsg);
+        ElasticSearchUserMsg::syncMsg($webSocketDialogMsg);
     }
 
     /**
@@ -37,7 +37,7 @@ class WebSocketDialogMsgObserver
      */
     public function deleted(WebSocketDialogMsg $webSocketDialogMsg)
     {
-        ElasticSearch::deleteDialogFromElasticSearch($webSocketDialogMsg);
+        ElasticSearchUserMsg::deleteMsg($webSocketDialogMsg);
     }
 
     /**

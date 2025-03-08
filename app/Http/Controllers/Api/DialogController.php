@@ -13,7 +13,7 @@ use App\Models\User;
 use App\Module\Base;
 use App\Module\Timer;
 use App\Module\Extranet;
-use App\Module\ElasticSearch;
+use App\Module\ElasticSearch\ElasticSearchUserMsg;
 use App\Module\TimeRange;
 use App\Module\MsgTool;
 use App\Module\Table\OnlineData;
@@ -172,8 +172,7 @@ class DialogController extends AbstractController
         }
         // 搜索消息会话
         if (count($list) < 20) {
-            $es = new ElasticSearch(ElasticSearch::DUMIndex());
-            $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, 20 - count($list));
+            $searchResults = ElasticSearchUserMsg::searchByKeyword($user->userid, $key, 20 - count($list));
             if ($searchResults) {
                 foreach ($searchResults as $item) {
                     if ($dialog = WebSocketDialog::find($item['id'])) {
@@ -734,8 +733,7 @@ class DialogController extends AbstractController
         $key = trim(Request::input('key'));
         $list = [];
         //
-        $es = new ElasticSearch(ElasticSearch::DUMIndex());
-        $searchResults = $es->searchDialogsByUserAndKeyword($user->userid, $key, Base::getPaginate(50, 20));
+        $searchResults = ElasticSearchUserMsg::searchByKeyword($user->userid, $key, Base::getPaginate(50, 20));
         if ($searchResults) {
             foreach ($searchResults as $item) {
                 if ($dialog = WebSocketDialog::find($item['id'])) {
