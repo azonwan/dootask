@@ -189,7 +189,7 @@
                 :data-transfer="true"
                 class="chat-input-record-transfer"
                 :class="recordClassName"
-                :style="recordTransferStyle"
+                :style="recordStyle"
                 @click="stopRecord">
                 <div v-if="recordDuration > 0" class="record-duration">{{recordFormatDuration}}</div>
                 <div v-else class="record-loading"><Loading type="pure"/></div>
@@ -204,20 +204,22 @@
                 v-transfer-dom
                 :data-transfer="true"
                 class="chat-input-convert-transfer"
-                :style="recordTransferStyle">
+                :style="recordConvertStyle">
                 <div class="convert-box">
                     <div class="convert-body">
-                        <div class="convert-content" :class="{'min-hight-mode': keyboardType === 'show'}">
+                        <div class="convert-content">
                             <Input
                                 type="textarea"
                                 class="convert-result no-dark-content"
                                 v-model="recordConvertResult"
                                 :rows="1"
                                 :autosize="{minRows: 1, maxRows: 5}"
-                                :placeholder="recordConvertStatus === 0 ? '...' : ''"/>
+                                :placeholder="recordConvertStatus === 0 ? '...' : ''"
+                                @on-focus="recordConvertFocus=true"
+                                @on-blur="recordConvertFocus=false"/>
                         </div>
                     </div>
-                    <ul class="convert-footer">
+                    <ul class="convert-footer" :style="recordConvertFooterStyle">
                         <li @click="recordConvertIng=false">
                             <i class="taskfont">&#xe637;</i>
                             <span>{{$L('取消')}}</span>
@@ -376,8 +378,9 @@ export default {
             recordState: "stop",
             recordDuration: 0,
             recordIndex: window.modalTransferIndex,
-            
+
             recordConvertIng: false,
+            recordConvertFocus: false,
             recordConvertStatus: 0,     // 0: 转换中 1: 转换成功 2: 转换失败
             recordConvertResult: '',
 
@@ -519,7 +522,6 @@ export default {
 
             'cacheKeyboard',
 
-            'keyboardType',
             'isModKey',
         ]),
 
@@ -551,15 +553,30 @@ export default {
             return ['ready', 'ing'].includes(recordState)
         },
 
-        recordTransferStyle() {
+        recordStyle() {
             const {windowScrollY, recordIndex} = this;
             const style = {
                 zIndex: recordIndex,
             }
             if (windowScrollY > 0) {
-                style.marginTop = windowScrollY + 'px'
+                style.marginTop = (windowScrollY / 2) + 'px'
             }
             return style
+        },
+
+        recordConvertStyle() {
+            const {recordIndex} = this;
+            return {
+                zIndex: recordIndex,
+            }
+        },
+
+        recordConvertFooterStyle() {
+            const {recordConvertFocus} = this;
+            return recordConvertFocus ? {
+                alignItems: 'flex-start',
+                transform: 'translateY(12px)'
+            } : {}
         },
 
         boxClass() {
@@ -1327,6 +1344,7 @@ export default {
                             this.recordBlob = blob;
                             this.recordDuration = duration;
                             if (isConvert === true) {
+                                this.blur();
                                 this.convertRecord();
                             } else {
                                 this.uploadRecord();
