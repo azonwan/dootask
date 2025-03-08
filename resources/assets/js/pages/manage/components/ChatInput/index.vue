@@ -210,7 +210,7 @@
                         <div class="convert-content">
                             <Input
                                 type="textarea"
-                                class="convert-result"
+                                class="convert-result no-dark-content"
                                 v-model="recordConvertResult"
                                 :rows="1"
                                 :autosize="{minRows: 1, maxRows: 5}"

@@ -63,7 +63,7 @@
                         </div>
                         <div class="item-content">
                             <div class="item-title">
-                                <div class="title-text">{{item.title}}</div>
+                                <div class="title-text" v-emoji-class="`no-dark-content`">{{item.title}}</div>
                                 <div
                                     v-if="item.activity"
                                     class="title-activity"
@@ -75,7 +75,7 @@
                                     v-if="item.tags"
                                     v-for="tag in item.tags"
                                     :style="tag.style">{{tag.name}}</span>
-                                <span class="desc-text" v-html="item.desc"></span>
+                                <span class="desc-text" v-emoji-class="`no-dark-content`" v-html="item.desc"></span>
                             </div>
                         </div>
                     </li>
