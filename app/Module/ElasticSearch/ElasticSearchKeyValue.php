@@ -48,8 +48,8 @@ class ElasticSearchKeyValue extends ElasticSearchBase
                 'properties' => [
                     'key' => ['type' => 'keyword'],
                     'value' => ['type' => 'text', 'fields' => ['keyword' => ['type' => 'keyword']]],
-                    'created_at' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis'],
-                    'updated_at' => ['type' => 'date', 'format' => 'yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis']
+                    'created_at' => ['type' => 'integer'],
+                    'updated_at' => ['type' => 'integer']
                 ]
             ];
 
@@ -90,8 +90,8 @@ class ElasticSearchKeyValue extends ElasticSearchBase
                 'key' => $key,
                 'value' => is_array($value) ? json_encode($value, JSON_UNESCAPED_UNICODE) : $value,
                 'namespace' => $namespace,
-                'created_at' => date('Y-m-d\TH:i:s\Z', strtotime(date('Y-m-d H:i:s'))),
-                'updated_at' => date('Y-m-d\TH:i:s\Z', strtotime(date('Y-m-d H:i:s')))
+                'created_at' => time(),
+                'updated_at' => time()
             ];
 
             // 索引文档
