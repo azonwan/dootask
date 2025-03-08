@@ -283,7 +283,7 @@ export default {
     },
     methods: {
         init() {
-            this.modalTransferIndex = window.modalTransferIndex = window.modalTransferIndex + 1
+            this.modalTransferIndex = ++window.modalTransferIndex
             if (this.$route.query.id) {
                 this.getInfo()
             }

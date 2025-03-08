@@ -768,6 +768,10 @@
                 padding: 18px;
                 border-radius: 14px;
                 transform: translateY(12px);
+                transition: transform 0.3s;
+                &.min-hight-mode {
+                    transform: translateY(-12px);
+                }
                 &:before {
                     content: "";
                     position: absolute;
@@ -785,6 +789,7 @@
                         box-shadow: none;
                         background: transparent;
                         color: #ffffff;
+                        caret-color: #ffffff;
                         border-radius: 0;
                         outline: none;
                         resize: none;

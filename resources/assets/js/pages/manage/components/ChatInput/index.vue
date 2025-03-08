@@ -184,7 +184,7 @@
         <!-- 录音浮窗 -->
         <transition name="fade">
             <div
-                v-if="['ready', 'ing'].includes(recordState)"
+                v-if="recordShow"
                 v-transfer-dom
                 :data-transfer="true"
                 class="chat-input-record-transfer"
@@ -207,7 +207,7 @@
                 :style="recordTransferStyle">
                 <div class="convert-box">
                     <div class="convert-body">
-                        <div class="convert-content">
+                        <div class="convert-content" :class="{'min-hight-mode': keyboardType === 'show'}">
                             <Input
                                 type="textarea"
                                 class="convert-result no-dark-content"
@@ -375,6 +375,8 @@ export default {
             recordInter: null,
             recordState: "stop",
             recordDuration: 0,
+            recordIndex: window.modalTransferIndex,
+            
             recordConvertIng: false,
             recordConvertStatus: 0,     // 0: 转换中 1: 转换成功 2: 转换失败
             recordConvertResult: '',
@@ -517,6 +519,7 @@ export default {
 
             'cacheKeyboard',
 
+            'keyboardType',
             'isModKey',
         ]),
 
@@ -543,16 +546,25 @@ export default {
             return this.dialogData.type === 'user' && !this.dialogData.bot
         },
 
+        recordShow() {
+            const {recordState} = this;
+            return ['ready', 'ing'].includes(recordState)
+        },
+
         recordTransferStyle() {
-            const {windowScrollY} = this;
-            return windowScrollY > 0 ? {
-                marginTop: (windowScrollY / 2) + 'px'
-            } : null
+            const {windowScrollY, recordIndex} = this;
+            const style = {
+                zIndex: recordIndex,
+            }
+            if (windowScrollY > 0) {
+                style.marginTop = windowScrollY + 'px'
+            }
+            return style
         },
 
         boxClass() {
             const array = [];
-            if (['ready', 'ing'].includes(this.recordState)) {
+            if (this.recordShow) {
                 if (this.recordState === 'ing' && this.recordDuration > 0) {
                     array.push('record-progress');
                 } else {
@@ -802,6 +814,18 @@ export default {
                 this.$refs.recwave.innerHTML = ""
             }
             this.$emit('on-record-state', state)
+        },
+
+        recordShow(show) {
+            if (show) {
+                this.recordIndex = ++window.modalTransferIndex
+            }
+        },
+
+        recordConvertIng(show) {
+            if (show) {
+                this.recordIndex = ++window.modalTransferIndex
+            }
         },
 
         fullInput(val) {
