@@ -243,7 +243,6 @@ export default {
             this.$store.state.menuOperation = {
                 event,
                 list,
-                scrollHide: true,
                 onUpdate: async (act) => {
                     switch (act) {
                         case 'browse':

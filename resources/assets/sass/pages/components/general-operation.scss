@@ -31,11 +31,15 @@
                     display: none
                 }
 
-                > li {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
+                &.operation-ul {
+                    > li {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                    }
+                }
 
+                > li {
                     .item {
                         display: flex;
                         align-items: center;

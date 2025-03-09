@@ -11,7 +11,7 @@
         <div ref="icon" class="general-operation-icon"></div>
         <EDropdownMenu ref="dropdownMenu" slot="dropdown" class="general-operation-more-dropdown menu-dropdown">
             <li class="general-operation-more-warp small">
-                <ul :style="ulStyle">
+                <ul class="operation-ul" :style="ulStyle">
                     <EDropdownItem
                         v-for="(item, key) in list"
                         :key="key"
@@ -39,7 +39,7 @@ export default {
             list: [],           // 数据列表: [{label: '', value: ''}]
             active: '',         // 当前选中的值
             onUpdate: null,     // 选中后的回调函数
-            scrollHide: false,  // 滚动立即隐藏
+            scrollHide: true,   // 滚动立即隐藏
             tickShow: true,     // 是否显示打勾
             maxHeight: 0,       // 滚动区域最大高度
 
@@ -80,7 +80,7 @@ export default {
                 this.list = data.list;
                 this.active = data.active && this.list.find(item => item.value === data.active) ? data.active : '';
                 this.onUpdate = typeof data.onUpdate === "function" ? data.onUpdate : null;
-                this.scrollHide = typeof data.scrollHide === "boolean" ? data.scrollHide : false;
+                this.scrollHide = typeof data.scrollHide === "boolean" ? data.scrollHide : true;
                 this.tickShow = typeof data.tickShow === "boolean" ? data.tickShow : true;
                 this.maxHeight = typeof data.maxHeight === "number" ? data.maxHeight : 0;
                 //

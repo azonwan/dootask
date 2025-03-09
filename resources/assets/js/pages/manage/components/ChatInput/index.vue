@@ -1455,7 +1455,6 @@ export default {
                 event,
                 list,
                 active,
-                scrollHide: true,
                 onUpdate: async (language) => {
                     if (type === 'transcription') {
                         await this.$store.dispatch('setTranscriptionLanguage', language)

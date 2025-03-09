@@ -1927,10 +1927,15 @@ export default {
                         return
                     }
                     const models = item.config?.models
+                    const list = $A.isArray(models) ? models : []
+                    let active = this.aiModelValue()
+                    if (!active && item.config?.model) {
+                        active = item.config.model
+                    }
                     this.$store.state.menuOperation = {
                         event,
-                        list: $A.isArray(models) ? models : [],
-                        scrollHide: true,
+                        list,
+                        active,
                         onUpdate: async model => {
                             this.dialogAiModel = [
                                 ...this.dialogAiModel.filter(({dialog_id}) => dialog_id !== this.dialogId),
@@ -3518,7 +3523,6 @@ export default {
                 event,
                 list,
                 active: this.cacheTranslationLanguage,
-                scrollHide: true,
                 onUpdate: async (language) => {
                     if (languageList[language]) {
                         await this.$store.dispatch("setTranslationLanguage", language);
