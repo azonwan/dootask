@@ -30,7 +30,7 @@
                 <div v-if="quoteUpdate" class="quote-label">{{$L('编辑消息')}}</div>
                 <UserAvatar v-else :userid="quoteData.userid" :userResult="onQuoteUserResult" :show-icon="false" :show-name="true"/>
                 <div class="quote-desc no-dark-content">{{$A.getMsgSimpleDesc(quoteData)}}</div>
-                <i class="taskfont" v-touchclick="cancelQuote">&#xe6e5;</i>
+                <i class="taskfont" v-touchclick="onTouchClick" data-action="cancel-quote">&#xe6e5;</i>
             </div>
 
             <!-- 输入框 -->
@@ -227,15 +227,15 @@
                         </div>
                     </div>
                     <ul class="convert-footer" :style="recordConvertFooterStyle">
-                        <li @click="recordConvertIng=false">
+                        <li v-touchclick="onTouchClick" data-action="record-convert-cancel">
                             <i class="taskfont">&#xe637;</i>
                             <span>{{$L('取消')}}</span>
                         </li>
-                        <li @click="convertSend('voice')">
+                        <li v-touchclick="onTouchClick" data-action="record-convert-voice">
                             <i class="taskfont voice">&#xe793;</i>
                             <span>{{$L('发送原语音')}}</span>
                         </li>
-                        <li @click="convertSend('result')">
+                        <li v-touchclick="onTouchClick" data-action="record-convert-result">
                             <i v-if="recordConvertStatus === 0" class="send"><Loading/></i>
                             <i v-else-if="recordConvertStatus === 2" class="taskfont error">&#xe665;</i>
                             <i v-else class="taskfont send">&#xe684;</i>
@@ -245,7 +245,7 @@
             </div>
         </transition>
 
-
+        <!-- 全屏输入 -->
         <Modal
             v-model="fullInput"
             :mask-closable="false"
@@ -532,6 +532,7 @@ export default {
             'cacheTranscriptionLanguage',
             'cacheKeyboard',
             'keyboardType',
+            'keyboardHeight',
             'isModKey',
         ]),
 
@@ -582,8 +583,8 @@ export default {
         },
 
         recordConvertFooterStyle() {
-            const {recordConvertFocus, keyboardType} = this;
-            return recordConvertFocus && keyboardType === 'show' ? {
+            const {recordConvertFocus, keyboardType, keyboardHeight} = this;
+            return (recordConvertFocus && keyboardType === 'show' && keyboardHeight > 120) ? {
                 alignItems: 'flex-start',
                 transform: 'translateY(12px)'
             } : {}
@@ -1391,6 +1392,30 @@ export default {
             this.$nextTick(_ => {
                 this.quill?.focus()
             })
+        },
+
+        onTouchClick(e, el) {
+            let action = el.getAttribute('data-action')
+            if (action === "children") {
+                action = e.target?.getAttribute('data-action')
+            }
+            switch (action) {
+                case "cancel-quote":
+                    this.cancelQuote()
+                    break;
+
+                case "record-convert-cancel":
+                    this.recordConvertIng = false
+                    break;
+
+                case "record-convert-voice":
+                    this.convertSend('voice')
+                    break;
+
+                case "record-convert-result":
+                    this.convertSend('result')
+                    break;
+            }
         },
 
         convertRecord() {

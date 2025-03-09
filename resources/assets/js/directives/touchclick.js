@@ -25,10 +25,10 @@ export default {
                         }
                     }
                 },
-                end: _ => {
+                end: e => {
                     if (touchData.time > 0) {
                         if (!touchData.move && $A.dayjs().valueOf() - touchData.time < 300) {
-                            binding.value();
+                            binding.value(e, el);
                         }
                         touchData.time = 0;
                     }
@@ -40,7 +40,7 @@ export default {
         } else {
             el.__clickEvent__ = e => {
                 e.preventDefault();
-                binding.value();
+                binding.value(e, el);
             };
             el.addEventListener('click', el.__clickEvent__);
         }
