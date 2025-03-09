@@ -32,6 +32,10 @@
                 }
 
                 > li {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+
                     .item {
                         display: flex;
                         align-items: center;
@@ -60,6 +64,18 @@
                             &.taskfont {
                                 text-align: center;
                             }
+                        }
+                    }
+
+                    .tick {
+                        color: $primary-color;
+                        transform: translateX(40%);
+                        width: 26px;
+                        height: 26px;
+                        text-align: right;
+                        margin-left: 6px;
+                        > i {
+                            font-size: 14px;
                         }
                     }
 

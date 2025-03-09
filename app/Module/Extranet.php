@@ -28,7 +28,6 @@ class Extranet
         if ($systemSetting['voice2text'] !== 'open' || empty($aibotSetting['openai_key'])) {
             return Base::retError("语音转文字功能未开启");
         }
-        //
         $extra = [
             'Content-Type' => 'multipart/form-data',
             'Authorization' => 'Bearer ' . $aibotSetting['openai_key'],
@@ -41,7 +40,6 @@ class Extranet
             'file' => new \CURLFile($filePath),
             'model' => 'whisper-1',
         ]);
-        // 转文字
         $cacheKey = "openAItranscriptions::" . md5($filePath . '_' . Base::array2json($extra) . '_' . Base::array2json($extParams));
         $result = Cache::remember($cacheKey, Carbon::now()->addDays(), function() use ($extra, $post) {
             $res = Ihttp::ihttp_request('https://api.openai.com/v1/audio/transcriptions', $post, $extra, 15);
@@ -56,12 +54,6 @@ class Extranet
         });
         if (Base::isError($result)) {
             Cache::forget($cacheKey);
-        } elseif ($extParams['language']) {
-            // 翻译
-            $translResult = self::openAItranslations($result['data'], Doo::getLanguages($extParams['language']));
-            if (Base::isSuccess($result)) {
-                $result = $translResult;
-            }
         }
         return $result;
     }
@@ -92,11 +84,19 @@ class Extranet
             "messages" => [
                 [
                     "role" => "system",
-                    "content" => "你是一个专业的翻译器，请将<text>标签里面的内容翻译成“{$targetLanguage}”语言，翻译的结果尽量符合“项目任务管理系统”的使用并且保持原格式。"
+                    "content" => <<<EOF
+                        你是一名专业翻译人员，请将 <translation_original_text> 标签内的内容翻译为{$targetLanguage}。
+
+                        翻译要求：
+                        - 翻译结果需符合“项目任务管理系统”的专业术语和使用场景。
+                        - 保持原文格式、结构和排版不变。
+                        - 语言表达准确、简洁，符合项目管理领域的行业规范。
+                        - 注意专业术语的一致性和连贯性。
+                        EOF
                 ],
                 [
                     "role" => "user",
-                    "content" => "<text>{$text}</text>"
+                    "content" => "<translation_original_text>{$text}</translation_original_text>"
                 ]
             ]
         ]);
@@ -112,7 +112,7 @@ class Extranet
             }
             $result = $resData['choices'][0]['message']['content'];
             $result = preg_replace('/^\"|\"$/', '', trim($result));
-            $result = preg_replace('/^<text>|<\/text>$/', '', trim($result));
+            $result = preg_replace('/<\/*translation_original_text>/', '', trim($result));
             if (empty($result)) {
                 return Base::retError("翻译失败", $result);
             }

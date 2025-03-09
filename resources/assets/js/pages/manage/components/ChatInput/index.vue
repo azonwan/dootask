@@ -208,8 +208,9 @@
                 <div class="convert-box">
                     <div class="convert-body">
                         <div class="convert-content">
-                            <div class="convert-setting" @click="convertSetting">
-                                <i class="taskfont">&#xe691;</i>
+                            <div class="convert-setting">
+                                <i class="taskfont" :class="{active: !!cacheTranscriptionLanguage}" @click="convertSetting('transcription', $event)">&#xe628;</i>
+                                <i class="taskfont" :class="{active: !!recordConvertTranslate}" @click="convertSetting('translate', $event)">&#xe795;</i>
                             </div>
                             <div class="convert-input">
                                 <Input
@@ -388,9 +389,9 @@ export default {
 
             recordConvertIng: false,
             recordConvertFocus: false,
-            recordConvertStatus: 0,     // 0: 转换中 1: 转换成功 2: 转换失败
+            recordConvertStatus: 0,         // 0: 转换中 1: 转换成功 2: 转换失败
             recordConvertResult: '',
-            recordConvertLanguage: '',
+            recordConvertTranslate: '',     // 转换之后翻译语言
 
             touchStart: {},
             touchFocus: false,
@@ -528,6 +529,7 @@ export default {
             'cacheDialogs',
             'dialogMsgs',
 
+            'cacheTranscriptionLanguage',
             'cacheKeyboard',
             'keyboardType',
             'isModKey',
@@ -1408,7 +1410,8 @@ export default {
                         dialog_id: this.dialogId,
                         base64: reader.result,
                         duration: this.recordDuration,
-                        language: this.recordConvertLanguage || getLanguage()
+                        language: this.cacheTranscriptionLanguage,
+                        translate: this.recordConvertTranslate
                     },
                     method: 'post',
                 }).then(({data}) => {
@@ -1422,22 +1425,43 @@ export default {
             reader.readAsDataURL(this.recordBlob);
         },
 
-        async convertSetting(event) {
+        async convertSetting(type, event) {
+            if (this.recordConvertStatus !== 1) {
+                $A.messageWarning("正在识别中，请稍后")
+                return;
+            }
             await this.$nextTick()
             const list = Object.keys(languageList).map(item => ({
                 label: languageList[item],
                 value: item
             }))
-            list.unshift(...[
-                {label: '自动识别', value: ''},
-            ])
+            let active
+            if (type === 'transcription') {
+                // 语音转文字
+                list.unshift(...[
+                    {label: '选择识别语言', value: '', disabled: true},
+                    {label: '自动识别', value: ''},
+                ])
+                active = this.cacheTranscriptionLanguage
+            } else {
+                // 翻译
+                list.unshift(...[
+                    {label: '选择翻译结果', value: '', disabled: true},
+                    {label: '不翻译结果', value: ''},
+                ])
+                active = this.recordConvertTranslate
+            }
             this.$store.state.menuOperation = {
                 event,
                 list,
-                active: this.recordConvertLanguage,
+                active,
                 scrollHide: true,
                 onUpdate: async (language) => {
-                    this.recordConvertLanguage = language
+                    if (type === 'transcription') {
+                        await this.$store.dispatch('setTranscriptionLanguage', language)
+                    } else {
+                        this.recordConvertTranslate = language
+                    }
                     this.convertRecord()
                 }
             }

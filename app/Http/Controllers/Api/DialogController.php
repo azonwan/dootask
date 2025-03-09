@@ -1356,7 +1356,15 @@ class DialogController extends AbstractController
      *
      * @apiParam {String} base64                语音base64
      * @apiParam {Number} duration              语音时长（毫秒）
-     * @apiParam {String} [language]            语音语言（比如：zh，默认：当前用户语言）
+     * @apiParam {String} [language]            识别语言
+     * - 比如：zh
+     * - 默认：自动识别
+     * - 格式：符合 ISO_639 标准
+     * - 此参数不一定起效果，AI会根据语音和language参考翻译识别结果
+     * @apiParam {String} [translate]           翻译识别结果
+     * - 比如：zh
+     * - 默认：不翻译结果
+     * - 格式：符合 ISO_639 标准
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -1370,10 +1378,12 @@ class DialogController extends AbstractController
         $path = "uploads/tmp/chat/" . date("Ym") . "/" . $user->userid . "/";
         $base64 = Request::input('base64');
         $language = Request::input('language');
+        $translate = Request::input('translate');
         $duration = intval(Request::input('duration'));
         if ($duration < 600) {
             return Base::retError('说话时间太短');
         }
+        // 保存录音
         $data = Base::record64save([
             "base64" => $base64,
             "path" => $path,
@@ -1382,28 +1392,30 @@ class DialogController extends AbstractController
             return Base::retError($data['msg']);
         }
         $recordData = $data['data'];
+        // 转文字
         $extParams = [];
         if ($language) {
-            $targetLanguage = Doo::getLanguages($language);
-            if (empty($targetLanguage)) {
-                return Base::retError("参数错误");
-            }
             $extParams = [
-                'language' => match ($language) {
-                    'zh-CHT' => 'zh',
-                    default => $language,
-                },
-                'prompt' => "此音频为“{$targetLanguage}”语言。",
+                'language' => $language === 'zh-CHT' ? 'zh' : $language,
+                'prompt' => "将此语音识别为“" . Doo::getLanguages($language) . "”。",
             ];
         }
-        $res = Extranet::openAItranscriptions($recordData['file'], $extParams);
-        if (Base::isError($res)) {
-            return $res;
+        $result = Extranet::openAItranscriptions($recordData['file'], $extParams);
+        if (Base::isError($result)) {
+            return $result;
         }
-        if (strlen($res['data']) < 1) {
+        if (strlen($result['data']) < 1) {
             return Base::retError('转文字失败');
         }
-        return $res;
+        // 翻译
+        if ($translate) {
+            $result = Extranet::openAItranslations($result['data'], Doo::getLanguages($translate));
+            if (Base::isError($result)) {
+                return $result;
+            }
+        }
+        // 返回
+        return $result;
     }
 
     /**

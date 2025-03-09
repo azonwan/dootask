@@ -11,14 +11,17 @@
         <div ref="icon" class="general-operation-icon"></div>
         <EDropdownMenu ref="dropdownMenu" slot="dropdown" class="general-operation-more-dropdown menu-dropdown">
             <li class="general-operation-more-warp small">
-                <ul>
+                <ul :style="ulStyle">
                     <EDropdownItem
                         v-for="(item, key) in list"
                         :key="key"
                         :command="item.value"
                         :divided="!!item.divided"
-                        :disabled="active === item.value">
+                        :disabled="active === item.value || !!item.disabled">
                         <div class="item">{{item.label}}</div>
+                        <div v-if="tickShow" class="tick">
+                            <i v-if="active === item.value && !item.disabled" class="taskfont">&#xe684;</i>
+                        </div>
                     </EDropdownItem>
                 </ul>
             </li>
@@ -37,6 +40,8 @@ export default {
             active: '',         // 当前选中的值
             onUpdate: null,     // 选中后的回调函数
             scrollHide: false,  // 滚动立即隐藏
+            tickShow: true,     // 是否显示打勾
+            maxHeight: 0,       // 滚动区域最大高度
 
             element: null,
             target: null,
@@ -51,7 +56,11 @@ export default {
     },
 
     computed: {
-        ...mapState(['menuOperation'])
+        ...mapState(['menuOperation']),
+
+        ulStyle({maxHeight}) {
+            return maxHeight > 0 ? {maxHeight: `${maxHeight}px`} : {};
+        }
     },
 
     watch: {
@@ -72,6 +81,8 @@ export default {
                 this.active = data.active && this.list.find(item => item.value === data.active) ? data.active : '';
                 this.onUpdate = typeof data.onUpdate === "function" ? data.onUpdate : null;
                 this.scrollHide = typeof data.scrollHide === "boolean" ? data.scrollHide : false;
+                this.tickShow = typeof data.tickShow === "boolean" ? data.tickShow : true;
+                this.maxHeight = typeof data.maxHeight === "number" ? data.maxHeight : 0;
                 //
                 this.$refs.icon.focus();
                 this.show();
