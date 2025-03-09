@@ -11,16 +11,18 @@
         <div ref="icon" class="general-operation-icon"></div>
         <EDropdownMenu ref="dropdownMenu" slot="dropdown" class="general-operation-more-dropdown menu-dropdown">
             <li class="general-operation-more-warp small">
-                <ul class="operation-ul" :style="ulStyle">
+                <ul :style="ulStyle">
                     <EDropdownItem
                         v-for="(item, key) in list"
                         :key="key"
                         :command="item.value"
                         :divided="!!item.divided"
                         :disabled="active === item.value || !!item.disabled">
-                        <div class="item">{{item.label}}</div>
-                        <div v-if="tickShow" class="tick">
-                            <i v-if="active === item.value && !item.disabled" class="taskfont">&#xe684;</i>
+                        <div class="item-box">
+                            <div class="item">{{item.label}}</div>
+                            <div v-if="tickShow" class="tick">
+                                <i v-if="active === item.value && !item.disabled" class="taskfont">&#xe684;</i>
+                            </div>
                         </div>
                     </EDropdownItem>
                 </ul>
