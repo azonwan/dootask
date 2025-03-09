@@ -678,31 +678,17 @@
             display: flex;
             flex-direction: column;
             position: relative;
-            .no-tip {
-                flex: 1;
-                display: none;
-                margin-left: 5px;
-            }
             .no-input {
                 position: relative;
                 margin: 22px 0 0 5px;
-                background-color: #F4F5F7;
-                padding: 10px 0;
-                border-radius: 10px;
                 .chat-input-box {
                     .chat-input-quick-emoji {
                         right: 0;
                     }
                     .chat-input-wrapper {
-                        padding: 0 4px 0 6px;
                         background-color: #F4F5F7;
-                        .chat-toolbar {
-                            right: 4px;
-                            bottom: 0;
-                        }
-                        .chat-record {
-                            background-color: #F4F5F7;
-                        }
+                        padding: 8px 4px 8px 6px;
+                        border-radius: 10px;
                     }
                 }
             }
@@ -821,18 +807,6 @@
                             font-size: 18px;
                         }
                     }
-                }
-            }
-            .no-dialog {
-                .no-tip {
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-left: 18px;
-                    color: $primary-desc-color;
-                }
-                .no-input {
-                    margin: 0 0 0 18px;
                 }
             }
             .dialog-wrapper {

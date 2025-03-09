@@ -479,7 +479,6 @@
                      @drop.prevent="taskPasteDrag($event, 'drag')"
                      @dragover.prevent="taskDragOver(true, $event)"
                      @dragleave.prevent="taskDragOver(false, $event)">
-                    <div class="no-tip">{{$L('暂无消息')}}</div>
                     <div class="no-input">
                         <ChatInput
                             ref="chatInput"
