@@ -208,7 +208,7 @@
                 <div class="convert-box">
                     <div class="convert-body">
                         <div class="convert-content">
-                            <div class="convert-setting">
+                            <div v-if="recordConvertSetting" class="convert-setting">
                                 <i class="taskfont" :class="{active: !!cacheTranscriptionLanguage}" @click="convertSetting('transcription', $event)">&#xe628;</i>
                                 <i class="taskfont" :class="{active: !!recordConvertTranslate}" @click="convertSetting('translate', $event)">&#xe795;</i>
                             </div>
@@ -389,9 +389,10 @@ export default {
 
             recordConvertIng: false,
             recordConvertFocus: false,
-            recordConvertStatus: 0,         // 0: 转换中 1: 转换成功 2: 转换失败
-            recordConvertResult: '',
-            recordConvertTranslate: '',     // 转换之后翻译语言
+            recordConvertSetting: false,    // 是否显示转换设置
+            recordConvertStatus: 0,         // 0: 转换中, 1: 转换成功, 2: 转换失败
+            recordConvertResult: '',        // 转换结果
+            recordConvertTranslate: '',     // 转换结果翻译语言
 
             touchStart: {},
             touchFocus: false,
@@ -853,6 +854,8 @@ export default {
         recordConvertIng(show) {
             if (show) {
                 this.recordIndex = ++window.modalTransferIndex
+            } else {
+                this.recordConvertSetting = false
             }
         },
 
@@ -1440,8 +1443,14 @@ export default {
                     },
                     method: 'post',
                 }).then(({data}) => {
-                    this.recordConvertStatus = data ? 1 : 2
-                    this.recordConvertResult = data || this.$L('转文字失败')
+                    if (data) {
+                        this.recordConvertStatus = 1
+                        this.recordConvertResult = data
+                        this.recordConvertSetting = true
+                    } else {
+                        this.recordConvertStatus = 2
+                        this.recordConvertResult = this.$L('转文字失败')
+                    }
                 }).catch(({msg}) => {
                     this.recordConvertStatus = 2
                     this.recordConvertResult = msg
@@ -1452,7 +1461,7 @@ export default {
 
         async convertSetting(type, event) {
             if (this.recordConvertStatus !== 1) {
-                $A.messageWarning("正在识别中，请稍后")
+                $A.messageWarning("请稍后再试...")
                 return;
             }
             await this.$nextTick()
