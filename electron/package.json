@@ -95,8 +95,6 @@
             "icon": "../resources/assets/statics/public/images/logo-app.png",
             "entitlements": "entitlements.plist",
             "entitlementsInherit": "entitlements.plist",
-            "hardenedRuntime": true,
-            "identity": null,
             "category": "public.app-category.productivity",
             "target": [
                 {
