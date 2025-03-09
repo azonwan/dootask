@@ -208,15 +208,21 @@
                 <div class="convert-box">
                     <div class="convert-body">
                         <div class="convert-content">
-                            <Input
-                                type="textarea"
-                                class="convert-result no-dark-content"
-                                v-model="recordConvertResult"
-                                :rows="1"
-                                :autosize="{minRows: 1, maxRows: 5}"
-                                :placeholder="recordConvertStatus === 0 ? '...' : ''"
-                                @on-focus="recordConvertFocus=true"
-                                @on-blur="recordConvertFocus=false"/>
+                            <div class="convert-setting" @click="convertSetting">
+                                <i class="taskfont">&#xe691;</i>
+                            </div>
+                            <div class="convert-input">
+                                <Input
+                                    type="textarea"
+                                    class="convert-result no-dark-content"
+                                    v-model="recordConvertResult"
+                                    :rows="1"
+                                    :autosize="{minRows: 1, maxRows: 5}"
+                                    :placeholder="recordConvertStatus === 0 ? '...' : ''"
+                                    :disabled="recordConvertStatus !== 1"
+                                    @on-focus="recordConvertFocus=true"
+                                    @on-blur="recordConvertFocus=false"/>
+                            </div>
                         </div>
                     </div>
                     <ul class="convert-footer" :style="recordConvertFooterStyle">
@@ -277,6 +283,7 @@ import TransferDom from "../../../../directives/transfer-dom";
 import clickoutside from "../../../../directives/clickoutside";
 import longpress from "../../../../directives/longpress";
 import {inputLoadAdd, inputLoadIsLast, inputLoadRemove} from "./one";
+import {getLanguage, languageList} from "../../../../language";
 import {isMarkdownFormat} from "../../../../store/markdown";
 import emitter from "../../../../store/events";
 
@@ -383,6 +390,7 @@ export default {
             recordConvertFocus: false,
             recordConvertStatus: 0,     // 0: 转换中 1: 转换成功 2: 转换失败
             recordConvertResult: '',
+            recordConvertLanguage: '',
 
             touchStart: {},
             touchFocus: false,
@@ -521,7 +529,7 @@ export default {
             'dialogMsgs',
 
             'cacheKeyboard',
-
+            'keyboardType',
             'isModKey',
         ]),
 
@@ -572,8 +580,8 @@ export default {
         },
 
         recordConvertFooterStyle() {
-            const {recordConvertFocus} = this;
-            return recordConvertFocus ? {
+            const {recordConvertFocus, keyboardType} = this;
+            return recordConvertFocus && keyboardType === 'show' ? {
                 alignItems: 'flex-start',
                 transform: 'translateY(12px)'
             } : {}
@@ -1400,6 +1408,7 @@ export default {
                         dialog_id: this.dialogId,
                         base64: reader.result,
                         duration: this.recordDuration,
+                        language: this.recordConvertLanguage || getLanguage()
                     },
                     method: 'post',
                 }).then(({data}) => {
@@ -1411,6 +1420,27 @@ export default {
                 });
             };
             reader.readAsDataURL(this.recordBlob);
+        },
+
+        async convertSetting(event) {
+            await this.$nextTick()
+            const list = Object.keys(languageList).map(item => ({
+                label: languageList[item],
+                value: item
+            }))
+            list.unshift(...[
+                {label: '自动识别', value: ''},
+            ])
+            this.$store.state.menuOperation = {
+                event,
+                list,
+                active: this.recordConvertLanguage,
+                scrollHide: true,
+                onUpdate: async (language) => {
+                    this.recordConvertLanguage = language
+                    this.convertRecord()
+                }
+            }
         },
 
         convertSend(type) {

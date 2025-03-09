@@ -1356,6 +1356,7 @@ class DialogController extends AbstractController
      *
      * @apiParam {String} base64                语音base64
      * @apiParam {Number} duration              语音时长（毫秒）
+     * @apiParam {String} [language]            语音语言（比如：zh，默认：当前用户语言）
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -1368,6 +1369,7 @@ class DialogController extends AbstractController
         //
         $path = "uploads/tmp/chat/" . date("Ym") . "/" . $user->userid . "/";
         $base64 = Request::input('base64');
+        $language = Request::input('language');
         $duration = intval(Request::input('duration'));
         if ($duration < 600) {
             return Base::retError('说话时间太短');
@@ -1380,7 +1382,21 @@ class DialogController extends AbstractController
             return Base::retError($data['msg']);
         }
         $recordData = $data['data'];
-        $res = Extranet::openAItranscriptions($recordData['file']);
+        $extParams = [];
+        if ($language) {
+            $targetLanguage = Doo::getLanguages($language);
+            if (empty($targetLanguage)) {
+                return Base::retError("参数错误");
+            }
+            $extParams = [
+                'language' => match ($language) {
+                    'zh-CHT' => 'zh',
+                    default => $language,
+                },
+                'prompt' => "此音频为“{$targetLanguage}”语言。",
+            ];
+        }
+        $res = Extranet::openAItranscriptions($recordData['file'], $extParams);
         if (Base::isError($res)) {
             return $res;
         }

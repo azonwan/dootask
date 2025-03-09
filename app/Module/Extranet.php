@@ -15,9 +15,10 @@ class Extranet
     /**
      * 通过 openAI 语音转文字
      * @param string $filePath
+     * @param array $extParams
      * @return array
      */
-    public static function openAItranscriptions($filePath)
+    public static function openAItranscriptions($filePath, $extParams = [])
     {
         if (!file_exists($filePath)) {
             return Base::retError("语音文件不存在");
@@ -36,19 +37,33 @@ class Extranet
             $extra['CURLOPT_PROXY'] = $aibotSetting['openai_agency'];
             $extra['CURLOPT_PROXYTYPE'] = str_contains($aibotSetting['openai_agency'], 'socks') ? CURLPROXY_SOCKS5 : CURLPROXY_HTTP;
         }
-        $res = Ihttp::ihttp_request('https://api.openai.com/v1/audio/transcriptions', [
+        $post = array_merge($extParams, [
             'file' => new \CURLFile($filePath),
-            'model' => 'whisper-1'
-        ], $extra, 15);
-        if (Base::isError($res)) {
-            return Base::retError("语音转文字失败", $res);
+            'model' => 'whisper-1',
+        ]);
+        // 转文字
+        $cacheKey = "openAItranscriptions::" . md5($filePath . '_' . Base::array2json($extra) . '_' . Base::array2json($extParams));
+        $result = Cache::remember($cacheKey, Carbon::now()->addDays(), function() use ($extra, $post) {
+            $res = Ihttp::ihttp_request('https://api.openai.com/v1/audio/transcriptions', $post, $extra, 15);
+            if (Base::isError($res)) {
+                return Base::retError("语音转文字失败", $res);
+            }
+            $resData = Base::json2array($res['data']);
+            if (empty($resData['text'])) {
+                return Base::retError("语音转文字失败", $resData);
+            }
+            return Base::retSuccess("success", $resData['text']);
+        });
+        if (Base::isError($result)) {
+            Cache::forget($cacheKey);
+        } elseif ($extParams['language']) {
+            // 翻译
+            $translResult = self::openAItranslations($result['data'], Doo::getLanguages($extParams['language']));
+            if (Base::isSuccess($result)) {
+                $result = $translResult;
+            }
         }
-        $resData = Base::json2array($res['data']);
-        if (empty($resData['text'])) {
-            return Base::retError("语音转文字失败", $resData);
-        }
-        //
-        return Base::retSuccess("success", $resData['text']);
+        return $result;
     }
 
     /**
@@ -72,32 +87,41 @@ class Extranet
             $extra['CURLOPT_PROXY'] = $aibotSetting['openai_agency'];
             $extra['CURLOPT_PROXYTYPE'] = str_contains($aibotSetting['openai_agency'], 'socks') ? CURLPROXY_SOCKS5 : CURLPROXY_HTTP;
         }
-        $res = Ihttp::ihttp_request('https://api.openai.com/v1/chat/completions', json_encode([
+        $post = json_encode([
             "model" => "gpt-4o-mini",
             "messages" => [
                 [
                     "role" => "system",
-                    "content" => "你是一个专业的翻译器，翻译的结果尽量符合“项目任务管理系统”的使用，并且翻译的结果不用额外添加换行尽量保持原格式，将提供的文本翻译成“{$targetLanguage}”语言。"
+                    "content" => "你是一个专业的翻译器，请将<text>标签里面的内容翻译成“{$targetLanguage}”语言，翻译的结果尽量符合“项目任务管理系统”的使用并且保持原格式。"
                 ],
                 [
                     "role" => "user",
-                    "content" => $text
+                    "content" => "<text>{$text}</text>"
                 ]
             ]
-        ]), $extra, 15);
-        if (Base::isError($res)) {
-            return Base::retError("翻译失败", $res);
+        ]);
+        $cacheKey = "openAItranslations::" . md5(Base::array2json($extra) . '_' . Base::array2json($post));
+        $result = Cache::remember($cacheKey, Carbon::now()->addDays(), function() use ($extra, $post) {
+            $res = Ihttp::ihttp_request('https://api.openai.com/v1/chat/completions', $post, $extra, 15);
+            if (Base::isError($res)) {
+                return Base::retError("翻译失败", $res);
+            }
+            $resData = Base::json2array($res['data']);
+            if (empty($resData['choices'])) {
+                return Base::retError("翻译失败", $resData);
+            }
+            $result = $resData['choices'][0]['message']['content'];
+            $result = preg_replace('/^\"|\"$/', '', trim($result));
+            $result = preg_replace('/^<text>|<\/text>$/', '', trim($result));
+            if (empty($result)) {
+                return Base::retError("翻译失败", $result);
+            }
+            return Base::retSuccess("success", $result);
+        });
+        if (Base::isError($result)) {
+            Cache::forget($cacheKey);
         }
-        $resData = Base::json2array($res['data']);
-        if (empty($resData['choices'])) {
-            return Base::retError("翻译失败", $resData);
-        }
-        $result = $resData['choices'][0]['message']['content'];
-        $result = preg_replace('/^\"|\"$/', '', $result);
-        if (empty($result)) {
-            return Base::retError("翻译失败", $result);
-        }
-        return Base::retSuccess("success", $result);
+        return $result;
     }
 
     /**
