@@ -28654,5 +28654,77 @@
         "fr": "Échec de la conversion en texte",
         "id": "Gagal mengonversi ke teks",
         "ru": "Ошибка преобразования в текст"
+    },
+    {
+        "key": "请稍后再试...",
+        "zh": "",
+        "zh-CHT": "請稍後再試...",
+        "en": "Please try again later...",
+        "ko": "잠시 후 다시 시도해 주세요...",
+        "ja": "しばらくしてからもう一度お試しください...",
+        "de": "Bitte versuchen Sie es später noch einmal...",
+        "fr": "Veuillez réessayer plus tard...",
+        "id": "Silakan coba lagi nanti...",
+        "ru": "Пожалуйста, попробуйте позже..."
+    },
+    {
+        "key": "选择识别语言",
+        "zh": "",
+        "zh-CHT": "選擇識別語言",
+        "en": "Select recognition language",
+        "ko": "인식 언어 선택",
+        "ja": "認識言語を選択",
+        "de": "Erkennungssprache wählen",
+        "fr": "Sélectionnez la langue de reconnaissance",
+        "id": "Pilih bahasa pengenalan",
+        "ru": "Выберите язык распознавания"
+    },
+    {
+        "key": "自动识别",
+        "zh": "",
+        "zh-CHT": "自動識別",
+        "en": "Automatic recognition",
+        "ko": "자동 인식",
+        "ja": "自動認識",
+        "de": "Automatische Erkennung",
+        "fr": "Reconnaissance automatique",
+        "id": "Pengenalan otomatis",
+        "ru": "Автоматическое распознавание"
+    },
+    {
+        "key": "选择翻译结果",
+        "zh": "",
+        "zh-CHT": "選擇翻譯結果",
+        "en": "Select translation result",
+        "ko": "번역 결과 선택",
+        "ja": "翻訳結果を選択",
+        "de": "Übersetzungsergebnis auswählen",
+        "fr": "Sélectionnez le résultat de traduction",
+        "id": "Pilih hasil terjemahan",
+        "ru": "Выберите результат перевода"
+    },
+    {
+        "key": "不翻译结果",
+        "zh": "",
+        "zh-CHT": "不翻譯結果",
+        "en": "Do not translate result",
+        "ko": "결과 번역 안 함",
+        "ja": "結果を翻訳しない",
+        "de": "Ergebnis nicht übersetzen",
+        "fr": "Ne pas traduire le résultat",
+        "id": "Jangan terjemahkan hasil",
+        "ru": "Не переводить результат"
+    },
+    {
+        "key": "即将到期",
+        "zh": "",
+        "zh-CHT": "即將到期",
+        "en": "About to expire",
+        "ko": "곧 만료",
+        "ja": "まもなく期限切れ",
+        "de": "Bald ablaufend",
+        "fr": "Sur le point d'expirer",
+        "id": "Akan segera kedaluwarsa",
+        "ru": "Скоро истечет"
     }
 ]

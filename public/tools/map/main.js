@@ -527,7 +527,7 @@ class BaiduMapPicker {
         // 按距离排序（如果有距离信息）
         pois.sort((a, b) => {
             if (a.distance_current && b.distance_current) {
-                return $A.sortFloat(a.distance_current, b.distance_current);
+                return this.sortFloat(a.distance_current, b.distance_current);
             }
             return 0;
         });
@@ -562,6 +562,17 @@ class BaiduMapPicker {
                 this.map.setCenter(this.marker.getPosition());
             }
         }, 100);  // 添加小延时确保DOM已更新
+    }
+
+    /**
+     * 计算排序值 （数字格式）
+     * @param v1
+     * @param v2
+     * @returns {number}
+     */
+    sortFloat(v1, v2) {
+        if (v1 === v2) return 0;
+        return (parseFloat(v1) || 0) - (parseFloat(v2) || 0);
     }
 
     /**

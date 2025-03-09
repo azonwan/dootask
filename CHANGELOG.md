@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.3]
+
+### Bug Fixes
+
+- 定位签到失败的问题
+
+### Performance
+
+- 优化发送语音效果
+- 录音转文字支持自定义语言
+- 优化ES模块
+- 优化emoji表情
+- 按住Ctrl/Command键可连续选择表情
+- Md消息支持html代码
+- 优化脚本
+- 优化安装命令
+- 优化ES索引名称
+
 ## [0.43.73]
 
 ### Bug Fixes
