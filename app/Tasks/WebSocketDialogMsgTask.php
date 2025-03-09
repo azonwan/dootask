@@ -119,14 +119,20 @@ class WebSocketDialogMsgTask extends AbstractTask
                 $mention = array_intersect([0, $userid], $mentions) ? 1 : 0;
                 $silence = $mention ? false : $silence;
                 $dot = $msg->type === 'record' ? 1 : 0;
-                WebSocketDialogMsgRead::createInstance([
+                $msgRead = WebSocketDialogMsgRead::createInstance([
                     'dialog_id' => $msg->dialog_id,
                     'msg_id' => $msg->id,
                     'userid' => $userid,
                     'mention' => $mention,
                     'silence' => $silence,
                     'dot' => $dot,
-                ])->saveOrIgnore();
+                ]);
+                if ($msgRead->saveOrIgnore()) {
+                    if ($dialog->session_id && $dialog->session_id != $msg->session_id) {
+                        $msgRead->read_at = Carbon::now();
+                        $msgRead->save();
+                    }
+                }
                 $array[$userid] = [
                     'userid' => $userid,
                     'mention' => $mention,
