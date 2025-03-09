@@ -257,11 +257,9 @@ export default {
         },
 
         onShow() {
+            const autoFocus = this.total === 0 || this.showModal || !this.windowTouch   // 这几种情况下显示完后自动获取焦点（无展示结果、现在已经显示了、不是触摸设备）
             this.showModal = true
-            if (this.total > 0) {
-                return
-            }
-            this.$nextTick(() => {
+            autoFocus && this.$nextTick(() => {
                 const $el = this.$refs.searchKey?.$refs?.input;
                 if ($el) {
                     $el.style.caretColor = 'transparent';
