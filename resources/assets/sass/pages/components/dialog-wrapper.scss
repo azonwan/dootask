@@ -2846,9 +2846,10 @@ body.window-portrait {
                 .chat-input-wrapper {
                     background-color: #ffffff;
                     .chat-record {
-                        margin-left: -10px;
-                        width: calc(100% + 20px);
                         background-color: #f8f8f8;
+                        .record-convert {
+                            margin-left: 8px;
+                        }
                     }
                 }
                 .chat-emoji-wrapper {

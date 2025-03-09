@@ -567,6 +567,26 @@ body.dark-mode-reverse {
                     }
                 }
             }
+
+            .chat-record {
+                &.convert {
+                    .record-convert {
+                        background-color: #2db7f5;
+                        color: #000000;
+                    }
+                }
+                &.cancel {
+                    .record-remove {
+                        background-color: #ff6565;
+                        color: #000000;
+                    }
+                }
+                .record-convert,
+                .record-remove {
+                    color: #000000;
+                    background-color: #c7c7c7;
+                }
+            }
         }
     }
 

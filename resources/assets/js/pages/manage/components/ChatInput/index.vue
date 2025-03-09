@@ -172,7 +172,18 @@
             </ul>
 
             <!-- 录音效果 -->
-            <div class="chat-record"><div ref="recwave"></div></div>
+            <div class="chat-record" :class="recordClassName">
+                <div class="record-convert">
+                    <i class="taskfont">&#xe628;</i>
+                </div>
+                <div class="record-recwave">
+                    <div ref="recwave"></div>
+                </div>
+                <div class="record-remove">
+                    <i class="taskfont">&#xe787;</i>
+                    <i class="taskfont">&#xe702;</i>
+                </div>
+            </div>
 
             <!-- 覆盖层 -->
             <div class="chat-cover" @click.stop="onClickCover"></div>
