@@ -882,7 +882,8 @@ export default {
             topPosLoad: 0,                      // 置顶跳转加载中
             positionLoad: 0,                    // 定位跳转加载中
             positionShow: false,                // 定位跳转显示
-            preventMoreLoad: false,             // 阻止加载更多
+            preventPrevLoad: 0,                 // 大于0阻止上一页加载
+            preventRangeLoad: 0,                // 大于0阻止范围加载
             preventToBottom: false,             // 阻止滚动到底部
             scrollToBottomRefresh: false,       // 滚动到底部重新获取消息
             androidKeyboardVisible: false,      // Android键盘是否可见
@@ -2539,8 +2540,9 @@ export default {
             this.msgNew = 0;
             const scroller = this.$refs.scroller;
             if (scroller) {
-                scroller.scrollToBottom();
-                requestAnimationFrame(_ => scroller.scrollToBottom())    // 确保滚动到
+                this.preventLoad().then(_ => {
+                    scroller.scrollToBottom();
+                })
             }
         },
 
@@ -2550,8 +2552,9 @@ export default {
                 scroller.stopToBottom();
                 const element = scroller.$el.querySelector(`[data-id="${id}"]`)
                 if (!element?.parentNode.parentNode.classList.contains('item-enter')) {
-                    scroller.scrollToIndex(index, -80);
-                    requestAnimationFrame(_ => scroller.scrollToIndex(index, -80))    // 确保滚动到
+                    this.preventLoad().then(_ => {
+                        scroller.scrollToIndex(index, -80);
+                    })
                 }
             }
             requestAnimationFrame(_ => this.msgActiveId = id)
@@ -2571,6 +2574,18 @@ export default {
                     }
                 }, 10)
             }
+        },
+
+        preventLoad() {
+            return new Promise(resolve => {
+                this.preventPrevLoad++
+                this.preventRangeLoad++
+                resolve()
+                requestAnimationFrame(_ => {
+                    this.preventPrevLoad--
+                    this.preventRangeLoad--
+                })
+            })
         },
 
         scrollInfo() {
@@ -2642,7 +2657,7 @@ export default {
         },
 
         onPrevPage() {
-            if (this.prevId === 0) {
+            if (this.prevId === 0 || this.preventPrevLoad > 0) {
                 return
             }
             this.getMsgs({
@@ -3006,7 +3021,7 @@ export default {
         },
 
         onRange(range) {
-            if (this.preventMoreLoad) {
+            if (this.preventRangeLoad > 0) {
                 return
             }
             const key = this.scrollDirection === 'down' ? 'next_id' : 'prev_id';
@@ -3020,14 +3035,14 @@ export default {
                 }
                 const nearMsg = this.allMsgs[i + (key === 'next_id' ? 1 : -1)]
                 if (nearMsg && nearMsg.id != rangeValue) {
-                    this.preventMoreLoad = true
+                    this.preventRangeLoad++
                     this.getMsgs({
                         dialog_id: this.dialogId,
                         msg_id: this.msgId,
                         msg_type: this.msgType,
                         [key]: rangeValue,
                     }).finally(_ => {
-                        this.preventMoreLoad = false
+                        this.preventRangeLoad--
                     })
                 }
             }
