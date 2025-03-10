@@ -173,13 +173,13 @@
 
             <!-- 录音效果 -->
             <div class="chat-record" :class="recordClassName">
-                <div class="record-convert">
+                <div @click="stopRecord(false, true)" class="record-convert">
                     <i class="taskfont">&#xe628;</i>
                 </div>
                 <div class="record-recwave">
                     <div ref="recwave"></div>
                 </div>
-                <div class="record-remove">
+                <div @click="stopRecord(true)" class="record-remove">
                     <i class="taskfont">&#xe787;</i>
                     <i class="taskfont">&#xe702;</i>
                 </div>
