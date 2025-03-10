@@ -16,13 +16,44 @@ const MarkdownUtils = {
      * @returns
      */
     formatMsg: (text) => {
-        const array = text.match(/<img\s+[^>]*?>/g);
-        if (array) {
-            array.some(res => {
-                text = text.replace(res, `<div class="no-size-image-box">${res}</div>`);
-            })
+        // 如果存在body标签，只取body中的内容
+        const bodyMatch = text.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        if (bodyMatch) {
+            text = bodyMatch[1];
         }
-        return text
+
+        // 使用正则一次性替换所有的link、script、style标签
+        text = text.replace(/<(link|script|style)[^>]*>[\s\S]*?<\/\1>|<(link|script|style)[^>]*\/?>/gi, '');
+
+        // 处理图片标签
+        const imgRegex = /<img\s+[^>]*?>/g;
+        const imgArray = text.match(imgRegex);
+        if (imgArray) {
+            // 创建一个替换映射，避免多次字符串替换操作
+            const replacements = {};
+            imgArray.forEach(img => {
+                replacements[img] = `<div class="no-size-image-box">${img}</div>`;
+            });
+
+            // 一次性完成所有替换
+            for (const [original, replacement] of Object.entries(replacements)) {
+                text = text.replace(original, replacement);
+            }
+        }
+
+        // 处理a标签，确保所有链接在新窗口打开
+        text = text.replace(/<a\s+([^>]*)>/gi, (match, attributes) => {
+            // 如果已经有target属性，检查是否为_blank
+            if (attributes.includes('target=')) {
+                // 将已有的target属性替换为target="_blank"
+                return match.replace(/target=(['"])[^'"]*\1/i, 'target="_blank"');
+            } else {
+                // 如果没有target属性，添加target="_blank"和rel="noopener noreferrer"
+                return `<a ${attributes} target="_blank" rel="noopener noreferrer">`;
+            }
+        });
+
+        return text;
     },
 
     /**
@@ -274,7 +305,7 @@ export function MarkdownConver(text) {
                 return MarkdownUtils.highlightBlock(hljs.highlightAuto(code).value, '')
             },
         })
-        MarkdownUtils.mdi.use(mila, {attrs: {target: '_blank', rel: 'noopener'}})
+        MarkdownUtils.mdi.use(mila, {attrs: {target: '_blank', rel: 'noopener noreferrer'}})
         MarkdownUtils.mdi.use(mdKatex, {blockClass: 'katexmath-block rounded-md p-[10px]', errorColor: ' #cc0000'})
         MarkdownPluginUtils.initReasoningPlugin(MarkdownUtils.mdi);
         MarkdownPluginUtils.initCreateTaskPlugin(MarkdownUtils.mdi);
