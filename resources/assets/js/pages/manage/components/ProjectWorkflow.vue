@@ -76,7 +76,7 @@
                                         <div
                                             class="taskflow-config-table-status-item taskflow-config-table-column-header">
                                             <div class="status-label-with-menu" :class="item.status">
-                                                <div class="name">{{$L(item.name)}}</div>
+                                                <div class="name">{{item.name}}</div>
                                                 <EDropdown
                                                     trigger="click"
                                                     class="more"
