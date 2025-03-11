@@ -1,8 +1,8 @@
 <template>
     <div class="page-project">
         <template v-if="projectId > 0">
-            <ProjectPanel/>
-            <ProjectDialog/>
+            <ProjectPanel ref="panel"/>
+            <ProjectDialog @on-close="onDialogClose"/>
         </template>
         <ProjectList v-if="windowPortrait" v-show="projectId === 0"/>
     </div>
@@ -73,6 +73,10 @@ export default {
                 });
                 this.$store.dispatch("forgetTaskCompleteTemp", true);
             });
+        },
+
+        onDialogClose() {
+            this.$refs.panel?.handleColumnDebounce();
         }
     }
 }

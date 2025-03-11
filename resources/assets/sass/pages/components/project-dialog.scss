@@ -10,15 +10,24 @@
         .member-head {
             display: flex;
             align-items: center;
-            padding: 0 22px;
+            padding: 0 14px 0 22px;
             .member-title {
                 flex: 1;
                 font-size: 18px;
                 font-weight: 600;
+                padding-right: 12px;
                 > span {
                     padding-left: 6px;
                     color: $primary-color;
                     cursor: pointer;
+                }
+            }
+            .member-open {
+                cursor: pointer;
+                margin-right: 8px;
+
+                .ivu-icon-ios-chatbubbles-outline {
+                    font-size: 22px;
                 }
             }
             .member-close {
@@ -26,8 +35,6 @@
 
                 .ivu-icon-ios-close {
                     font-size: 38px;
-                    top: 3px;
-                    right: 2px;
                     transition: all 0.2s;
                 }
 
