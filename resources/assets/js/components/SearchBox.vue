@@ -340,7 +340,7 @@ export default {
                     if (item.complete_at) {
                         tags.push({
                             name: this.$L('已完成'),
-                            style: 'background-color:#ccc',
+                            style: 'background-color:rgba(11,192,55,0.56)',
                         })
                     } else if (item.overdue) {
                         tags.push({
@@ -351,6 +351,12 @@ export default {
                         tags.push({
                             name: this.$L('即将到期'),
                             style: 'background-color:#f80',
+                        })
+                    }
+                    if (item.archived_at) {
+                        tags.push({
+                            name: this.$L('已归档'),
+                            style: 'background-color:#ccc',
                         })
                     }
                     return {

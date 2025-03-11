@@ -38,7 +38,7 @@
             .chat-record {
                 visibility: visible;
                 opacity: 1;
-                z-index: 9;
+                z-index: 10;
             }
         }
     }
@@ -318,7 +318,7 @@
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        z-index: 2;
+                        z-index: 20;
                         transform: translate(-50%, -50%) scale(1);
                         border-radius: 50%;
                         background-color: $primary-color;
@@ -334,7 +334,7 @@
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        z-index: 3;
+                        z-index: 30;
                         transform: translate(-50%, -50%) scale(1);
                         transition: all 0.3s ease;
                         color: #ffffff;
@@ -344,7 +344,7 @@
                         position: absolute;
                         top: 50%;
                         left: 50%;
-                        z-index: 3;
+                        z-index: 30;
                         transform: translate(-50%, -50%) scale(1);
                         display: flex;
                         align-items: center;
