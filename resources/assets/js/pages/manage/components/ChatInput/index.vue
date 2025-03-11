@@ -1075,17 +1075,16 @@ export default {
                     if (data.disabled === true) {
                         return `<div class="mention-item-disabled">${data.value}</div>`;
                     }
+                    const nameHtml = `<div class="mention-item-name" title="${data.value}">${data.value}</div>`;
+                    const tipHtml = data.tip ? `<div class="mention-item-tip" title="${data.tip}">${data.tip}</div>` : '';
                     if (data.id === 0) {
-                        return `<div class="mention-item-at">@</div><div class="mention-item-name">${data.value}</div><div class="mention-item-tip">${data.tip}</div>`;
+                        return `<div class="mention-item-at">@</div>${nameHtml}${tipHtml}`;
                     }
                     if (data.avatar) {
                         const botHtml = data.bot ? `<div class="taskfont mention-item-bot">&#xe68c;</div>` : ''
-                        return `<div class="mention-item-img${data.online ? ' online' : ''}"><img src="${data.avatar}"/><em></em></div>${botHtml}<div class="mention-item-name">${data.value}</div>`;
+                        return `<div class="mention-item-img${data.online ? ' online' : ''}"><img src="${data.avatar}"/><em></em></div>${botHtml}${nameHtml}${tipHtml}`;
                     }
-                    if (data.tip) {
-                        return `<div class="mention-item-name" title="${data.value}">${data.value}</div><div class="mention-item-tip">${data.tip}</div>`;
-                    }
-                    return `<div class="mention-item-name" title="${data.value}">${data.value}</div>`;
+                    return `${nameHtml}${tipHtml}`;
                 },
                 renderLoading: () => {
                     return "Loading...";
