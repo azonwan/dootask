@@ -879,6 +879,7 @@ export default {
             msgChangeCache: {},
 
             unreadOne: 0,                       // 最早未读消息id
+            startMsgId: 0,                      // 可见区域第一个消息id
             topPosLoad: 0,                      // 置顶跳转加载中
             positionLoad: 0,                    // 定位跳转加载中
             positionShow: false,                // 定位跳转显示
@@ -1213,11 +1214,11 @@ export default {
             return null
         },
 
-        positionMsg({msgNew, dialogData, allMsgs}) {
+        positionMsg({msgNew, dialogData, allMsgs, startMsgId}) {
             const {unread, unread_one, mention, mention_ids} = dialogData
             const not = unread - msgNew
             const array = []
-            if (unread_one) {
+            if (unread_one && unread_one < startMsgId) {
                 array.push({
                     type: 'unread',
                     label: this.$L(`未读消息${not}条`),
@@ -3025,6 +3026,7 @@ export default {
                 return
             }
             const key = this.scrollDirection === 'down' ? 'next_id' : 'prev_id';
+            this.startMsgId = this.allMsgs[range.start]?.id || 0;
             for (let i = range.start; i <= range.end; i++) {
                 if (!this.allMsgs[i]) {
                     continue
