@@ -28726,5 +28726,17 @@
         "fr": "Sur le point d'expirer",
         "id": "Akan segera kedaluwarsa",
         "ru": "Скоро истечет"
+    },
+    {
+        "key": "在消息中打开",
+        "zh": "",
+        "zh-CHT": "在消息中打開",
+        "en": "Open in messages",
+        "ko": "메시지에서 열기",
+        "ja": "メッセージで開く",
+        "de": "In Nachrichten öffnen",
+        "fr": "Ouvrir dans les messages",
+        "id": "Buka di pesan",
+        "ru": "Открыть в сообщениях"
     }
 ]

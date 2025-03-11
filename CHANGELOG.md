@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.15]
+
+### Bug Fixes
+
+- 会话内消息搜索布局错位
+- 流程设置翻译不统一
+
+### Performance
+
+- 优化消息定位
+- 优化MD消息
+
 ## [0.44.3]
 
 ### Bug Fixes

@@ -340,7 +340,7 @@ export default {
                     if (item.complete_at) {
                         tags.push({
                             name: this.$L('已完成'),
-                            style: 'background-color:rgba(11,192,55,0.56)',
+                            style: 'background-color:#0bc037',
                         })
                     } else if (item.overdue) {
                         tags.push({
