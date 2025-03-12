@@ -1082,13 +1082,14 @@ const timezone = require("dayjs/plugin/timezone");
         /**
          * 滚动到元素并抖动
          * @param element
+         * @param viewIfNeeded
          */
-        scrollIntoAndShake(element) {
+        scrollIntoAndShake(element, viewIfNeeded = true) {
             if (!element) return;
             const elements = Array.isArray(element) ? element : [element];
             elements.forEach(el => {
                 if (el) {
-                    $A.scrollIntoViewIfNeeded(el);
+                    viewIfNeeded && $A.scrollIntoViewIfNeeded(el);
                     $A.addClassWithTimeout(el, "common-shake", 800);
                 }
             });
@@ -1300,6 +1301,28 @@ const timezone = require("dayjs/plugin/timezone");
                 item === arr2[arr2.length - arr1.length + index]
             ).length));
         },
+
+        /**
+         * 查找元素并在失败时重试
+         * @param {Function} findElementFn - 查找元素的函数
+         * @param {number} maxAttempts - 最大尝试次数
+         * @param {number} delayMs - 每次尝试之间的延迟(毫秒)
+         * @returns {Promise<*>}
+         */
+        async findElementWithRetry(findElementFn, maxAttempts = 3, delayMs = 500) {
+            for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+                const element = findElementFn();
+
+                if (element) {
+                    return element;
+                }
+
+                if (attempt < maxAttempts) {
+                    await new Promise(resolve => setTimeout(resolve, delayMs));
+                }
+            }
+            throw new Error(`Element not found after ${maxAttempts} attempts`);
+        }
     });
 
     /**

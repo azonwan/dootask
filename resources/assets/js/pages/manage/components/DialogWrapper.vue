@@ -1487,8 +1487,7 @@ export default {
         msgActiveId(val) {
             if (val > 0) {
                 this.msgActiveId = 0
-                const element = this.$refs.scroller.$el.querySelector(`[data-id="${val}"]`)?.querySelector(".dialog-head")
-                $A.scrollIntoAndShake(element)
+                this.shakeToMsgId(val)
             }
         },
 
@@ -2650,6 +2649,8 @@ export default {
                 msg_id: this.msgId,
                 msg_type: this.msgType,
                 clear_before: true
+            }).then(_ => {
+                this.onToBottom()
             }).catch(_ => {})
         },
 
@@ -4382,6 +4383,15 @@ export default {
                 $A.messageError(msg);
             });
         },
+
+        async shakeToMsgId(id) {
+            try {
+                const element = await $A.findElementWithRetry(() => this.$refs.scroller.$el.querySelector(`[data-id="${id}"]`)?.querySelector(".dialog-head"));
+                $A.scrollIntoAndShake(element, false)
+            } catch (e) {
+                // console.log(e)
+            }
+        }
     }
 }
 </script>
