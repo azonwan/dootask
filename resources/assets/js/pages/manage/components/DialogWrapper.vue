@@ -206,7 +206,7 @@
                 @scroll="onScroll"
                 @totop="onPrevPage"
                 @range="onRange"
-                @active-range="onActiveRange"
+                @visible="onVisible"
 
                 @on-mention="onMention"
                 @on-longpress="onLongpress"
@@ -1556,7 +1556,9 @@ export default {
                 setTimeout(_ => {
                     this.onSearchMsgId()
                     this.positionShow = this.readTimeout === null
-                    this.startMsgId === 0 && (this.startMsgId = data.list[data.list.length - 1]?.id || 0)
+                    if (this.startMsgId === 0 && data.list.length > 0) {
+                        this.startMsgId = data.list[data.list.length - 1].id
+                    }
                 }, 100)
             }).catch(_ => {
                 this.errorId = dialog_id
@@ -3052,8 +3054,8 @@ export default {
             }
         },
 
-        onActiveRange(array) {
-            this.startMsgId = $A.runNum(array.length > 0 ? array[0] : 0)
+        onVisible(v) {
+            this.startMsgId = $A.runNum(v.length > 0 ? v[0] : 0)
         },
 
         onBack() {

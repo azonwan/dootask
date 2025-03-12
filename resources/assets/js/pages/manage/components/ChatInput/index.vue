@@ -1180,6 +1180,10 @@ export default {
             }, 100)
         },
 
+        getEditor() {
+            return this.fullInput ? this.fullQuill : this.quill
+        },
+
         getText() {
             if (this.quill) {
                 return `${this.quill.getText()}`.replace(/^\s+|\s+$/g, "")
@@ -1230,16 +1234,17 @@ export default {
 
         focus() {
             this.$nextTick(() => {
-                if (this.quill) {
-                    this.quill.setSelection(this.quill.getLength())
-                    this.quill.focus()
+                const quill = this.getEditor();
+                if (quill) {
+                    quill.setSelection(quill.getLength())
+                    quill.focus()
                 }
             })
         },
 
         blur() {
             this.$nextTick(() => {
-                this.quill && this.quill.blur()
+                this.getEditor()?.blur()
             })
         },
 
