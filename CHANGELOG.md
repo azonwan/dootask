@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.19]
+
+### Bug Fixes
+
+- 看不到未读消息定位提醒
+
+### Performance
+
+- 优化消息定位
+- 优化消息性能
+
 ## [0.44.15]
 
 ### Bug Fixes
