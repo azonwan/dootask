@@ -204,8 +204,9 @@
                 :disabled="scrollDisabled"
                 @activity="onActivity"
                 @scroll="onScroll"
-                @range="onRange"
                 @totop="onPrevPage"
+                @range="onRange"
+                @active-range="onActiveRange"
 
                 @on-mention="onMention"
                 @on-longpress="onLongpress"
@@ -1524,6 +1525,7 @@ export default {
             this.msgType = ''
             this.searchKey = ''
             this.unreadOne = 0
+            this.startMsgId = 0
             this.scrollTail = 0
             this.scrollOffset = 0
             this.searchShow = false
@@ -1554,6 +1556,7 @@ export default {
                 setTimeout(_ => {
                     this.onSearchMsgId()
                     this.positionShow = this.readTimeout === null
+                    this.startMsgId === 0 && (this.startMsgId = data.list[data.list.length - 1]?.id || 0)
                 }, 100)
             }).catch(_ => {
                 this.errorId = dialog_id
@@ -3026,7 +3029,6 @@ export default {
                 return
             }
             const key = this.scrollDirection === 'down' ? 'next_id' : 'prev_id';
-            this.startMsgId = this.allMsgs[range.start]?.id || 0;
             for (let i = range.start; i <= range.end; i++) {
                 if (!this.allMsgs[i]) {
                     continue
@@ -3048,6 +3050,10 @@ export default {
                     })
                 }
             }
+        },
+
+        onActiveRange(array) {
+            this.startMsgId = $A.runNum(array.length > 0 ? array[0] : 0)
         },
 
         onBack() {
