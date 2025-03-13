@@ -3,7 +3,7 @@ import {initLanguage, languageList, languageName} from "../language";
 import {$callData, $urlSafe, SSEClient} from './utils'
 import emitter from "./events";
 
-const saveDraftTimers = {}
+const dialogDraftState = { timer: {}, subTemp: null }
 
 export default {
     /**
@@ -1001,6 +1001,12 @@ export default {
                 loading: false,
             }));
 
+            // 特殊处理dialogDrafts
+            state.dialogDrafts = state.dialogDrafts.filter(item => !!item.content).map(item => ({
+                ...item,
+                tag: !!item.content,
+            }));
+
             // TranslationLanguage检查
             if (typeof languageList[state.cacheTranslationLanguage] === "undefined") {
                 state.cacheTranslationLanguage = languageName;
@@ -1029,12 +1035,11 @@ export default {
 
     /**
      * Electron 页面卸载触发
-     * @param commit
      */
-    onBeforeUnload({commit}) {
-        if ($A.isSubElectron && $A.isJson(window.__dialogDraft)) {
-            commit('SET_DIALOG_DRAFT', window.__dialogDraft)
-            window.__dialogDraft = null;
+    onBeforeUnload() {
+        if ($A.isSubElectron && dialogDraftState.subTemp) {
+            $A.execMainDispatch("saveDialogDraft", dialogDraftState.subTemp)
+            dialogDraftState.subTemp = null;
         }
     },
 
@@ -3181,25 +3186,25 @@ export default {
      * @param commit
      * @param id
      * @param content
+     * @param immediate
      */
-    saveDialogDraft({commit}, {id, content}) {
+    saveDialogDraft({commit}, {id, content, immediate = false}) {
         if ($A.isSubElectron) {
-            window.__dialogDraft = {id, content}
+            dialogDraftState.subTemp = {id, content, immediate: true}
             return
         }
 
         // 清除已有的计时器
-        if (saveDraftTimers[id]) {
-            clearTimeout(saveDraftTimers[id])
-            delete saveDraftTimers[id]
+        if (dialogDraftState.timer[id]) {
+            clearTimeout(dialogDraftState.timer[id])
+            delete dialogDraftState.timer[id]
         }
 
         // 创建新的计时器
-        saveDraftTimers[id] = setTimeout(() => {
+        dialogDraftState.timer[id] = setTimeout(() => {
             commit('SET_DIALOG_DRAFT', {id, content})
-            delete saveDraftTimers[id]
-            resolve()
-        }, content ? 600 : 0)
+            delete dialogDraftState.timer[id]
+        }, (immediate || !content) ? 0 : 600)
     },
 
     /** *****************************************************************************************/

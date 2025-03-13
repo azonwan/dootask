@@ -7,14 +7,22 @@ export default {
             content: $A.filterInvalidLine(content),
             time: new Date().getTime()
         }
+        if (index === -1 && !item.content) {
+            return
+        }
+
+        // 草稿标签
+        if (state.dialogId == id) {
+            item.tag = index !== -1 ? state.dialogDrafts[index].tag : false
+        } else {
+            item.tag = !!item.content
+        }
 
         if (index !== -1) {
             // 更新已存在的草稿
-            item.tag = state.dialogDrafts[index].tag
             state.dialogDrafts.splice(index, 1, item)
         } else {
             // 添加新草稿
-            item.tag = state.dialogId != id
             state.dialogDrafts.push(item)
         }
 
@@ -22,8 +30,11 @@ export default {
         $A.IDBSave("dialogDrafts", state.dialogDrafts)
     },
 
-    // 显示草稿标签
+    // 草稿标签
     TAG_DIALOG_DRAFT(state, id) {
+        if (state.dialogId == id) {
+            return
+        }
         const index = state.dialogDrafts.findIndex(item => item.id === id)
         if (index !== -1) {
             state.dialogDrafts[index].tag = !!state.dialogDrafts[index].content
