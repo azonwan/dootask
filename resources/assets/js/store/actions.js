@@ -990,29 +990,29 @@ export default {
                 ...dataMap.json.map(key => $A.IDBJson(key))
             ]);
 
-            // 更新state
+            // 更新 state
             [...dataMap.string, ...dataMap.array, ...dataMap.json].forEach((key, index) => {
                 state[key] = data[index];
             });
 
-            // 特殊处理cacheDialogs
+            // 特殊处理 cacheDialogs
             state.cacheDialogs = state.cacheDialogs.map(item => ({
                 ...item,
                 loading: false,
             }));
 
-            // 特殊处理dialogDrafts
+            // 特殊处理 dialogDrafts
             state.dialogDrafts = state.dialogDrafts.filter(item => !!item.content).map(item => ({
                 ...item,
                 tag: !!item.content,
             }));
 
-            // TranslationLanguage检查
+            // TranslationLanguage 检查
             if (typeof languageList[state.cacheTranslationLanguage] === "undefined") {
                 state.cacheTranslationLanguage = languageName;
             }
 
-            // TranscriptionLanguage检查
+            // TranscriptionLanguage 检查
             if (typeof languageList[state.cacheTranscriptionLanguage] === "undefined") {
                 state.cacheTranscriptionLanguage = '';
             }
@@ -1024,7 +1024,7 @@ export default {
                 state.userIsAdmin = $A.inArray("admin", state.userInfo.identity);
             }
 
-            // 处理ServerUrl
+            // 处理 ServerUrl
             if (state.cacheServerUrl) {
                 window.systemInfo.apiUrl = state.cacheServerUrl
             }

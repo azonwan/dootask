@@ -3056,7 +3056,7 @@ export default {
         },
 
         onVisible(v) {
-            this.startMsgId = $A.runNum(v.length > 0 ? v[0] : 0)
+            this.startMsgId = $A.runNum(v.length ? v[Math.min(1, v.length - 1)] : 0)
         },
 
         onBack() {

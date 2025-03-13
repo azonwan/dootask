@@ -615,6 +615,7 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
          * @returns {string}
          */
         filterInvalidLine(content) {
+            if (!content) return '';
             return `${content}`
                 .replace(/^(<p>\s*<\/p>)+|(<p>\s*<\/p>)+$/gi, '')
                 .replace(/^(<p><br\/*><\/p>)+|(<p><br\/*><\/p>)+$/gi, '')
