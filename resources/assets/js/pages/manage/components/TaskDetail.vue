@@ -1688,10 +1688,7 @@ export default {
             if (!this.msgText) {
                 return;
             }
-            this.$store.dispatch("saveDraft", {
-                dialogId: this.taskDetail.dialog_id,
-                content: this.msgText
-            })
+            this.$store.dispatch("saveDialogDraft", {id: this.taskDetail.dialog_id, content: this.msgText})
         },
 
         taskPasteDrag(e, type) {

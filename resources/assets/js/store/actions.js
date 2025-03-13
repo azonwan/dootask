@@ -971,11 +971,11 @@ export default {
                     'cacheTaskBrowse',
                     'cacheTranslations',
                     'dialogMsgs',
+                    'dialogDrafts',
                     'fileLists',
                     'callAt',
                     'cacheEmojis',
                     'cacheDialogs',
-                    'cacheDrafts',
                 ],
                 json: [
                     'userInfo'
@@ -1032,7 +1032,7 @@ export default {
      */
     onBeforeUnload({commit}) {
         if ($A.isSubElectron && $A.isJson(window.__dialogDraft)) {
-            commit('SET_DRAFT', window.__dialogDraft)
+            commit('SET_DIALOG_DRAFT', window.__dialogDraft)
             window.__dialogDraft = null;
         }
     },
@@ -3085,7 +3085,7 @@ export default {
         $A.execMainDispatch("closeDialog", dialog_id)
 
         // 更新草稿标签
-        commit('TAG_DRAFT', dialog_id)
+        commit('TAG_DIALOG_DRAFT', dialog_id)
 
         // 关闭会话后删除会话超限消息
         const msgs = state.dialogMsgs.filter(item => item.dialog_id == dialog_id)
@@ -3178,15 +3178,15 @@ export default {
     /**
      * 保存草稿
      * @param commit
-     * @param dialogId
+     * @param id
      * @param content
      */
-    saveDraft({commit}, {dialogId, content}) {
+    saveDialogDraft({commit}, {id, content}) {
         if ($A.isSubElectron) {
-            window.__dialogDraft = {dialogId, content}
+            window.__dialogDraft = {id, content}
             return
         }
-        commit('SET_DRAFT', {dialogId, content})
+        commit('SET_DIALOG_DRAFT', {id, content})
     },
 
     /** *****************************************************************************************/

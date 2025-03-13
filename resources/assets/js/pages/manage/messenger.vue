@@ -107,9 +107,9 @@
                                         <em v-if="dialog.last_at">{{$A.timeFormat(dialog.last_at)}}</em>
                                     </div>
                                     <div class="dialog-text no-dark-content">
-                                        <template v-if="dialog.id != dialogId && tagDraft(dialog.id)">
+                                        <template v-if="dialog.id != dialogId && tagDialogDraft(dialog.id)">
                                             <div class="last-draft">[{{$L('草稿')}}]</div>
-                                            <div class="last-text"><span>{{formatDraft(getDraft(dialog.id))}}</span></div>
+                                            <div class="last-text"><span>{{formatDraft(getDialogDraft(dialog.id))}}</span></div>
                                         </template>
                                         <template v-else>
                                             <template v-if="dialog.type=='group' && dialog.last_msg && dialog.last_msg.userid">
@@ -363,7 +363,7 @@ export default {
             'taskColorList'
         ]),
 
-        ...mapGetters(['getDraft', 'tagDraft']),
+        ...mapGetters(['getDialogDraft', 'tagDialogDraft']),
 
         routeName() {
             return this.$route.name
@@ -740,7 +740,7 @@ export default {
                 return $A.sortFloat(b.todo_num, a.todo_num);
             }
             // 根据草稿排序
-            const drafts = [this.tagDraft(a.id) ? 1 : 0, this.tagDraft(b.id) ? 1 : 0];
+            const drafts = [this.tagDialogDraft(a.id) ? 1 : 0, this.tagDialogDraft(b.id) ? 1 : 0];
             if (drafts[0] || drafts[1]) {
                 return $A.sortFloat(drafts[1], drafts[0]);
             }

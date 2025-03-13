@@ -548,7 +548,7 @@ export default {
             'isModKey',
         ]),
 
-        ...mapGetters(['getDraft']),
+        ...mapGetters(['getDialogDraft']),
 
         isEnterSend({cacheKeyboard}) {
             if (this.$isEEUiApp) {
@@ -708,7 +708,7 @@ export default {
         },
 
         inputDraft() {
-            return this.getDraft(this.dialogId)
+            return this.getDialogDraft(this.dialogId)
         }
     },
     watch: {
@@ -723,10 +723,7 @@ export default {
                 }
             }
             if (!this.simpleMode) {
-                this.$store.dispatch("saveDraft", {
-                    dialogId: this.dialogId,
-                    content: val
-                })
+                this.$store.dispatch("saveDialogDraft", {id: this.dialogId, content: val})
             }
         },
 

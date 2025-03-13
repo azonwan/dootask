@@ -244,8 +244,8 @@ export default {
      * @param state
      * @returns {function(*): *|string}
      */
-    getDraft: (state) => (dialogId) => {
-        const draft = state.cacheDrafts.find(item => item.dialogId === dialogId)
+    getDialogDraft: (state) => (id) => {
+        const draft = state.dialogDrafts.find(item => item.id === id)
         return draft ? draft.content : ''
     },
 
@@ -254,8 +254,8 @@ export default {
      * @param state
      * @returns {function(*): boolean}
      */
-    tagDraft: (state) => (dialogId) => {
-        const draft = state.cacheDrafts.find(item => item.dialogId === dialogId)
+    tagDialogDraft: (state) => (id) => {
+        const draft = state.dialogDrafts.find(item => item.id === id)
         return !!draft?.tag
     },
 }
