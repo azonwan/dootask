@@ -28738,5 +28738,101 @@
         "fr": "Ouvrir dans les messages",
         "id": "Buka di pesan",
         "ru": "Открыть в сообщениях"
+    },
+    {
+        "key": "项目已归档，无法查看",
+        "zh": "",
+        "zh-CHT": "项目已歸檔，無法查看",
+        "en": "The project has been archived and cannot be viewed",
+        "ko": "프로젝트가 보관되어 볼 수 없습니다",
+        "ja": "プロジェクトがアーカイブされ、表示できません",
+        "de": "Das Projekt wurde archiviert und kann nicht angezeigt werden",
+        "fr": "Le projet a été archivé et ne peut pas être consulté",
+        "id": "Proyek telah diarsipkan dan tidak dapat dilihat",
+        "ru": "Проект архивирован и просмотреть его невозможно"
+    },
+    {
+        "key": "默认：90",
+        "zh": "",
+        "zh-CHT": "默認：90",
+        "en": "Default: 90",
+        "ko": "기본값: 90",
+        "ja": "デフォルト: 90",
+        "de": "Standard: 90",
+        "fr": "Par défaut : 90",
+        "id": "Default: 90",
+        "ru": "По умолчанию: 90"
+    },
+    {
+        "key": "出差",
+        "zh": "",
+        "zh-CHT": "出差",
+        "en": "Business trip",
+        "ko": "출장",
+        "ja": "出張",
+        "de": "Dienstreise",
+        "fr": "Voyage d'affaires",
+        "id": "Perjalanan bisnis",
+        "ru": "Командировка"
+    },
+    {
+        "key": "仅未读",
+        "zh": "",
+        "zh-CHT": "僅未讀",
+        "en": "Only unread",
+        "ko": "읽지 않음만",
+        "ja": "未読のみ",
+        "de": "Nur ungelesen",
+        "fr": "Seulement non lus",
+        "id": "Hanya belum dibaca",
+        "ru": "Только непрочитанные"
+    },
+    {
+        "key": "仅已读",
+        "zh": "",
+        "zh-CHT": "僅已讀",
+        "en": "Only read",
+        "ko": "읽음만",
+        "ja": "既読のみ",
+        "de": "Nur gelesen",
+        "fr": "Seulement lus",
+        "id": "Hanya yang sudah dibaca",
+        "ru": "Только прочитанные"
+    },
+    {
+        "key": "汇报状态",
+        "zh": "",
+        "zh-CHT": "匯報狀態",
+        "en": "Report status",
+        "ko": "보고 상태",
+        "ja": "報告ステータス",
+        "de": "Berichtstatus",
+        "fr": "Statut du rapport",
+        "id": "Status laporan",
+        "ru": "Статус отчета"
+    },
+    {
+        "key": "无法录音：NotFoundError: Requested device not found，无可用麦克风",
+        "zh": "",
+        "zh-CHT": "無法錄音：NotFoundError: Requested device not found，無可用麥克風",
+        "en": "Unable to record: NotFoundError: Requested device not found, no available microphone",
+        "ko": "녹음할 수 없음: NotFoundError: 요청한 장치를 찾을 수 없음, 사용 가능한 마이크 없음",
+        "ja": "録音できません: NotFoundError: 要求されたデバイスが見つかりません、使用可能なマイクがありません",
+        "de": "Aufnahme nicht möglich: NotFoundError: Angefordertes Gerät nicht gefunden, kein verfügbares Mikrofon",
+        "fr": "Impossible d'enregistrer : NotFoundError : Périphérique demandé introuvable, aucun microphone disponible",
+        "id": "Tidak dapat merekam: NotFoundError: Perangkat yang diminta tidak ditemukan, tidak ada mikrofon yang tersedia",
+        "ru": "Невозможно записать: NotFoundError: Запрашиваемое устройство не найдено, нет доступного микрофона"
+    },
+    {
+        "key": "状态[(%T1)]设置错误，状态负责人[(%T2)]不在项目成员内",
+        "zh": "",
+        "zh-CHT": "狀態[(%T1)]設置錯誤，狀態負責人[(%T2)]不在項目成員內",
+        "en": "Status [(%T1)] is set incorrectly, and the status manager [(%T2)] is not in the project team",
+        "ko": "상태 [(%T1)]가 잘못 설정되었으며, 상태 관리자 [(%T2)]가 프로젝트 팀에 없습니다",
+        "ja": "ステータス[(%T1)]が誤って設定されており、ステータス担当者[(%T2)]がプロジェクトメンバーに含まれていません",
+        "de": "Status [(%T1)] ist falsch eingestellt, und der Statusmanager [(%T2)] ist nicht im Projektteam",
+        "fr": "Le statut [(%T1)] est mal défini, et le responsable du statut [(%T2)] ne fait pas partie de l'équipe du projet",
+        "id": "Status [(%T1)] disetel secara salah, dan manajer status [(%T2)] tidak ada dalam tim proyek",
+        "ru": "Статус [(%T1)] установлен неправильно, и менеджер статуса [(%T2)] не входит в состав команды проекта"
     }
 ]

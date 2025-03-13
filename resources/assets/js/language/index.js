@@ -138,15 +138,19 @@ function switchLanguage(inputString) {
     for (const translation of languageRegex) {
         const { key, _m } = translation;
         const match = key.exec(inputString);
-        if (match && translation[languageName]) {
-            const result = translation[languageName].replace(/\$(\d+)/g, (_, index) => {
-                if (_m.includes(index)) {
-                    return switchLanguage(match[index]);
-                }
-                return match[index] || '';
-            });
-            languageCache.set(cacheKey, result);
-            return result;
+        if (match) {
+            if (translation[languageName]) {
+                const result = translation[languageName].replace(/\$(\d+)/g, (_, index) => {
+                    if (_m.includes(index)) {
+                        return switchLanguage(match[index]);
+                    }
+                    return match[index] || '';
+                });
+                languageCache.set(cacheKey, result);
+                return result;
+            }
+            languageCache.set(cacheKey, inputString);
+            return inputString;
         }
     }
 
