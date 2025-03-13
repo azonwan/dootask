@@ -3025,11 +3025,12 @@ export default {
 
     /**
      * 保存正在会话
+     * @param commit
      * @param state
      * @param dispatch
      * @param data {uid, dialog_id}
      */
-    saveInDialog({state, dispatch}, data) {
+    saveInDialog({commit, state, dispatch}, data) {
         $A.execMainDispatch("saveInDialog", data)
         //
         const index = state.dialogIns.findIndex(item => item.uid == data.uid);
@@ -3055,8 +3056,7 @@ export default {
                 }
             })
             if (delIds.length > 0) {
-                state.dialogMsgs = state.dialogMsgs.filter(item => !delIds.includes(item.dialog_id));
-                $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
+                commit("DIALOG_MSGS_SAVE", state.dialogMsgs.filter(item => !delIds.includes(item.dialog_id)))
             }
             state.dialogHistory = newIds
         }
@@ -3096,11 +3096,8 @@ export default {
         // 关闭会话后删除会话超限消息
         const msgs = state.dialogMsgs.filter(item => item.dialog_id == dialog_id)
         if (msgs.length > state.dialogMsgKeep) {
-            const delIds = msgs.sort((a, b) => {
-                return b.id - a.id
-            }).splice(state.dialogMsgKeep).map(item => item.id)
-            state.dialogMsgs = state.dialogMsgs.filter(item => !delIds.includes(item.id))
-            $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
+            const delIds = msgs.sort((a, b) => b.id - a.id).splice(state.dialogMsgKeep).map(item => item.id)
+            commit("DIALOG_MSGS_SAVE", state.dialogMsgs.filter(item => !delIds.includes(item.id)))
         }
     },
 
@@ -3213,11 +3210,12 @@ export default {
 
     /**
      * 更新消息数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveDialogMsg({state, dispatch}, data) {
+    saveDialogMsg({commit, state, dispatch}, data) {
         $A.execMainDispatch("saveDialogMsg", data)
         //
         if ($A.isArray(data)) {
@@ -3235,11 +3233,10 @@ export default {
                     delete data.read_at
                 }
                 data = Object.assign({}, original, data)
-                state.dialogMsgs.splice(index, 1, data);
+                commit("DIALOG_MSGS_SPLICE", {index, data})
             } else {
-                state.dialogMsgs.push(data);
+                commit("DIALOG_MSGS_PUSH", data)
             }
-            $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
             //
             const dialog = state.cacheDialogs.find(({id}) => id == data.dialog_id);
             if (dialog) {
@@ -3267,11 +3264,12 @@ export default {
 
     /**
      * 忘记消息数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param msg_id
      */
-    forgetDialogMsg({state, dispatch}, msg_id) {
+    forgetDialogMsg({commit, state, dispatch}, msg_id) {
         $A.execMainDispatch("forgetDialogMsg", msg_id)
         //
         const ids = $A.isArray(msg_id) ? msg_id : [msg_id];
@@ -3281,8 +3279,7 @@ export default {
                 const msgData = state.dialogMsgs[index]
                 dispatch("decrementMsgReplyNum", msgData);
                 dispatch("audioStop", $A.getObject(msgData, 'msg.path'));
-                state.dialogMsgs.splice(index, 1);
-                $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
+                commit("DIALOG_MSGS_SPLICE", {index})
             }
         })
         dispatch("forgetDialogTodoForMsgId", msg_id)
@@ -3291,13 +3288,14 @@ export default {
 
     /**
      * 获取会话消息
+     * @param commit
      * @param state
      * @param dispatch
      * @param getters
      * @param data {dialog_id, msg_id, ?msg_type, ?position_id, ?prev_id, ?next_id, ?save_before, ?save_after, ?clear_before, ?spinner}
      * @returns {Promise<unknown>}
      */
-    getDialogMsgs({state, dispatch, getters}, data) {
+    getDialogMsgs({commit, state, dispatch, getters}, data) {
         return new Promise((resolve, reject) => {
             let saveBefore = _ => {}
             let saveAfter = _ => {}
@@ -3328,8 +3326,7 @@ export default {
             dispatch("setLoad", loadKey)
             //
             if (clearBefore) {
-                state.dialogMsgs = state.dialogMsgs.filter(({dialog_id}) => dialog_id !== data.dialog_id)
-                $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
+                commit("DIALOG_MSGS_SAVE", state.dialogMsgs.filter(({dialog_id}) => dialog_id !== data.dialog_id))
             }
             //
             data.pagesize = 25;
@@ -3344,10 +3341,9 @@ export default {
                 const resData = result.data;
                 if ($A.isJson(resData.dialog)) {
                     const ids = resData.list.map(({id}) => id)
-                    state.dialogMsgs = state.dialogMsgs.filter(item => {
+                    commit("DIALOG_MSGS_SAVE", state.dialogMsgs.filter(item => {
                         return item.dialog_id != data.dialog_id || ids.includes(item.id) || $A.dayjs(item.created_at).unix() >= resData.time
-                    });
-                    $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
+                    }))
                     dispatch("saveDialog", resData.dialog)
                 }
                 if ($A.isArray(resData.todo)) {
