@@ -618,7 +618,12 @@ class ProjectTask extends AbstractModel
                         $data['complete_at'] = false;
                     }
                 }
-                if ($newFlowItem->userids) {
+                $flowUserids = $newFlowItem->userids;
+                if ($flowUserids) {
+                    // 确认负责人在任务中
+                    $flowUserids = ProjectUser::whereProjectId($this->project_id)->whereIn('userid', $flowUserids)->pluck('userid')->toArray();
+                }
+                if ($flowUserids) {
                     // 判断自动添加负责人
                     $flowData['owner'] = $data['owner'] = $this->taskUser->where('owner', 1)->pluck('userid')->toArray();
                     if (in_array($newFlowItem->usertype, ["replace", "merge"])) {
@@ -627,14 +632,14 @@ class ProjectTask extends AbstractModel
                             $flowData['assist'] = $data['assist'] = $this->taskUser->where('owner', 0)->pluck('userid')->toArray();
                             $data['assist'] = array_merge($data['assist'], $data['owner']);
                         }
-                        $data['owner'] = $newFlowItem->userids;
+                        $data['owner'] = $flowUserids;
                         // 判断剔除模式：保留操作状态的人员
                         if ($newFlowItem->usertype == "merge") {
                             $data['owner'][] = User::userid();
                         }
                     } else {
                         // 添加模式
-                        $data['owner'] = array_merge($data['owner'], $newFlowItem->userids);
+                        $data['owner'] = array_merge($data['owner'], $flowUserids);
                     }
                     $data['owner'] = array_values(array_unique($data['owner']));
                     if (isset($data['assist'])) {

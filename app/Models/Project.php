@@ -419,6 +419,7 @@ class Project extends AbstractModel
             $hasStart = false;
             $hasEnd = false;
             $upTaskList = [];
+            $projectUserids = $this->relationUserids();
             foreach ($flows as $item) {
                 $id = intval($item['id']);
                 $turns = Base::arrayRetainInt($item['turns'] ?: [], true);
@@ -434,6 +435,12 @@ class Project extends AbstractModel
                 }
                 if ($userlimit && empty($userids)) {
                     throw new ApiException("状态[{$item['name']}]设置错误，设置限制负责人时必须填写状态负责人");
+                }
+                foreach ($userids as $userid) {
+                    if (!in_array($userid, $projectUserids)) {
+                        $nickname = User::userid2nickname($userid);
+                        throw new ApiException("状态[{$item['name']}]设置错误，状态负责人[{$nickname}]不在项目成员内");
+                    }
                 }
                 $flow = ProjectFlowItem::updateInsert([
                     'id' => $id,
