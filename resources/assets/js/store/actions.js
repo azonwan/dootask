@@ -1,8 +1,9 @@
 import * as openpgp from 'openpgp_hi/lightweight';
-import {debounce} from "lodash";
 import {initLanguage, languageList, languageName} from "../language";
 import {$callData, $urlSafe, SSEClient} from './utils'
 import emitter from "./events";
+
+const saveDraftTimers = {}
 
 export default {
     /**
@@ -3186,7 +3187,19 @@ export default {
             window.__dialogDraft = {id, content}
             return
         }
-        commit('SET_DIALOG_DRAFT', {id, content})
+
+        // 清除已有的计时器
+        if (saveDraftTimers[id]) {
+            clearTimeout(saveDraftTimers[id])
+            delete saveDraftTimers[id]
+        }
+
+        // 创建新的计时器
+        saveDraftTimers[id] = setTimeout(() => {
+            commit('SET_DIALOG_DRAFT', {id, content})
+            delete saveDraftTimers[id]
+            resolve()
+        }, content ? 600 : 0)
     },
 
     /** *****************************************************************************************/

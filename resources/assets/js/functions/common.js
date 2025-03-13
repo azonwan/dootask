@@ -1361,6 +1361,7 @@ const timezone = require("dayjs/plugin/timezone");
             }
             this.__IDBTimer[key] = setTimeout(async _ => {
                 await localforage.setItem(key, value)
+                delete this.__IDBTimer[key]
             }, delay)
         },
 
