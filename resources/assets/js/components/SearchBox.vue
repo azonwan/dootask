@@ -207,6 +207,10 @@ export default {
                     break;
 
                 case 'project':
+                    if (item.rawData.archived_at) {
+                        $A.modalWarning("项目已归档，无法查看")
+                        return
+                    }
                     this.goForward({name: 'manage-project', params: {projectId: item.id}})
                     this.onHide()
                     break;

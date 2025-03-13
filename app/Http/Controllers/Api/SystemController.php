@@ -1178,7 +1178,7 @@ class SystemController extends AbstractController
         if ($logResults) {
             $logVersion = $logResults[0]['title'];
             $logContent = implode("\n", array_map(function($item) {
-                return "## [{$item['title']}]" . $item['content'];
+                return "## {$item['title']}" . $item['content'];
             }, $logResults));
         }
         return Base::retSuccess('success', [

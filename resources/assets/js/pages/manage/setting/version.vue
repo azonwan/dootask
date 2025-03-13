@@ -17,6 +17,25 @@
     .vuepress-markdown-body {
         padding: 0 !important;
         color: inherit;
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.25;
+        }
+        h2 {
+            padding-bottom: .4em;
+            font-size: 1.5em;
+            margin: 1.5em 0 1em;
+        }
+        h3 {
+            font-size: 1.2em;
+            margin: 1.5em 0 1em;
+        }
+        ul, ol {
+            padding-left: 2em;
+            line-height: 1.5;
+        }
+        li {
+            margin-top: .25em;
+        }
     }
 }
 </style>
