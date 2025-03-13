@@ -19,7 +19,15 @@
                     <Button v-else shape="circle" icon="md-arrow-round-down"></Button>
                 </div>
                 <div :class="['file-search', searchKey ? 'has-value' : '']" @click="onSearchFocus" @mouseenter="onSearchFocus">
-                    <Input v-model="searchKey" ref="searchInput" suffix="ios-search" @on-change="onSearchChange" :placeholder="$L('搜索名称')"/>
+                    <Input
+                        v-model="searchKey"
+                        ref="searchInput"
+                        suffix="ios-search"
+                        @on-focus="searchIsFocus=true"
+                        @on-blur="searchIsFocus=false"
+                        @on-change="onSearchChange"
+                        :placeholder="$L('搜索名称')"
+                        clearable/>
                 </div>
                 <div class="file-add">
                     <Button shape="circle" icon="md-add" @click.stop="handleRightClick($event, null, true)"></Button>
@@ -456,6 +464,7 @@ export default {
             loadIng: 0,
             searchKey: '',
             searchTimeout: null,
+            searchIsFocus: false,
 
             types: [
                 {
@@ -1612,6 +1621,9 @@ export default {
         },
 
         onSearchFocus() {
+            if (this.searchIsFocus) {
+                return
+            }
             this.$nextTick(() => {
                 this.$refs.searchInput.focus({
                     cursor: "end"

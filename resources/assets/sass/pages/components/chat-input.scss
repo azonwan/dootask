@@ -39,6 +39,10 @@
                 visibility: visible;
                 opacity: 1;
                 z-index: 10;
+                .record-remove {
+                    z-index: 3;
+                    opacity: 1;
+                }
             }
         }
     }
@@ -388,6 +392,7 @@
             .record-remove {
                 color: #ffffff;
                 background-color: #a7a7a7;
+                transition: all 0.3s;
             }
             .record-convert {
                 margin-right: 12px;
@@ -421,7 +426,7 @@
                 bottom: 96px;
                 width: 36px;
                 right: 8px;
-                z-index: 3;
+                z-index: -1;
                 padding: 10px 0;
                 border-radius: 18px;
                 display: flex;
@@ -429,6 +434,7 @@
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
+                opacity: 0;
                 > i {
                     font-size: 18px;
                     &:last-child {
