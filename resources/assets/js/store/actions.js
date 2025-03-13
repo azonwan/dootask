@@ -1,4 +1,5 @@
 import * as openpgp from 'openpgp_hi/lightweight';
+import {debounce} from "lodash";
 import {initLanguage, languageList, languageName} from "../language";
 import {$callData, $urlSafe, SSEClient} from './utils'
 import emitter from "./events";
@@ -973,7 +974,8 @@ export default {
                     'fileLists',
                     'callAt',
                     'cacheEmojis',
-                    'cacheDialogs'
+                    'cacheDialogs',
+                    'cacheDrafts',
                 ],
                 json: [
                     'userInfo'
@@ -996,7 +998,6 @@ export default {
             state.cacheDialogs = state.cacheDialogs.map(item => ({
                 ...item,
                 loading: false,
-                extra_draft_has: item.extra_draft_content ? 1 : 0
             }));
 
             // TranslationLanguage检查
@@ -1027,11 +1028,11 @@ export default {
 
     /**
      * Electron 页面卸载触发
-     * @param dispatch
+     * @param commit
      */
-    onBeforeUnload({dispatch}) {
+    onBeforeUnload({commit}) {
         if ($A.isSubElectron && $A.isJson(window.__dialogDraft)) {
-            dispatch("saveDialog", window.__dialogDraft)
+            commit('SET_DRAFT', window.__dialogDraft)
             window.__dialogDraft = null;
         }
     },
@@ -3073,20 +3074,19 @@ export default {
     /**
      * 关闭对话
      * @param state
+     * @param commit
      * @param dispatch
      * @param dialog_id
      */
-    closeDialog({state, dispatch}, dialog_id) {
+    closeDialog({state, commit, dispatch}, dialog_id) {
         if (!/^\d+$/.test(dialog_id)) {
             return
         }
         $A.execMainDispatch("closeDialog", dialog_id)
-        //
-        // 更新草稿状态
-        const dialog = state.cacheDialogs.find(item => item.id == dialog_id);
-        if (dialog) {
-            dialog.extra_draft_has = dialog.extra_draft_content ? 1 : 0
-        }
+
+        // 更新草稿标签
+        commit('TAG_DRAFT', dialog_id)
+
         // 关闭会话后删除会话超限消息
         const msgs = state.dialogMsgs.filter(item => item.dialog_id == dialog_id)
         if (msgs.length > state.dialogMsgKeep) {
@@ -3176,24 +3176,17 @@ export default {
     },
 
     /**
-     * 保存聊天草稿
-     * @param state
-     * @param dispatch
-     * @param data {id, extra_draft_content}
+     * 保存草稿
+     * @param commit
+     * @param dialogId
+     * @param content
      */
-    saveDialogDraft({state, dispatch}, data) {
-        data.extra_draft_content = $A.filterInvalidLine(data.extra_draft_content)
+    saveDraft({commit}, {dialogId, content}) {
         if ($A.isSubElectron) {
-            window.__dialogDraft = data
+            window.__dialogDraft = {dialogId, content}
             return
         }
-        state.dialogDraftTimer[data.id] && clearTimeout(state.dialogDraftTimer[data.id])
-        state.dialogDraftTimer[data.id] = setTimeout(_ => {
-            if (state.dialogId != data.id) {
-                data.extra_draft_has = data.extra_draft_content ? 1 : 0
-            }
-            dispatch("saveDialog", data)
-        }, data.extra_draft_content ? 600 : 0)
+        commit('SET_DRAFT', {dialogId, content})
     },
 
     /** *****************************************************************************************/
@@ -4428,6 +4421,5 @@ export default {
                 },10)
             }
         }
-
     },
 }

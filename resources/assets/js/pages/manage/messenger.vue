@@ -107,9 +107,9 @@
                                         <em v-if="dialog.last_at">{{$A.timeFormat(dialog.last_at)}}</em>
                                     </div>
                                     <div class="dialog-text no-dark-content">
-                                        <template v-if="dialog.extra_draft_has && dialog.id != dialogId">
+                                        <template v-if="dialog.id != dialogId && tagDraft(dialog.id)">
                                             <div class="last-draft">[{{$L('草稿')}}]</div>
-                                            <div class="last-text"><span>{{formatDraft(dialog.extra_draft_content)}}</span></div>
+                                            <div class="last-text"><span>{{formatDraft(getDraft(dialog.id))}}</span></div>
                                         </template>
                                         <template v-else>
                                             <template v-if="dialog.type=='group' && dialog.last_msg && dialog.last_msg.userid">
@@ -260,7 +260,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapGetters, mapState} from "vuex";
 import DialogWrapper from "./components/DialogWrapper";
 import longpress from "../../directives/longpress";
 import emitter from "../../store/events";
@@ -362,6 +362,8 @@ export default {
             'appNotificationPermission',
             'taskColorList'
         ]),
+
+        ...mapGetters(['getDraft', 'tagDraft']),
 
         routeName() {
             return this.$route.name
@@ -738,8 +740,9 @@ export default {
                 return $A.sortFloat(b.todo_num, a.todo_num);
             }
             // 根据草稿排序
-            if (a.extra_draft_has || b.extra_draft_has) {
-                return $A.sortFloat(b.extra_draft_has, a.extra_draft_has);
+            const drafts = [this.tagDraft(a.id) ? 1 : 0, this.tagDraft(b.id) ? 1 : 0];
+            if (drafts[0] || drafts[1]) {
+                return $A.sortFloat(drafts[1], drafts[0]);
             }
             // 根据最后会话时间排序
             return $A.sortDay(b.last_at, a.last_at);

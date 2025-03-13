@@ -124,7 +124,7 @@ export default {
         const todayStart = $A.daytz().startOf('day'),
             todayEnd = $A.daytz().endOf('day'),
             todayNow = $A.daytz();
-            
+
         const filterTask = (task, checkCompleted = true) => {
             if (task.archived_at) {
                 return false;
@@ -137,10 +137,10 @@ export default {
             }
             return task.owner == 1;
         }
-        
+
         // 获取所有未完成的任务
         let array = state.cacheTasks.filter(task => filterTask(task));
-        
+
         // 处理临时完成的任务
         let tmpCount = 0;
         if (state.taskCompleteTemps.length > 0) {
@@ -165,7 +165,7 @@ export default {
         // 遍历任务进行分类
         array.forEach(task => {
             const isTemp = state.taskCompleteTemps.includes(task.id);
-            
+
             if (task.end_at && $A.dayjs(task.end_at) <= todayNow) {
                 // 超期任务
                 result.overdue.push(task);
@@ -217,14 +217,14 @@ export default {
 
         // 获取所有未完成的协助任务
         let array = state.cacheTasks.filter(task => filterTask(task));
-        
+
         // 处理临时完成的任务
         if (state.taskCompleteTemps.length > 0) {
-            const tmps = state.cacheTasks.filter(task => 
-                state.taskCompleteTemps.includes(task.id) && 
+            const tmps = state.cacheTasks.filter(task =>
+                state.taskCompleteTemps.includes(task.id) &&
                 filterTask(task, false)
             );
-            
+
             if (tmps.length > 0) {
                 array = $A.cloneJSON(array);
                 array.push(...tmps);
@@ -237,5 +237,25 @@ export default {
             const timeB = b.end_at ? $A.dayjs(b.end_at) : $A.dayjs('2099-12-31 23:59:59');
             return timeA - timeB;
         });
+    },
+
+    /**
+     * 获取草稿
+     * @param state
+     * @returns {function(*): *|string}
+     */
+    getDraft: (state) => (dialogId) => {
+        const draft = state.cacheDrafts.find(item => item.dialogId === dialogId)
+        return draft ? draft.content : ''
+    },
+
+    /**
+     * 是否显示草稿标签
+     * @param state
+     * @returns {function(*): boolean}
+     */
+    tagDraft: (state) => (dialogId) => {
+        const draft = state.cacheDrafts.find(item => item.dialogId === dialogId)
+        return !!draft?.tag
     },
 }

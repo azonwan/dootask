@@ -78,6 +78,9 @@ export default {
     // Dialog
     cacheDialogs: [],
 
+    // Draft
+    cacheDrafts: [],
+
     // Project
     cacheProjects: [],
     cacheColumns: [],
@@ -123,7 +126,6 @@ export default {
     dialogTodos: [],
     dialogMsgTops: [],
     dialogHistory: [],
-    dialogDraftTimer: {},
     dialogMsgTransfer: {time: 0},
     dialogSseList: [],
     dialogDroupWordChain: {},

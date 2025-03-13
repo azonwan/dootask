@@ -285,7 +285,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapGetters, mapState} from "vuex";
 import Quill from 'quill-hi';
 import "quill-mention-hi";
 import ChatEmoji from "./emoji";
@@ -548,6 +548,8 @@ export default {
             'isModKey',
         ]),
 
+        ...mapGetters(['getDraft']),
+
         isEnterSend({cacheKeyboard}) {
             if (this.$isEEUiApp) {
                 return cacheKeyboard.send_button_app === 'enter';
@@ -704,6 +706,10 @@ export default {
             }
             return style
         },
+
+        inputDraft() {
+            return this.getDraft(this.dialogId)
+        }
     },
     watch: {
         // Watch content change
@@ -717,7 +723,10 @@ export default {
                 }
             }
             if (!this.simpleMode) {
-                this.$store.dispatch("saveDialogDraft", {id: this.dialogId, extra_draft_content: val})
+                this.$store.dispatch("saveDraft", {
+                    dialogId: this.dialogId,
+                    content: val
+                })
             }
         },
 
@@ -744,7 +753,7 @@ export default {
             this.loadInputDraft()
         },
 
-        'dialogData.extra_draft_content'() {
+        inputDraft() {
             if (this.isFocus) {
                 return
             }
@@ -1208,13 +1217,12 @@ export default {
         },
 
         loadInputDraft() {
-            const {extra_draft_content} = this.dialogData;
-            if (this.simpleMode || !extra_draft_content) {
+            if (this.simpleMode || !this.inputDraft) {
                 this.$emit('input', '')
                 return
             }
             this.pasteClean = false
-            this.$emit('input', extra_draft_content)
+            this.$emit('input', this.inputDraft)
             this.$nextTick(_ => this.pasteClean = true)
         },
 
