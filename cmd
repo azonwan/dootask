@@ -504,14 +504,20 @@ if [ $# -gt 0 ]; then
         run_exec mariadb "sh /etc/mysql/repassword.sh"
     elif [[ "$1" == "update" ]]; then
         shift 1
-        if [[ "$@" != "nobackup" ]]; then
-            run_mysql backup
-        fi
         if [[ -z "$(arg_get local)" ]]; then
             git fetch --all
-            git reset --hard origin/$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+            current_branch=$(git branch | sed -n -e 's/^\* \(.*\)/\1/p')
+            db_changes=$(git diff --name-only HEAD..origin/$current_branch | grep -E "^database/")
+            if [[ -n "$db_changes" ]]; then
+                info "数据库有迁移变动，执行数据库备份..."
+                run_mysql backup
+            fi
+            git reset --hard origin/$current_branch
             git pull
             run_exec php "composer update"
+        else
+            info "执行数据库备份..."
+            run_mysql backup
         fi
         run_exec php "php artisan migrate"
         run_exec nginx "nginx -s reload"
