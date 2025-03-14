@@ -1,11 +1,11 @@
 <template>
     <div class="common-network-exception">
         <template v-if="type==='alert'">
-            <Alert v-if="show" type="error" show-icon closable>{{$L('网络连接失败，请检查网络设置。')}}</Alert>
+            <Alert v-if="show" type="error" show-icon closable @on-close="onClose">{{$L('网络连接失败，请检查网络设置。')}}</Alert>
         </template>
         <template v-else-if="type==='modal'">
             <Modal
-                v-model="show"
+                :value="show"
                 :width="416"
                 :closable="false"
                 :mask-closable="false"
@@ -18,7 +18,8 @@
                         <div>{{ajaxNetworkException}}</div>
                     </div>
                     <div class="ivu-modal-confirm-footer">
-                        <Button type="primary" @click="show = false">{{$L('确定')}}</Button>
+                        <Button type="text" @click="onClose">{{$L('关闭提示')}}</Button>
+                        <Button type="primary" :loading="loadIng" @click="onCheck">{{$L('重试')}}</Button>
                     </div>
                 </div>
             </Modal>
@@ -39,32 +40,30 @@ export default {
     },
     data() {
         return {
-            show: false,
-            timeShow: null,
-            timeCheck: null,
+            timer: null,
+            checkIng: false,
+            loadIng: false
         }
     },
 
     beforeDestroy() {
-        this.clearTimer()
+        this.onClose()
     },
 
     computed: {
         ...mapState(['ajaxNetworkException']),
+
+        show() {
+            return !!this.ajaxNetworkException
+        }
     },
 
     watch: {
-        ajaxNetworkException: {
-            handler(v) {
-                this.clearTimer()
-                if (v) {
-                    this.checkNetwork();
-                    this.timeShow = setTimeout(_ => {
-                        this.show = true;
-                    }, 5000)
-                }
-            },
-            immediate: true
+        show(v) {
+            this.timer && clearInterval(this.timer)
+            if (v) {
+                this.timer = setInterval(this.checkNetwork, 3000)
+            }
         }
     },
 
@@ -74,26 +73,60 @@ export default {
             return this.$isSoftware && (apiHome == "" || apiHome == "public")
         },
 
-        checkNetwork() {
-            this.timeCheck && clearTimeout(this.timeCheck);
-            this.timeCheck = setTimeout(() => {
-                if (!this.ajaxNetworkException) {
-                    return; // 已经恢复
-                }
-                if (this.isNotServer()) {
-                    return; // 没有配置服务器地址
-                }
-                this.$store.dispatch("call", {
-                    url: "system/setting",
-                }).finally(() => {
-                    this.checkNetwork();
-                });
-            }, 3000);
+        /**
+         * 调用网络
+         * @returns {Promise<void>}
+         */
+        async callNetwork() {
+            if (this.isNotServer()) {
+                this.onClose()
+                return;
+            }
+            await this.$store.dispatch("call", {
+                url: "system/setting",
+            })
+            this.onClose()
         },
 
-        clearTimer() {
-            this.timeShow && clearTimeout(this.timeShow)
-            this.show = false
+        /**
+         * 检查网络（自动）
+         * @returns {Promise<void>}
+         */
+        async checkNetwork() {
+            if (this.checkIng) {
+                return
+            }
+            this.checkIng = true
+            try {
+                await this.callNetwork()
+            } catch (e) {
+                //
+            }
+            this.checkIng = false
+        },
+
+        /**
+         * 检查网络（重试）
+         * @returns {Promise<void>}
+         */
+        async onCheck() {
+            if (this.loadIng) {
+                return
+            }
+            this.loadIng = true
+            try {
+                await this.callNetwork()
+            } catch (e) {
+                $A.messageError("网络连接失败")
+            }
+            this.loadIng = false
+        },
+
+        /**
+         * 关闭提示
+         */
+        onClose() {
+            this.$store.state.ajaxNetworkException = null
         }
     }
 }

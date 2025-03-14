@@ -211,22 +211,29 @@ export default {
             };
         },
 
-        onVersion() {
-            const array = []
-            this.getServerVersion().then(version => {
-                array.push(`${this.$L('服务器')}: ${$A.getDomain($A.mainUrl())}`)
+        async onVersion() {
+            const array = [
+                `${this.$L('服务器')}: ${$A.getDomain($A.mainUrl())}`
+            ]
+            await this.$store.dispatch("showSpinner", 600)
+            try {
+                const version = await this.getServerVersion()
                 array.push(`${this.$L('服务器版本')}: v${version}`)
-                array.push(`${this.$L('客户端版本')}: v${this.version}`)
-                $A.modalInfo({
-                    language: false,
-                    title: this.$L('版本信息'),
-                    content: array.join('<br/>')
-                })
+            } catch (e) {
+                array.push(`${this.$L('服务器版本')}: ` + this.$L('获取失败'))
+            }
+            await this.$store.dispatch("hiddenSpinner")
+            array.push(`${this.$L('客户端版本')}: v${this.version}`)
+            //
+            $A.modalInfo({
+                language: false,
+                title: this.$L('版本信息'),
+                content: array.join('<br/>')
             })
         },
 
         getServerVersion() {
-            return new Promise(resolve => {
+            return new Promise((resolve, reject) => {
                 if (/^\d+\.\d+\.\d+$/.test(this.systemConfig.server_version)) {
                     resolve(this.systemConfig.server_version)
                     return;
@@ -235,7 +242,7 @@ export default {
                     if (status === 200) {
                         resolve(data.version)
                     }
-                }).catch(_ => { })
+                }).catch(reject)
             })
         }
     }

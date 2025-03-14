@@ -249,8 +249,6 @@ export default {
 
             // 请求成功
             params.success = async (result, status, xhr) => {
-                state.ajaxNetworkException = null
-
                 // 数据校验
                 if (!$A.isJson(result)) {
                     console.log(result, status, xhr)
