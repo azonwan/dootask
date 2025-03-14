@@ -1,12 +1,31 @@
 export default {
-    // 添加消息
-    DIALOG_MSGS_PUSH(state, data) {
+    // 会员管理
+    'user/push': function(state, data) {
+        state.cacheUserBasic.push(data)
+        $A.IDBSave("cacheUserBasic", state.cacheUserBasic, 600)
+    },
+
+    'user/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheUserBasic.splice(index, count)
+        } else {
+            state.cacheUserBasic.splice(index, count, data)
+        }
+        $A.IDBSave("cacheUserBasic", state.cacheUserBasic, 600)
+    },
+
+    'user/save': function(state, data) {
+        state.cacheUserBasic = data
+        $A.IDBSave("cacheUserBasic", state.cacheUserBasic, 600)
+    },
+
+    // 消息管理
+    'message/push': function(state, data) {
         state.dialogMsgs.push(data)
         $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
     },
 
-    // 修改、删除消息
-    DIALOG_MSGS_SPLICE(state, {index, data, count = 1}) {
+    'message/splice': function(state, {index, data, count = 1}) {
         if (typeof data === "undefined") {
             state.dialogMsgs.splice(index, count)
         } else {
@@ -15,23 +34,18 @@ export default {
         $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
     },
 
-    // 保存消息
-    DIALOG_MSGS_SAVE(state, data) {
+    'message/save': function(state, data) {
         state.dialogMsgs = data
         $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
     },
 
-
-
-
-    // 添加任务
-    CACHE_TASKS_PUSH(state, data) {
+    // 任务管理
+    'task/push': function(state, data) {
         state.cacheTasks.push(data)
         $A.IDBSave("cacheTasks", state.cacheTasks, 600)
     },
 
-    // 修改、删除任务
-    CACHE_TASKS_SPLICE(state, {index, data, count = 1}) {
+    'task/splice': function(state, {index, data, count = 1}) {
         if (typeof data === "undefined") {
             state.cacheTasks.splice(index, count)
         } else {
@@ -40,17 +54,13 @@ export default {
         $A.IDBSave("cacheTasks", state.cacheTasks, 600)
     },
 
-
-
-
-    // 添加对话
-    CACHE_DIALOGS_PUSH(state, data) {
+    // 对话管理
+    'dialog/push': function(state, data) {
         state.cacheDialogs.push(data)
         $A.IDBSave("cacheDialogs", state.cacheDialogs, 600)
     },
 
-    // 修改、删除对话
-    CACHE_DIALOGS_SPLICE(state, {index, data, count = 1}) {
+    'dialog/splice': function(state, {index, data, count = 1}) {
         if (typeof data === "undefined") {
             state.cacheDialogs.splice(index, count)
         } else {
@@ -59,10 +69,8 @@ export default {
         $A.IDBSave("cacheDialogs", state.cacheDialogs, 600)
     },
 
-
-
-    // 设置草稿
-    SET_DIALOG_DRAFT(state, {id, content}) {
+    // 草稿管理
+    'draft/set': function(state, {id, content}) {
         const index = state.dialogDrafts.findIndex(item => item.id === id)
         const item = {
             id,
@@ -92,8 +100,7 @@ export default {
         $A.IDBSave("dialogDrafts", state.dialogDrafts)
     },
 
-    // 草稿标签
-    TAG_DIALOG_DRAFT(state, id) {
+    'draft/tag': function(state, id) {
         if (state.dialogId == id) {
             return
         }
