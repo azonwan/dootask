@@ -625,7 +625,7 @@ export default {
                 data: {
                     userid: [this.userInfo.userid]
                 },
-                skipAuthError: true
+                checkAuth: false
             }).then(({data}) => {
                 this.addData.department_id = data[0]?.department[0] || 0;
                 this.getProcdefList().then(_ => {

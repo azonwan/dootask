@@ -1083,7 +1083,7 @@ export default {
                             data: {
                                 userid: [userid]
                             },
-                            skipAuthError: true
+                            checkAuth: false
                         });
                         tempUser = data.find(item => item.userid == userid);
                     } catch (_) {}

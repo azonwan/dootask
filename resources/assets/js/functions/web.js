@@ -848,14 +848,11 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
             if (config === false) {
                 return;
             }
+            if ($A.isJson(config) && config.content === false) {
+                return;
+            }
             if (millisecond > 0) {
                 setTimeout(() => { $A.modalWarning(config) }, millisecond);
-                return;
-            }
-            if (typeof config === "string" && config === "Network exception") {
-                return;
-            }
-            if ($A.isJson(config) && config.content === "Network exception") {
                 return;
             }
             $A.Modal.warning($A.modalConfig(config));
@@ -865,14 +862,11 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
             if (config === false) {
                 return;
             }
+            if ($A.isJson(config) && config.content === false) {
+                return;
+            }
             if (millisecond > 0) {
                 setTimeout(() => { $A.modalError(config) }, millisecond);
-                return;
-            }
-            if (typeof config === "string" && config === "Network exception") {
-                return;
-            }
-            if ($A.isJson(config) && config.content === "Network exception") {
                 return;
             }
             $A.Modal.error($A.modalConfig(config));
@@ -891,14 +885,14 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
         },
 
         messageWarning(msg) {
-            if (typeof msg === "string" && msg === "Network exception") {
+            if (msg === false) {
                 return;
             }
             $A.Message.warning($A.L(msg));
         },
 
         messageError(msg) {
-            if (typeof msg === "string" && msg === "Network exception") {
+            if (msg === false) {
                 return;
             }
             $A.Message.error($A.L(msg));
@@ -921,10 +915,16 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
         },
 
         noticeWarning(config) {
+            if (config === false) {
+                return;
+            }
             $A.Notice.warning($A.noticeConfig(config));
         },
 
         noticeError(config) {
+            if (config === false) {
+                return;
+            }
             if (typeof config === "string") {
                 config = {
                     desc: config,

@@ -95,7 +95,8 @@ export default {
     cacheKeyboard: {},
 
     // Ajax
-    ajaxNetworkException: false,
+    ajaxAuthException: null,
+    ajaxNetworkException: null,
 
     // Websocket
     ws: null,

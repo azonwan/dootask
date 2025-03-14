@@ -22,6 +22,9 @@
         <!--图片预览-->
         <PreviewImageState/>
 
+        <!--身份提示-->
+        <AuthException/>
+
         <!--网络提示-->
         <NetworkException v-if="windowLandscape"/>
 
@@ -43,6 +46,7 @@
 import FloatSpinner from "./components/FloatSpinner";
 import RightBottom from "./components/RightBottom";
 import PreviewImageState from "./components/PreviewImage/state";
+import AuthException from "./components/AuthException";
 import NetworkException from "./components/NetworkException";
 import GuidePage from "./components/GuidePage";
 import TaskOperation from "./pages/manage/components/TaskOperation";
@@ -56,6 +60,7 @@ export default {
     mixins: [ctrlPressed],
 
     components: {
+        AuthException,
         MeetingManager,
         DropdownMenu,
         TaskOperation,

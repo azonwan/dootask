@@ -229,11 +229,6 @@ export default {
         //
         this.getDemoAccount();
         this.getNeedStartHome();
-        //
-        if (this.$Electron) {
-            this.$Electron.sendMessage('webTabDestroyAll')
-            this.$Electron.sendMessage('childWindowDestroyAll')
-        }
     },
 
     deactivated() {
@@ -444,6 +439,7 @@ export default {
                 this.$store.dispatch("call", {
                     url: `${url}system/setting`,
                     checkNetwork: false,
+                    networkFailureRetry: false
                 }).then(async ({data}) => {
                     if (typeof data.server_version === "undefined" && typeof data.all_group_mute === "undefined") {
                         reject(`服务器（${$A.getDomain(value)}）版本过低`)

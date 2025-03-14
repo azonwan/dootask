@@ -210,13 +210,14 @@ export default {
                 reject({ret: -1, data: {}, msg: "No server address"})
                 return
             }
+
             // 加密传输
             const encrypt = []
             if (params.encrypt === true) {
-                // 有数据才加密
                 if (params.data) {
-                    // PGP加密
+                    // 有数据才加密
                     if (state.apiKeyData.type === 'pgp') {
+                        // PGP加密
                         encrypt.push(`encrypt_type=${state.apiKeyData.type};encrypt_id=${state.apiKeyData.id}`)
                         params.method = "post"  // 加密传输时强制使用post
                         params.data = {encrypted: await dispatch("pgpEncryptApi", params.data)}
@@ -227,51 +228,54 @@ export default {
             if (encrypt.length > 0) {
                 params.header.encrypt = encrypt.join(";")
             }
+
             // 数据转换
             if (params.method === "post") {
                 params.data = JSON.stringify(params.data)
             }
-            // Spinner
+
+            // 等待效果（Spinner）
             if (params.spinner === true || (typeof params.spinner === "number" && params.spinner > 0)) {
                 const {before, complete} = params
                 params.before = () => {
                     dispatch("showSpinner", typeof params.spinner === "number" ? params.spinner : 0)
                     typeof before === "function" && before()
                 }
-                //
                 params.complete = () => {
                     dispatch("hiddenSpinner")
                     typeof complete === "function" && complete()
                 }
             }
-            // 请求回调
+
+            // 请求成功
             params.success = async (result, status, xhr) => {
-                state.ajaxNetworkException = false
+                state.ajaxNetworkException = null
+
+                // 数据校验
                 if (!$A.isJson(result)) {
                     console.log(result, status, xhr)
                     reject({ret: -1, data: {}, msg: $A.L('返回参数错误')})
                     return
                 }
+
+                // 数据解密
                 if (params.encrypt === true && result.encrypted) {
                     result = await dispatch("pgpDecryptApi", result.encrypted)
                 }
                 const {ret, data, msg} = result
+
+                // 身份判断（身份丢失）
                 if (ret === -1) {
                     state.userId = 0
-                    if (params.skipAuthError !== true) {
-                        //身份丢失
-                        $A.modalError({
-                            content: msg,
-                            onOk: () => {
-                                dispatch("logout")
-                            }
-                        })
-                        reject(result)
+                    if (params.checkAuth !== false) {
+                        state.ajaxAuthException = msg || $A.L('请登录后继续...')
+                        reject(Object.assign(result, {msg: false}))
                         return
                     }
                 }
+
+                // 身份判断（需要昵称）
                 if (ret === -2 && params.checkNick !== false) {
-                    // 需要昵称
                     dispatch("userEditInput", 'nickname').then(() => {
                         dispatch("call", cloneParams).then(resolve).catch(reject)
                     }).catch(err => {
@@ -279,8 +283,9 @@ export default {
                     })
                     return
                 }
+
+                // 身份判断（需要联系电话）
                 if (ret === -3 && params.checkTel !== false) {
-                    // 需要联系电话
                     dispatch("userEditInput", 'tel').then(() => {
                         dispatch("call", cloneParams).then(resolve).catch(reject)
                     }).catch(err => {
@@ -288,48 +293,54 @@ export default {
                     })
                     return
                 }
+
+                // 返回数据
                 if (ret === 1) {
                     resolve({data, msg, xhr})
-                } else {
-                    reject({ret, data, msg: msg || $A.L('未知错误')})
-                    //
-                    if (ret === -4001) {
-                        dispatch("forgetProject", data.project_id)
-                    } else if (ret === -4002) {
-                        if (data.force === 1) {
-                            state.taskArchiveView = 0
-                        }
-                        dispatch("forgetTask", data.task_id)
-                    } else if (ret === -4003) {
-                        dispatch("forgetDialog", data.dialog_id)
-                    } else if (ret === -4004) {
-                        dispatch("getTaskForParent", data.task_id).catch(() => {})
-                    }
-                }
-            }
-            params.error = (xhr, status) => {
-                const networkException = window.navigator.onLine === false || (status === 0 && xhr.readyState === 4)
-                if (networkException
-                    && cloneParams.method !== "post"
-                    && cloneParams.__networkFailureRetry !== true) {
-                    // 网络异常，重试一次
-                    setTimeout(_ => {
-                        cloneParams.__networkFailureRetry = true
-                        dispatch("call", cloneParams).then(resolve).catch(reject)
-                    }, 1000)
                     return
                 }
-                if (params.checkNetwork !== false) {
-                    state.ajaxNetworkException = networkException
+
+                // 错误处理
+                reject({ret, data, msg: msg || $A.L('未知错误')})
+                if (ret === -4001) {
+                    dispatch("forgetProject", data.project_id)
+                } else if (ret === -4002) {
+                    data.force === 1 && (state.taskArchiveView = 0)
+                    dispatch("forgetTask", data.task_id)
+                } else if (ret === -4003) {
+                    dispatch("forgetDialog", data.dialog_id)
+                } else if (ret === -4004) {
+                    dispatch("getTaskForParent", data.task_id).catch(() => {})
                 }
-                if (networkException) {
-                    reject({ret: -1001, data: {}, msg: $A.L('网络异常，请重试。')})
-                } else {
-                    reject({ret: -1, data: {}, msg: $A.L('请求失败，请重试。')})
+            }
+
+            // 请求失败
+            params.error = async (xhr, status) => {
+                const reason = {ret: -1, data: {}, msg: $A.L('请求失败，请重试。')}
+                const isNetworkException = window.navigator.onLine === false || (status === 0 && xhr.readyState === 4)
+
+                // 网络异常
+                if (isNetworkException) {
+                    // 重试一次
+                    if (cloneParams.method !== "post" && cloneParams.networkFailureRetry !== false) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        dispatch("call", Object.assign(cloneParams, {networkFailureRetry: false})).then(resolve).catch(reject)
+                        return
+                    }
+                    // 异常提示
+                    reason.ret = -1001
+                    reason.msg = params.checkNetwork !== false ? false : $A.L('网络异常，请重试。')
+                    if (params.checkNetwork !== false) {
+                        state.ajaxNetworkException = $A.L("网络连接失败，请检查网络设置。")
+                    }
                 }
+
+                // 异常处理
+                reject(reason)
                 console.error(xhr, status);
             }
-            //
+
+            // 发起请求
             $A.ajaxc(params)
         })
     },
@@ -770,7 +781,7 @@ export default {
             data: {
                 userid: [...new Set(array.map(({userid}) => userid))]
             },
-            skipAuthError: true
+            checkAuth: false
         }).then(result => {
             time = $A.dayjs().unix();
             array.forEach(value => {

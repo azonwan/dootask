@@ -19,7 +19,7 @@ export default {
     },
 
     mounted() {
-        this.src = $.apiUrl('../images/guide.png');
+        this.src = $.apiUrl('../images/other/guide.png');
     },
 
     watch: {
