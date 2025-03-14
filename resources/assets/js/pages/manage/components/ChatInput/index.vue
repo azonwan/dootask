@@ -548,7 +548,7 @@ export default {
             'isModKey',
         ]),
 
-        ...mapGetters(['getDialogDraft']),
+        ...mapGetters(['getDialogDraft', 'getDialogQuote']),
 
         isEnterSend({cacheKeyboard}) {
             if (this.$isEEUiApp) {
@@ -687,16 +687,16 @@ export default {
             return this.dialogId > 0 ? (this.cacheDialogs.find(({id}) => id == this.dialogId) || {}) : {};
         },
 
-        quoteUpdate() {
-            return this.dialogData.extra_quote_type === 'update'
+        draftData() {
+            return this.getDialogDraft(this.dialogId)?.content || ''
         },
 
         quoteData() {
-            const {extra_quote_id} = this.dialogData;
-            if (extra_quote_id) {
-                return this.dialogMsgs.find(item => item.id === extra_quote_id)
-            }
-            return null;
+            return this.getDialogQuote(this.dialogId)?.content || null
+        },
+
+        quoteUpdate() {
+            return this.getDialogQuote(this.dialogId)?.type === 'update'
         },
 
         chatInputBoxStyle({iOSDevices, fullInput, viewportHeight}) {
@@ -705,10 +705,6 @@ export default {
                 style.height = Math.max(100, viewportHeight - 70) + 'px'
             }
             return style
-        },
-
-        inputDraft() {
-            return this.getDialogDraft(this.dialogId)
         }
     },
     watch: {
@@ -750,7 +746,7 @@ export default {
             this.loadInputDraft()
         },
 
-        inputDraft() {
+        draftData() {
             if (this.isFocus) {
                 return
             }
@@ -1214,12 +1210,12 @@ export default {
         },
 
         loadInputDraft() {
-            if (this.simpleMode || !this.inputDraft) {
+            if (this.simpleMode || !this.draftData) {
                 this.$emit('input', '')
                 return
             }
             this.pasteClean = false
-            this.$emit('input', this.inputDraft)
+            this.$emit('input', this.draftData)
             this.$nextTick(_ => this.pasteClean = true)
         },
 
@@ -1718,10 +1714,18 @@ export default {
         },
 
         setQuote(id, type = 'reply') {
-            this.dialogId > 0 && this.$store.dispatch("saveDialog", {
+            if (this.dialogId <= 0) {
+                return
+            }
+            const content = this.dialogMsgs.find(item => item.id == id && item.dialog_id == this.dialogId)
+            if (!content) {
+                this.$store.dispatch("removeDialogQuote", this.dialogId);
+                return
+            }
+            this.$store.dispatch("saveDialogQuote", {
                 id: this.dialogId,
-                extra_quote_id: id,
-                extra_quote_type: type === 'update' ? 'update' : 'reply'
+                type: type === 'update' ? 'update' : 'reply',
+                content
             });
         },
 

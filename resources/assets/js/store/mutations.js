@@ -81,7 +81,6 @@ export default {
             return
         }
 
-        // 草稿标签
         if (state.dialogId == id) {
             item.tag = index !== -1 ? state.dialogDrafts[index].tag : false
         } else {
@@ -89,14 +88,11 @@ export default {
         }
 
         if (index !== -1) {
-            // 更新已存在的草稿
             state.dialogDrafts.splice(index, 1, item)
         } else {
-            // 添加新草稿
             state.dialogDrafts.push(item)
         }
 
-        // 保存到 IndexedDB
         $A.IDBSave("dialogDrafts", state.dialogDrafts)
     },
 
@@ -108,6 +104,36 @@ export default {
         if (index !== -1) {
             state.dialogDrafts[index].tag = !!state.dialogDrafts[index].content
             $A.IDBSave("dialogDrafts", state.dialogDrafts)
+        }
+    },
+
+    // 引用管理
+    'quote/set': function(state, {id, type, content}) {
+        const index = state.dialogQuotes.findIndex(item => item.id === id)
+        const item = {
+            id,
+            type,
+            content,
+            time: new Date().getTime()
+        }
+        if (index === -1 && !item.content) {
+            return
+        }
+
+        if (index !== -1) {
+            state.dialogQuotes.splice(index, 1, item)
+        } else {
+            state.dialogQuotes.push(item)
+        }
+
+        $A.IDBSave("dialogQuotes", state.dialogQuotes)
+    },
+
+    'quote/remove': function(state, id) {
+        const index = state.dialogQuotes.findIndex(item => item.id === id)
+        if (index !== -1) {
+            state.dialogQuotes.splice(index, 1)
+            $A.IDBSave("dialogQuotes", state.dialogQuotes)
         }
     },
 }

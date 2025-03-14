@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
+import {mapGetters} from "vuex";
 
 export default {
     name: 'DialogUpload',
@@ -42,7 +42,7 @@ export default {
     },
 
     computed: {
-        ...mapState(['cacheDialogs']),
+        ...mapGetters(['getDialogQuote']),
 
         headers() {
             return {
@@ -54,12 +54,12 @@ export default {
         params() {
             return {
                 dialog_id: this.dialogId,
-                reply_id: this.dialogData.extra_quote_id || 0,
+                reply_id: this.quoteData?.id || 0,
             }
         },
 
-        dialogData() {
-            return this.cacheDialogs.find(({id}) => id == this.dialogId) || {};
+        quoteData() {
+            return this.getDialogQuote(this.dialogId)?.content || null
         },
     },
 

@@ -982,6 +982,7 @@ export default {
                     'cacheTranslations',
                     'dialogMsgs',
                     'dialogDrafts',
+                    'dialogQuotes',
                     'fileLists',
                     'callAt',
                     'cacheEmojis',
@@ -3207,6 +3208,24 @@ export default {
             commit('draft/set', {id, content})
             delete dialogDraftState.timer[id]
         }, (immediate || !content) ? 0 : 600)
+    },
+
+    /**
+     * 保存引用
+     * @param commit
+     * @param data {id, type, content}
+     */
+    saveDialogQuote({commit}, data) {
+        commit('quote/set', data)
+    },
+
+    /**
+     * 移除引用
+     * @param commit
+     * @param id
+     */
+    removeDialogQuote({commit}, id) {
+        commit('quote/remove', id)
     },
 
     /** *****************************************************************************************/

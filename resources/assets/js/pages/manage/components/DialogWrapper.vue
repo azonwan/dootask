@@ -952,7 +952,7 @@ export default {
             'cacheTranslationLanguage'
         ]),
 
-        ...mapGetters(['isLoad']),
+        ...mapGetters(['isLoad', 'getDialogQuote']),
 
         isReady() {
             return this.dialogId > 0 && this.dialogData.id > 0
@@ -1191,15 +1191,19 @@ export default {
             return this.dialogData.is_disable ?? false
         },
 
+        quoteData() {
+            return this.getDialogQuote(this.dialogId)?.content || null
+        },
+
+        quoteUpdate() {
+            return this.getDialogQuote(this.dialogId)?.type === 'update'
+        },
+
         quoteId() {
             if (this.msgId > 0) {
                 return this.msgId
             }
-            return this.dialogData.extra_quote_id || 0
-        },
-
-        quoteData() {
-            return this.quoteId ? this.allMsgs.find(({id}) => id === this.quoteId) : null
+            return this.quoteData?.id || 0
         },
 
         todoViewMsg() {
@@ -1662,7 +1666,7 @@ export default {
                     .replace(/(<span\s+class="mention"(.*?)>.*?<\/span>.*?<\/span>.*?<\/span>)(\x20)?/, "$1 ")
             }
             //
-            if (this.dialogData.extra_quote_type === 'update') {
+            if (this.quoteUpdate) {
                 // 修改
                 if (textType === "text") {
                     textBody = textBody.replace(new RegExp(`src=(["'])${$A.mainUrl()}`, "g"), "src=$1{{RemoteURL}}")

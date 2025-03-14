@@ -109,7 +109,7 @@
                                     <div class="dialog-text no-dark-content">
                                         <template v-if="dialog.id != dialogId && tagDialogDraft(dialog.id)">
                                             <div class="last-draft">[{{$L('草稿')}}]</div>
-                                            <div class="last-text"><span>{{formatDraft(getDialogDraft(dialog.id))}}</span></div>
+                                            <div class="last-text"><span>{{formatDraft(getDialogDraft(dialog.id)?.content)}}</span></div>
                                         </template>
                                         <template v-else>
                                             <template v-if="dialog.type=='group' && dialog.last_msg && dialog.last_msg.userid">

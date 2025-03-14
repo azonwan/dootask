@@ -246,7 +246,7 @@ export default {
      */
     getDialogDraft: (state) => (id) => {
         const draft = state.dialogDrafts.find(item => item.id === id)
-        return draft ? draft.content : ''
+        return draft || null
     },
 
     /**
@@ -258,4 +258,14 @@ export default {
         const draft = state.dialogDrafts.find(item => item.id === id)
         return !!draft?.tag
     },
+
+    /**
+     * 获取引用
+     * @param state
+     * @returns {function(*): *}
+     */
+    getDialogQuote: (state) => (id) => {
+        const quote = state.dialogQuotes.find(item => item.id === id)
+        return quote || null
+    }
 }

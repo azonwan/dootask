@@ -7,7 +7,7 @@ export default {
     clientId: "",
 
     // 缓存版本号（如果想升级后清除客户端缓存则修改此参数值）
-    cacheVersion: "v13",
+    cacheVersion: "v14",
 
     // 窗口是否激活
     windowActive: true,
@@ -125,6 +125,7 @@ export default {
     dialogMsgTops: [],
     dialogHistory: [],
     dialogDrafts: [],
+    dialogQuotes: [],
     dialogMsgTransfer: {time: 0},
     dialogSseList: [],
     dialogDroupWordChain: {},
