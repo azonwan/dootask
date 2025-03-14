@@ -12,6 +12,7 @@ use App\Models\File;
 use App\Models\User;
 use App\Module\Base;
 use App\Module\Timer;
+use App\Models\Setting;
 use App\Module\Extranet;
 use App\Module\ElasticSearch\ElasticSearchUserMsg;
 use App\Module\TimeRange;
@@ -1092,6 +1093,9 @@ class DialogController extends AbstractController
             //
             if ($update_id > 0) {
                 $action = $update_mark ? "update-$update_id" : "change-$update_id";
+                if (!($user->bot || $user->isAdmin())) {
+                    Setting::validateMsgLimit('edit', $update_id);
+                }
             } elseif ($reply_id > 0) {
                 $action = "reply-$reply_id";
                 if ($reply_check === 'yes') {
@@ -1843,6 +1847,9 @@ class DialogController extends AbstractController
         $msg = WebSocketDialogMsg::whereId($msg_id)->whereUserid($user->userid)->first();
         if (empty($msg)) {
             return Base::retError("消息不存在或已被删除");
+        }
+        if (!($user->bot || $user->isAdmin())) {
+            Setting::validateMsgLimit('rev', $msg);
         }
         $msg->withdrawMsg();
         return Base::retSuccess("success");

@@ -2,8 +2,11 @@
 
 namespace App\Models;
 
+use App\Exceptions\ApiException;
 use App\Module\Base;
+use App\Module\Doo;
 use App\Module\Timer;
+use Carbon\Carbon;
 
 /**
  * App\Models\Setting
@@ -262,5 +265,37 @@ class Setting extends AbstractModel
             }
         }
         return $array;
+    }
+
+    /**
+     * 验证消息限制
+     * @param $type
+     * @param $msg
+     * @return void
+     */
+    public static function validateMsgLimit($type, $msg)
+    {
+        $keyName = 'msg_edit_limit';
+        $error = '此消息不可修改';
+        if ($type == 'rev') {
+            $keyName = 'msg_rev_limit';
+            $error = '此消息不可撤回';
+        }
+        $limitNum = intval(Base::settingFind('system', $keyName, 0));
+        if ($limitNum <= 0) {
+            return;
+        }
+        if ($msg instanceof WebSocketDialogMsg) {
+            $dialogMsg = $msg;
+        } else {
+            $dialogMsg = WebSocketDialogMsg::find($msg);
+        }
+        if (!$dialogMsg) {
+            return;
+        }
+        $limitTime = Carbon::parse($dialogMsg->created_at)->addMinutes($limitNum);
+        if ($limitTime->lt(Carbon::now())) {
+            throw new ApiException('已超过' . Doo::translate(Base::forumMinuteDay($limitNum)) . '，' . $error);
+        }
     }
 }

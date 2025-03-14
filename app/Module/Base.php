@@ -1476,12 +1476,34 @@ class Base
     public static function forumHourDay($hour)
     {
         $hour = intval($hour);
-        if ($hour > 24) {
+        if ($hour >= 24) {
             $day = floor($hour / 24);
             $hour -= $day * 24;
-            return $day . '天' . $hour . '小时';
+            if ($hour > 0) {
+                return $day . '天' . $hour . '小时';
+            }
+            return $day . '天';
         }
         return $hour . '小时';
+    }
+
+    /**
+     * 分钟转天/小时/分钟
+     * @param $minute
+     * @return string
+     */
+    public static function forumMinuteDay($minute)
+    {
+        $minute = intval($minute);
+        if ($minute >= 60) {
+            $hour = floor($minute / 60);
+            $minute -= $hour * 60;
+            if ($minute > 0) {
+                return Base::forumHourDay($hour) . $minute . '分钟';
+            }
+            return Base::forumHourDay($hour);
+        }
+        return $minute . '分钟';
     }
 
     /**

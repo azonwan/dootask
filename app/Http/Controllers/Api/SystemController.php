@@ -71,6 +71,8 @@ class SystemController extends AbstractController
                     'voice2text',
                     'translation',
                     'e2e_message',
+                    'msg_rev_limit',
+                    'msg_edit_limit',
                     'auto_archived',
                     'archived_day',
                     'task_visible',
@@ -135,6 +137,8 @@ class SystemController extends AbstractController
         $setting['voice2text'] = $setting['voice2text'] ?: 'close';
         $setting['translation'] = $setting['translation'] ?: 'close';
         $setting['e2e_message'] = $setting['e2e_message'] ?: 'close';
+        $setting['msg_rev_limit'] = $setting['msg_rev_limit'] ?: '';
+        $setting['msg_edit_limit'] = $setting['msg_edit_limit'] ?: '';
         $setting['auto_archived'] = $setting['auto_archived'] ?: 'close';
         $setting['archived_day'] = floatval($setting['archived_day']) ?: 7;
         $setting['task_visible'] = $setting['task_visible'] ?: 'close';

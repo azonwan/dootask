@@ -539,10 +539,6 @@ class WebSocketDialogMsg extends AbstractModel
      */
     public function withdrawMsg()
     {
-        $send_dt = Carbon::parse($this->created_at)->addDay();
-        if ($send_dt->lt(Carbon::now())) {
-            throw new ApiException('已超过24小时，此消息不能撤回');
-        }
         AbstractModel::transaction(function() {
             $deleteRead = WebSocketDialogMsgRead::whereMsgId($this->id)->whereNull('read_at')->delete();    // 未阅读记录不需要软删除，直接删除即可
             $this->delete();

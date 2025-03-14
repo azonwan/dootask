@@ -206,6 +206,26 @@
                         <div v-if="formDatum.e2e_message == 'open'" class="form-tip">{{$L('使用端到端加密传输数据。')}}</div>
                         <div v-else class="form-tip">{{$L('关闭端到端加密传输数据。')}}</div>
                     </FormItem>
+                    <FormItem :label="$L('撤回消息限制')" prop="msgRevLimit">
+                        <div style="width: 220px;">
+                            <Input type="number" number v-model="formDatum.msg_rev_limit" :placeholder="$L('默认不限制')">
+                                <template #append>
+                                    <span>{{$L('分钟')}}</span>
+                                </template>
+                            </Input>
+                        </div>
+                        <div class="form-tip">{{$L('消息发出后的可撤回时长。')}} ({{$L('系统管理员除外')}})</div>
+                    </FormItem>
+                    <FormItem :label="$L('修改消息限制')" prop="msgEditLimit">
+                        <div style="width: 220px;">
+                            <Input type="number" number v-model="formDatum.msg_edit_limit" :placeholder="$L('默认不限制')">
+                                <template #append>
+                                    <span>{{$L('分钟')}}</span>
+                                </template>
+                            </Input>
+                        </div>
+                        <div class="form-tip">{{$L('消息发出后的可修改时长。')}} ({{$L('系统管理员除外')}})</div>
+                    </FormItem>
                 </div>
             </div>
             <div class="block-setting-box">
