@@ -28834,5 +28834,41 @@
         "fr": "Fermer la fenêtre",
         "id": "Tutup jendela",
         "ru": "Закрыть окно"
+    },
+    {
+        "key": "关闭提示",
+        "zh": "",
+        "zh-CHT": "關閉提示",
+        "en": "Close Prompt",
+        "ko": "알림 닫기",
+        "ja": "プロンプトを閉じる",
+        "de": "Hinweis schließen",
+        "fr": "Fermer l'invite",
+        "id": "Tutup Petunjuk",
+        "ru": "Закрыть подсказку"
+    },
+    {
+        "key": "网络连接失败",
+        "zh": "",
+        "zh-CHT": "網路連接失敗",
+        "en": "Network Connection Failed",
+        "ko": "네트워크 연결 실패",
+        "ja": "ネットワーク接続に失敗しました",
+        "de": "Netzwerkverbindung fehlgeschlagen",
+        "fr": "Échec de la connexion réseau",
+        "id": "Koneksi Jaringan Gagal",
+        "ru": "Не удалось подключиться к сети"
+    },
+    {
+        "key": "重试",
+        "zh": "",
+        "zh-CHT": "重試",
+        "en": "Retry",
+        "ko": "재시도",
+        "ja": "再試行",
+        "de": "Erneut versuchen",
+        "fr": "Réessayer",
+        "id": "Coba Lagi",
+        "ru": "Повторить"
     }
 ]
