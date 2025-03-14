@@ -5,6 +5,14 @@
                 <ul>
                     <li>
                         <div class="search-label">
+                            {{ $L("关键词") }}
+                        </div>
+                        <div class="search-content">
+                            <Input v-model="keys.key" :placeholder="$L('输入关键词搜索')" clearable/>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="search-label">
                             {{ $L("汇报类型") }}
                         </div>
                         <div class="search-content">
@@ -77,11 +85,20 @@ export default {
         return {
             loadIng: 0,
             columns: [{
-                title: this.$L("名称"),
+                title: this.$L("标题"),
                 key: 'title',
                 minWidth: 180,
                 render: (h, {row}) => {
-                    return h('AutoTip', row.title);
+                    const displayTitle = `${row.title || ""}`.replace(/(\[([^\[\]]*)\]\s*){0,2}$/, '');
+                    return h('AutoTip', displayTitle);
+                }
+            }, {
+                title: this.$L("时间"),
+                key: 'time',
+                sortable: true,
+                minWidth: 180,
+                render: (h, {row}) => {
+                    return h('AutoTip', $A.reportExtractTime(row.title) || '-');
                 }
             }, {
                 title: this.$L("类型"),

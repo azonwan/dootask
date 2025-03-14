@@ -40,11 +40,6 @@
             </div>
         </div>
 
-        <!--工作报告-->
-        <DrawerOverlay v-model="workReportShow" placement="right" :size="1200">
-            <Report v-if="workReportShow" v-model="workReportTabs" @on-read="$store.dispatch('getReportUnread', 1000)" />
-        </DrawerOverlay>
-
         <!--AI-->
         <DrawerOverlay v-model="aibotShow" placement="right" :size="720">
             <div v-if="aibotShow" class="ivu-modal-wrap-apply">
@@ -244,7 +239,6 @@
 import {mapState} from "vuex";
 import DrawerOverlay from "../../components/DrawerOverlay";
 import UserSelect from "../../components/UserSelect";
-import Report from "../manage/components/Report";
 import SystemAibot from "./setting/components/SystemAibot";
 import SystemCheckin from "./setting/components/SystemCheckin";
 import Checkin from "./setting/checkin";
@@ -259,7 +253,6 @@ export default {
     components: {
         UserSelect,
         DrawerOverlay,
-        Report,
         SystemAibot,
         SystemCheckin,
         Checkin,
@@ -272,9 +265,6 @@ export default {
         return {
             applyList: [],
             applyListTypes: ['base', 'admin'],
-            //
-            workReportShow: false,
-            workReportTabs: "my",
             //
             aibotList: AIBotList,
             aibotShow: false,
@@ -421,8 +411,7 @@ export default {
                     });
                     break;
                 case 'report':
-                    this.workReportTabs = area == 'badge' ? 'receive' : 'my';
-                    this.workReportShow = true;
+                    emitter.emit('openReport', area == 'badge' ? 'receive' : 'my');
                     break;
                 case 'robot':
                     this.getAITags();

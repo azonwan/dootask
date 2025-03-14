@@ -662,6 +662,27 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
                     })
                 }
             })
+        },
+
+        /**
+         * 提取工作报告中的时间
+         * @param text
+         * @returns {*|string}
+         */
+        reportExtractTime(text) {
+            const regex = /(?:.*?)(?:\[([^\[\]]*)\]\s*)?(?:\[([^\[\]]*)\]\s*)?$/;
+            const match = text.match(regex);
+            if (!match) return "";
+            const secondLast = `${match[1] || ""}`.replace(/^\s*\((.*)\)\s*$/, "$1");
+            const last = `${match[2] || ""}`.replace(/^\s*\((.*)\)\s*$/, "$1");
+            if (last && secondLast) {
+                return `${last} (${secondLast})`;
+            } else if (last) {
+                return last;
+            } else if (secondLast) {
+                return secondLast;
+            }
+            return "";
         }
     });
 

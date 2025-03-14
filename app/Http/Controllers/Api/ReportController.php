@@ -33,6 +33,7 @@ class ReportController extends AbstractController
      * @apiName my
      *
      * @apiParam {Object} [keys]             搜索条件
+     * - keys.key: 关键词
      * - keys.type: 汇报类型，weekly:周报，daily:日报
      * - keys.created_at: 汇报时间
      * @apiParam {Number} [page]        当前页，默认:1
@@ -49,6 +50,15 @@ class ReportController extends AbstractController
         $builder = Report::with(['receivesUser'])->whereUserid($user->userid);
         $keys = Request::input('keys');
         if (is_array($keys)) {
+            if ($keys['key']) {
+                if (str_contains($keys['key'], '@')) {
+                    $builder->whereHas('sendUser', function ($q2) use ($keys) {
+                        $q2->where("users.email", "LIKE", "%{$keys['key']}%");
+                    });
+                } else {
+                    $builder->where("title", "LIKE", "%{$keys['key']}%");
+                }
+            }
             if (in_array($keys['type'], [Report::WEEKLY, Report::DAILY])) {
                 $builder->whereType($keys['type']);
             }
@@ -70,6 +80,7 @@ class ReportController extends AbstractController
      *
      * @apiParam {Object} [keys]             搜索条件
      * - keys.key: 关键词
+     * - keys.department_id: 部门ID
      * - keys.type: 汇报类型，weekly:周报，daily:日报
      * - keys.status: 状态，unread:未读，read:已读
      * - keys.created_at: 汇报时间
@@ -90,10 +101,19 @@ class ReportController extends AbstractController
         $keys = Request::input('keys');
         if (is_array($keys)) {
             if ($keys['key']) {
-                $builder->where(function($query) use ($keys) {
-                    $query->whereHas('sendUser', function ($q2) use ($keys) {
+                if (str_contains($keys['key'], '@')) {
+                    $builder->whereHas('sendUser', function ($q2) use ($keys) {
                         $q2->where("users.email", "LIKE", "%{$keys['key']}%");
-                    })->orWhere("title", "LIKE", "%{$keys['key']}%");
+                    });
+                } elseif (Base::isNumber($keys['key'])) {
+                    $builder->where("userid", intval($keys['key']));
+                } else {
+                    $builder->where("title", "LIKE", "%{$keys['key']}%");
+                }
+            }
+            if ($keys['department_id']) {
+                $builder->whereHas('sendUser', function ($query) use ($keys) {
+                    $query->where("users.department", "LIKE", "%,{$keys['department_id']},%");
                 });
             }
             if (in_array($keys['type'], [Report::WEEKLY, Report::DAILY])) {

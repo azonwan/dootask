@@ -296,7 +296,7 @@
             v-model="workReportShow"
             placement="right"
             :size="1200">
-            <Report v-if="workReportShow" v-model="reportTabs" @on-read="$store.dispatch('getReportUnread', 1000)" />
+            <Report v-if="workReportShow" v-model="workReportTab" @on-read="$store.dispatch('getReportUnread', 1000)" />
         </DrawerOverlay>
 
         <!--查看所有团队-->
@@ -435,7 +435,6 @@ export default {
             visibleMenu: false,
             showMobileMenu: false,
 
-            workReportShow: false,
             allUserShow: false,
             allProjectShow: false,
             archivedProjectShow: false,
@@ -443,7 +442,8 @@ export default {
             natificationReady: false,
             notificationManage: null,
 
-            reportTabs: "my",
+            workReportShow: false,
+            workReportTab: "my",
 
             operateStyles: {},
             operateVisible: false,
@@ -465,6 +465,7 @@ export default {
         emitter.on('createGroup', this.onCreateGroup);
         emitter.on('dialogMsgPush', this.addDialogMsg);
         emitter.on('approveDetails', this.openApproveDetails);
+        emitter.on('openReport', this.openReport);
         //
         document.addEventListener('keydown', this.shortcutEvent);
     },
@@ -487,6 +488,7 @@ export default {
         emitter.off('createGroup', this.onCreateGroup);
         emitter.off('dialogMsgPush', this.addDialogMsg);
         emitter.off('approveDetails', this.openApproveDetails);
+        emitter.off('openReport', this.openReport);
         //
         document.removeEventListener('keydown', this.shortcutEvent);
     },
@@ -801,10 +803,7 @@ export default {
                     this.exportApproveShow = true;
                     return;
                 case 'workReport':
-                    if (this.reportUnreadNumber > 0) {
-                        this.reportTabs = "receive";
-                    }
-                    this.workReportShow = true;
+                    this.openReport(this.reportUnreadNumber > 0 ? 'receive' : 'my');
                     return;
                 case 'version':
                     emitter.emit('updateNotification', null);
@@ -1142,6 +1141,11 @@ export default {
             this.$nextTick(() => {
                 this.approveDetails = {id};
             })
+        },
+
+        openReport(tab) {
+            this.workReportTab = tab;
+            this.workReportShow = true;
         },
 
         handleLongpress(event, el) {

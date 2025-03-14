@@ -12,6 +12,25 @@
                 </li>
                 <li>
                     <div class="search-label">
+                        {{ $L("汇报部门") }}
+                    </div>
+                    <div class="search-content">
+                        <Select
+                            v-model="keys.department_id"
+                            :placeholder="$L('全部')">
+                            <Option value="">{{$L('全部')}}</Option>
+                            <Option
+                                v-for="(item, index) in departmentList"
+                                :value="item.id"
+                                :key="index"
+                                :label="item.chains.join(' - ')">
+                                <div :class="`department-level-name level-${item.level}`">{{ item.name }}</div>
+                            </Option>
+                        </Select>
+                    </div>
+                </li>
+                <li>
+                    <div class="search-label">
                         {{ $L("汇报类型") }}
                     </div>
                     <div class="search-content">
@@ -113,7 +132,8 @@ export default {
                 sortable: true,
                 minWidth: 180,
                 render: (h, {row}) => {
-                    let arr = []
+                    const displayTitle = `${row.title || ""}`.replace(/(\[([^\[\]]*)\]\s*){0,2}$/, '');
+                    const arr = []
                     const myUser = row.receives_user.find(({userid}) => userid == this.userId)
                     if (myUser && myUser.pivot.read == 0) {
                         arr.push(
@@ -125,11 +145,11 @@ export default {
                                     flexShrink: 0,
                                 }
                             }, this.$L("未读")),
-                            h('AutoTip', row.title)
+                            h('AutoTip', displayTitle)
                         )
                     } else {
                         arr.push(
-                            h('AutoTip', row.title)
+                            h('AutoTip', displayTitle)
                         )
                     }
                     return h('div', {
@@ -138,6 +158,14 @@ export default {
                             alignItems: 'center',
                         }
                     }, arr)
+                }
+            }, {
+                title: this.$L("时间"),
+                key: 'time',
+                sortable: true,
+                minWidth: 180,
+                render: (h, {row}) => {
+                    return h('AutoTip', $A.reportExtractTime(row.title) || '-');
                 }
             }, {
                 title: this.$L("类型"),
@@ -209,10 +237,13 @@ export default {
                 {value: "unread", label: this.$L('仅未读')},
                 {value: "read", label: this.$L('仅已读')},
             ],
+
+            departmentList: [],
         }
     },
-    mounted() {
+    async mounted() {
         this.getLists();
+        this.departmentList = await this.$store.dispatch("getDepartmentList")
     },
     watch: {
         keyIs(v) {
