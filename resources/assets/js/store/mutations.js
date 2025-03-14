@@ -21,6 +21,46 @@ export default {
         $A.IDBSave("dialogMsgs", state.dialogMsgs, 600)
     },
 
+
+
+
+    // 添加任务
+    CACHE_TASKS_PUSH(state, data) {
+        state.cacheTasks.push(data)
+        $A.IDBSave("cacheTasks", state.cacheTasks, 600)
+    },
+
+    // 修改、删除任务
+    CACHE_TASKS_SPLICE(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheTasks.splice(index, count)
+        } else {
+            state.cacheTasks.splice(index, count, data)
+        }
+        $A.IDBSave("cacheTasks", state.cacheTasks, 600)
+    },
+
+
+
+
+    // 添加对话
+    CACHE_DIALOGS_PUSH(state, data) {
+        state.cacheDialogs.push(data)
+        $A.IDBSave("cacheDialogs", state.cacheDialogs, 600)
+    },
+
+    // 修改、删除对话
+    CACHE_DIALOGS_SPLICE(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheDialogs.splice(index, count)
+        } else {
+            state.cacheDialogs.splice(index, count, data)
+        }
+        $A.IDBSave("cacheDialogs", state.cacheDialogs, 600)
+    },
+
+
+
     // 设置草稿
     SET_DIALOG_DRAFT(state, {id, content}) {
         const index = state.dialogDrafts.findIndex(item => item.id === id)

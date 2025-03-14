@@ -1655,11 +1655,12 @@ export default {
 
     /**
      * 保存任务数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveTask({state, dispatch}, data) {
+    saveTask({commit, state, dispatch}, data) {
         $A.execMainDispatch("saveTask", data)
         //
         if ($A.isArray(data)) {
@@ -1689,9 +1690,9 @@ export default {
             //
             const index = state.cacheTasks.findIndex(({id}) => id == data.id);
             if (index > -1) {
-                state.cacheTasks.splice(index, 1, Object.assign({}, state.cacheTasks[index], data));
+                commit("CACHE_TASKS_SPLICE", {index, data: Object.assign({}, state.cacheTasks[index], data)});
             } else {
-                state.cacheTasks.push(data);
+                commit("CACHE_TASKS_PUSH", data);
             }
             //
             if (updateMarking.is_update_maintask === true || (data.parent_id > 0 && state.cacheTasks.findIndex(({id}) => id == data.parent_id) === -1)) {
@@ -1721,18 +1722,17 @@ export default {
                     }
                 }
             })
-            //
-            $A.IDBSave("cacheTasks", state.cacheTasks);
         }
     },
 
     /**
      * 忘记任务数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param task_id
      */
-    forgetTask({state, dispatch}, task_id) {
+    forgetTask({commit, state, dispatch}, task_id) {
         $A.execMainDispatch("forgetTask", task_id)
         //
         const ids = ($A.isArray(task_id) ? task_id : [task_id]).filter(id => id != state.taskArchiveView);
@@ -1745,13 +1745,13 @@ export default {
                     parent_ids.push(state.cacheTasks[index].parent_id)
                 }
                 project_ids.push(state.cacheTasks[index].project_id)
-                state.cacheTasks.splice(index, 1);
+                commit("CACHE_TASKS_SPLICE", {index})
             }
             state.cacheTasks.filter(task => task.parent_id == id).some(childTask => {
                 let cIndex = state.cacheTasks.findIndex(task => task.id == childTask.id);
                 if (cIndex > -1) {
                     project_ids.push(childTask.project_id)
-                    state.cacheTasks.splice(cIndex, 1);
+                    commit("CACHE_TASKS_SPLICE", {index: cIndex})
                 }
             })
         })
@@ -1761,8 +1761,6 @@ export default {
         if (ids.includes(state.taskId)) {
             state.taskId = 0;
         }
-        //
-        $A.IDBSave("cacheTasks", state.cacheTasks);
     },
 
     /**
@@ -2631,11 +2629,12 @@ export default {
 
     /**
      * 更新会话数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveDialog({state, dispatch}, data) {
+    saveDialog({commit, state, dispatch}, data) {
         $A.execMainDispatch("saveDialog", data)
         //
         if ($A.isArray(data)) {
@@ -2677,12 +2676,10 @@ export default {
                     delete data.last_at
                     delete data.last_msg
                 }
-                state.cacheDialogs.splice(index, 1, Object.assign({}, original, data));
+                commit("CACHE_DIALOGS_SPLICE", {index, data: Object.assign({}, original, data)})
             } else {
-                state.cacheDialogs.push(data);
+                commit("CACHE_DIALOGS_PUSH", data)
             }
-            //
-            $A.IDBSave("cacheDialogs", state.cacheDialogs);
         }
     },
 
@@ -3001,11 +2998,12 @@ export default {
 
     /**
      * 忘记对话数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param dialog_id
      */
-    forgetDialog({state, dispatch}, dialog_id) {
+    forgetDialog({commit, state, dispatch}, dialog_id) {
         $A.execMainDispatch("forgetDialog", dialog_id)
         //
         const ids = $A.isArray(dialog_id) ? dialog_id : [dialog_id];
@@ -3013,14 +3011,12 @@ export default {
             const index = state.cacheDialogs.findIndex(dialog => dialog.id == id);
             if (index > -1) {
                 dispatch("forgetDialogMsg", state.dialogMsgs.filter(item => item.dialog_id == dialog_id).map(item => item.id))
-                state.cacheDialogs.splice(index, 1);
+                commit("CACHE_DIALOGS_SPLICE", {index})
             }
         })
         if (ids.includes(state.dialogId)) {
             state.dialogId = 0
         }
-        //
-        $A.IDBSave("cacheDialogs", state.cacheDialogs);
     },
 
     /**
