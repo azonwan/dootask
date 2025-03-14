@@ -631,7 +631,6 @@ export default {
         }, typeof timeout === "number" ? timeout : 1000)
     },
 
-
      /**
      * 获取审批待办未读数量
      * @param state
@@ -863,6 +862,38 @@ export default {
                     onCancel: _ => userReject
                 });
             }, 100)
+        });
+    },
+
+    /**
+     * 获取部门列表
+     * @param dispatch
+     * @returns {Promise<unknown>}
+     */
+    getDepartmentList({dispatch}) {
+        return new Promise((resolve, reject) => {
+            const generateList = (data, parent_id = 0, level = 0, chains = []) => {
+                let result = [];
+                data.some(item => {
+                    if (item.parent_id == parent_id) {
+                        const newItem = Object.assign({}, item, {
+                            chains: chains.concat([item.name]),
+                            level: level + 1
+                        });
+                        result.push(newItem);
+                        // 递归获取子部门
+                        const children = generateList(data, item.id, level + 1, chains.concat([item.name]));
+                        result = result.concat(children);
+                    }
+                });
+                return result;
+            };
+
+            dispatch("call", {
+                url: 'users/department/list',
+            }).then(({data}) => {
+                resolve(generateList(data, 0, 1));
+            }).catch(reject);
         });
     },
 

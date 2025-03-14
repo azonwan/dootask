@@ -191,15 +191,15 @@
                 <FormItem prop="parent_id" :label="$L('上级部门')">
                     <Select v-model="departmentData.parent_id" :placeholder="$L('请选择上级部门')">
                         <Option :value="0">
-                            <div class="team-department-level-name level-1">{{ $L('默认部门') }}</div>
+                            <div class="department-level-name level-1">{{ $L('默认部门') }}</div>
                         </Option>
                         <Option
                             v-for="(item, index) in departmentList"
-                            :disabled="item.level > 3 || item.id == departmentData.id || item.parent_id == departmentData.id"
+                            :disabled="item.level > 3 || item.id == departmentData.id || (item.parent_id == departmentData.id && departmentData.id > 0)"
                             :value="item.id"
                             :key="index"
                             :label="item.chains.join(' - ')">
-                            <div :class="`team-department-level-name level-${item.level}`">{{ item.name }}</div>
+                            <div :class="`department-level-name level-${item.level}`">{{ item.name }}</div>
                         </Option>
                     </Select>
                 </FormItem>
@@ -311,7 +311,7 @@
                             :value="item.id"
                             :key="index"
                             :label="item.chains.join(' - ')">
-                            <div :class="`team-department-level-name level-${item.level - 1}`">{{ item.name }}</div>
+                            <div :class="`department-level-name level-${item.level - 1}`">{{ item.name }}</div>
                         </Option>
                     </Select>
                 </FormItem>
@@ -1238,25 +1238,10 @@ export default {
 
         getDepartmentLists() {
             this.departmentLoading++;
-            this.$store.dispatch("call", {
-                url: 'users/department/list',
-            }).then(({data}) => {
-                this.departmentList = []
-                this.generateDepartmentList(data, 0, 1, [])
+            this.$store.dispatch("getDepartmentList").then(list => {
+                this.departmentList = list;
             }).finally(_ => {
                 this.departmentLoading--;
-            })
-        },
-
-        generateDepartmentList(data, parent_id, level, chains = []) {
-            data.some(item => {
-                if (item.parent_id == parent_id) {
-                    this.departmentList.push(Object.assign(item, {
-                        chains: chains.concat([item.name]),
-                        level: level + 1
-                    }))
-                    this.generateDepartmentList(data, item.id, level + 1, chains.concat([item.name]))
-                }
             })
         },
 

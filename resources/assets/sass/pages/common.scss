@@ -942,3 +942,16 @@ body.window-portrait {
         transform: translateY(-50%);
     }
 }
+
+/*部门层级*/
+.department-level-name {
+    &.level-2 {
+        margin-left: 18px;
+    }
+    &.level-3 {
+        margin-left: 36px;
+    }
+    &.level-4 {
+        margin-left: 54px;
+    }
+}
