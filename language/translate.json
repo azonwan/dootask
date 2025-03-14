@@ -7272,18 +7272,6 @@
         "ru": "Обновить сейчас"
     },
     {
-        "key": "立即登录",
-        "zh": "",
-        "zh-CHT": "立即登錄",
-        "en": "Login now",
-        "ko": "지금 로그인",
-        "ja": "今すぐログイン",
-        "de": "Jetzt anmelden",
-        "fr": "Se connecter maintenant",
-        "id": "Login sekarang",
-        "ru": "Войти сейчас"
-    },
-    {
         "key": "签到功能",
         "zh": "",
         "zh-CHT": "簽到功能",
@@ -28834,5 +28822,17 @@
         "fr": "Le statut [(%T1)] est mal défini, et le responsable du statut [(%T2)] ne fait pas partie de l'équipe du projet",
         "id": "Status [(%T1)] disetel secara salah, dan manajer status [(%T2)] tidak ada dalam tim proyek",
         "ru": "Статус [(%T1)] установлен неправильно, и менеджер статуса [(%T2)] не входит в состав команды проекта"
+    },
+    {
+        "key": "关闭窗口",
+        "zh": "",
+        "zh-CHT": "關閉窗口",
+        "en": "Close window",
+        "ko": "창 닫기",
+        "ja": "ウィンドウを閉じる",
+        "de": "Fenster schließen",
+        "fr": "Fermer la fenêtre",
+        "id": "Tutup jendela",
+        "ru": "Закрыть окно"
     }
 ]

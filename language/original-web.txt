@@ -547,7 +547,6 @@ SMTP服务器
 空白模板
 立即上传
 立即升级
-立即登录
 签到功能
 签到数据
 签到日期
@@ -1990,3 +1989,4 @@ API请求的URL路径
 仅已读
 汇报状态
 无法录音：NotFoundError: Requested device not found，无可用麦克风
+关闭窗口
