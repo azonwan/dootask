@@ -1,7 +1,7 @@
 <template>
     <div class="electron-report">
         <PageTitle :title="$L('报告详情')"/>
-        <ReportDetail :data="detailData"/>
+        <ReportDetail :data="detailData" :type="type"/>
     </div>
 </template>
 <style lang="scss" scoped>
@@ -19,17 +19,18 @@ export default {
     components: {ReportDetail},
     data() {
         return {
+            type: 'view',
             detailData: {},
         };
     },
     computed: {
-        reportDetailId() {
+        reportId() {
             const {reportDetailId} = this.$route.params;
-            return parseInt(/^\d+$/.test(reportDetailId) ? reportDetailId : 0);
+            return reportDetailId;
         },
     },
     watch: {
-        reportDetailId: {
+        reportId: {
             handler() {
                 this.getDetail();
             },
@@ -38,14 +39,20 @@ export default {
     },
     methods: {
         getDetail() {
-            if (this.reportDetailId <= 0) {
+            if (!this.reportId) {
                 return;
+            }
+            const data = {}
+            if (/^\d+$/.test(this.reportId)) {
+                data.id = this.reportId;
+                this.type = 'view';
+            } else {
+                data.code = this.reportId;
+                this.type = 'share';
             }
             this.$store.dispatch("call", {
                 url: 'report/detail',
-                data: {
-                    id: this.reportDetailId,
-                },
+                data,
             }).then(({data}) => {
                 this.detailData = data;
             }).catch(({msg}) => {

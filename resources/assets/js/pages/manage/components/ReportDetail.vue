@@ -4,43 +4,43 @@
             {{ data.title }}
             <Icon v-if="loadIng > 0" type="ios-loading" class="icon-loading"></Icon>
         </div>
-        <div v-if="formOptions.labelWidth === 'auto'" class="report-detail-context">
-            <Form class="report-form auto-form" label-width="auto" inline>
-                <FormItem :label="$L('汇报人')">
-                    <UserAvatar :userid="data.userid" :size="28"/>
-                </FormItem>
-                <FormItem :label="$L('提交时间')">
-                    {{ data.created_at }}
-                </FormItem>
-                <FormItem :label="$L('汇报对象')">
-                    <template v-if="data.receives_user.length === 0">-</template>
-                    <UserAvatar v-else v-for="(item, key) in data.receives_user" :key="key" :userid="item.userid" :size="28"/>
-                </FormItem>
-            </Form>
-            <Form class="report-form auto-form" label-width="auto">
-                <FormItem :label="$L('汇报内容')">
-                    <div class="report-content" v-html="data.content"></div>
-                </FormItem>
-            </Form>
-        </div>
-        <div v-else class="report-detail-context">
-            <Form class="report-form" v-bind="formOptions">
-                <template v-if="formOptions.labelWidth !== 'auto'">
-                    <FormItem :label="$L('汇报人')">
+        <div class="report-detail-context">
+            <ul>
+                <li>
+                    <div class="report-label">
+                        {{ $L("汇报人") }}
+                    </div>
+                    <div class="report-value">
                         <UserAvatar :userid="data.userid" :size="28"/>
-                    </FormItem>
-                    <FormItem :label="$L('提交时间')">
+                    </div>
+                </li>
+                <li>
+                    <div class="report-label">
+                        {{ $L("提交时间") }}
+                    </div>
+                    <div class="report-value">
                         {{ data.created_at }}
-                    </FormItem>
-                    <FormItem :label="$L('汇报对象')">
+                    </div>
+                </li>
+                <li>
+                    <div class="report-label">
+                        {{ $L("汇报对象") }}
+                    </div>
+                    <div class="report-value">
                         <template v-if="data.receives_user.length === 0">-</template>
                         <UserAvatar v-else v-for="(item, key) in data.receives_user" :key="key" :userid="item.userid" :size="28"/>
-                    </FormItem>
-                </template>
-                <FormItem :label="$L('汇报内容')">
-                    <div class="report-content" v-html="data.content"></div>
-                </FormItem>
-            </Form>
+                    </div>
+                </li>
+                <li v-if="data.report_link" :title="$L('分享时间') + '：' + data.report_link.created_at">
+                    <div class="report-label">
+                        {{ $L("分享人") }}
+                    </div>
+                    <div class="report-value">
+                        <UserAvatar :userid="data.report_link.userid" :size="28"/>
+                    </div>
+                </li>
+            </ul>
+            <div class="report-content" v-html="data.content"></div>
         </div>
     </div>
 </template>
@@ -53,7 +53,10 @@ export default {
     props: {
         data: {
             default: {},
-        }
+        },
+        type: {
+            default: 'view',
+        },
     },
     data() {
         return {
@@ -66,7 +69,9 @@ export default {
     watch: {
         'data.id': {
             handler(id) {
-                if (id > 0) this.sendRead();
+                if (id > 0 && this.type === 'view') {
+                    this.sendRead();
+                }
             },
             immediate: true
         },

@@ -6,6 +6,7 @@ use App\Exceptions\ApiException;
 use App\Models\AbstractModel;
 use App\Models\ProjectTask;
 use App\Models\Report;
+use App\Models\ReportLink;
 use App\Models\ReportReceive;
 use App\Models\User;
 use App\Module\Base;
@@ -441,7 +442,8 @@ class ReportController extends AbstractController
      * @apiGroup report
      * @apiName detail
      *
-     * @apiParam {Number} [id]           报告id
+     * @apiParam {Number} [id]           报告ID
+     * @apiParam {String} [code]         报告分享代码，与ID二选一，优先ID
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -450,24 +452,35 @@ class ReportController extends AbstractController
     public function detail(): array
     {
         $user = User::auth();
+        //
         $id = intval(trim(Request::input("id")));
-        if (empty($id))
+        $code = trim(Request::input("code"));
+        //
+        if (empty($id) && empty($code)) {
             return Base::retError("缺少ID参数");
-
-        $one = Report::getOne($id);
-        $one->type_val = $one->getRawOriginal("type");
-
-        // 标记为已读
-        if (!empty($one->receivesUser)) {
-            foreach ($one->receivesUser as $item) {
-                if ($item->userid === $user->userid && $item->pivot->read === 0) {
-                    $one->receivesUser()->updateExistingPivot($user->userid, [
-                        "read" => 1,
-                    ]);
+        }
+        //
+        if (!empty($id)) {
+            $one = Report::getOne($id);
+            $one->type_val = $one->getRawOriginal("type");
+            // 标记为已读
+            if (!empty($one->receivesUser)) {
+                foreach ($one->receivesUser as $item) {
+                    if ($item->userid === $user->userid && $item->pivot->read === 0) {
+                        $one->receivesUser()->updateExistingPivot($user->userid, [
+                            "read" => 1,
+                        ]);
+                    }
                 }
             }
+        } else {
+            $link = ReportLink::whereCode($code)->first();
+            if (empty($link)) {
+                return Base::retError("报告不存在或已被删除");
+            }
+            $one = Report::getOne($link->rid);
+            $one->report_link = $link;
         }
-
         return Base::retSuccess("success", $one);
     }
 
