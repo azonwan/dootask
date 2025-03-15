@@ -380,6 +380,7 @@ export default {
             userCache: null,
             taskList: null,
             fileList: {},
+            reportList: {},
 
             showMenu: false,
             showMore: false,
@@ -420,6 +421,7 @@ export default {
             scrollTimer: null,
             textTimer: null,
             fileTimer: null,
+            reportTimer: null,
             moreTimer: null,
             selectTimer: null,
             selectRange: null,
@@ -734,6 +736,7 @@ export default {
             this.userCache = null;
             this.taskList = null;
             this.fileList = {};
+            this.reportList = {};
             this.loadInputDraft()
             inputLoadAdd(id1, this._uid)
             inputLoadRemove(id2, this._uid)
@@ -743,6 +746,7 @@ export default {
             this.userCache = null;
             this.taskList = null;
             this.fileList = {};
+            this.reportList = {};
             this.loadInputDraft()
         },
 
@@ -1069,7 +1073,7 @@ export default {
         quillMention() {
             return {
                 allowedChars: /^\S*$/,
-                mentionDenotationChars: ["@", "#", "~"],
+                mentionDenotationChars: ["@", "#", "~", "%"],
                 defaultMenuOrientation: this.defaultMenuOrientation,
                 isolateCharacter: true,
                 positioningStrategy: 'fixed',
@@ -2057,9 +2061,11 @@ export default {
                         return;
                     }
                     this.fileTimer && clearTimeout(this.fileTimer)
-                    this.fileTimer = setTimeout(_ => {
-                        this.$store.dispatch("searchFiles", searchTerm).then(({data}) => {
-                            this.fileList[searchTerm] = [{
+                    this.fileTimer = setTimeout(async _ => {
+                        const lists = [];
+                        const data = (await this.$store.dispatch("searchFiles", searchTerm).catch(_ => {}))?.data;
+                        if (data) {
+                            lists.push({
                                 label: [{id: 0, value: this.$L('文件分享查看'), disabled: true}],
                                 list: data.filter(item => item.type !== "folder").map(item => {
                                     return {
@@ -2067,11 +2073,67 @@ export default {
                                         value: item.ext ? `${item.name}.${item.ext}` : item.name
                                     }
                                 })
-                            }];
-                            resultCallback(this.fileList[searchTerm])
-                        }).catch(() => {
-                            resultCallback([])
-                        })
+                            })
+                            this.fileList[searchTerm] = lists
+                        }
+                        resultCallback(lists)
+                    }, 300)
+                    break;
+
+                case "%": // %报告
+                    this.mentionMode = "report-mention";
+                    if ($A.isArray(this.reportList[searchTerm])) {
+                        resultCallback(this.reportList[searchTerm])
+                        return;
+                    }
+                    this.reportTimer && clearTimeout(this.reportTimer)
+                    this.reportTimer = setTimeout(async _ => {
+                        const lists = [];
+                        let wait = 2;
+                        const myData = (await this.$store.dispatch("call", {
+                            url: 'report/my',
+                            data: {
+                                keys: {
+                                    key: searchTerm,
+                                },
+                            },
+                        }).catch(_ => {}))?.data;
+                        if (myData) {
+                            lists.push({
+                                label: [{id: 0, value: this.$L('我的报告'), disabled: true}],
+                                list: myData.data.map(item => {
+                                    return {
+                                        id: item.id,
+                                        value: item.title
+                                    }
+                                })
+                            })
+                            wait--
+                        }
+                        const receiveData = (await this.$store.dispatch("call", {
+                            url: 'report/receive',
+                            data: {
+                                keys: {
+                                    key: searchTerm,
+                                },
+                            },
+                        }).catch(_ => {}))?.data;
+                        if (receiveData) {
+                            lists.push({
+                                label: [{id: 0, value: this.$L('收到的报告'), disabled: true}],
+                                list: receiveData.data.map(item => {
+                                    return {
+                                        id: item.id,
+                                        value: item.title
+                                    }
+                                })
+                            })
+                            wait--
+                        }
+                        if (wait === 0) {
+                            this.reportList[searchTerm] = lists
+                        }
+                        resultCallback(lists)
                     }, 300)
                     break;
 
