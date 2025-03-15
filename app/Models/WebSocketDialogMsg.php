@@ -962,6 +962,18 @@ class WebSocketDialogMsg extends AbstractModel
                         throw new ApiException('文件分享错误');
                     }
                 }
+            } elseif ($matchChar[1] === "%") {
+                if (Base::isNumber($keyId)) {
+                    $reportLink = ReportLink::generateLink($keyId, User::userid());
+                    $keyId = $reportLink['code'];
+                } else {
+                    preg_match("/\/single\/report\/detail\/(.*?)$/i", $keyId, $match);
+                    if ($match && strlen($match[1]) >= 8) {
+                        $keyId = $match[1];
+                    } else {
+                        throw new ApiException('报告分享错误');
+                    }
+                }
             }
             $text = str_replace($matchs[0][$key], "[:{$matchChar[1]}:{$keyId}:{$matchValye[1]}:]", $text);
         }
@@ -1044,6 +1056,7 @@ class WebSocketDialogMsg extends AbstractModel
         $text = preg_replace("/\[:@:(.*?):(.*?):\]/i", "<span class=\"mention user\" data-id=\"$1\">@$2</span>", $text);
         $text = preg_replace("/\[:#:(.*?):(.*?):\]/is", "<span class=\"mention task\" data-id=\"$1\">#$2</span>", $text);
         $text = preg_replace("/\[:~:(.*?):(.*?):\]/i", "<a class=\"mention file\" href=\"{{RemoteURL}}single/file/$1\" target=\"_blank\">~$2</a>", $text);
+        $text = preg_replace("/\[:%:(.*?):(.*?):\]/i", "<a class=\"mention report\" href=\"{{RemoteURL}}single/report/detail/$1\" target=\"_blank\">%$2</a>", $text);
         $text = preg_replace("/\[:QUICK:(.*?):(.*?):\]/i", "<span data-quick-key=\"$1\">$2</span>", $text);
         return preg_replace("/^(<p><\/p>)+|(<p><\/p>)+$/i", "", $text);
     }

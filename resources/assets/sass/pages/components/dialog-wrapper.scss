@@ -1513,7 +1513,9 @@
                             }
 
                             &.file,
-                            &[data-denotation-char="~"]  {
+                            &.report,
+                            &[data-denotation-char="~"],
+                            &[data-denotation-char="%"] {
                                 color: #436FF6 !important;
                             }
 
