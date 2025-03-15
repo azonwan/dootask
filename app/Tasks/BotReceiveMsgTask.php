@@ -5,6 +5,7 @@ namespace App\Tasks;
 use App\Models\FileContent;
 use App\Models\Project;
 use App\Models\ProjectTask;
+use App\Models\Report;
 use App\Models\User;
 use App\Models\UserBot;
 use App\Models\UserDepartment;
@@ -606,22 +607,37 @@ class BotReceiveMsgTask extends AbstractTask
                     $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
                 }
             }
-            if (preg_match_all("/<a class=\"mention file\" href=\"([^\"']+?)\"[^>]*?>(.*?)<\/a>/", $original, $match)) {
-                $filePaths = $match[1];
-                foreach ($filePaths as $index => $filePath) {
-                    if (preg_match("/single\/file\/(.*?)$/", $filePath, $fileMatch)) {
-                        $fileName = addslashes($match[2][$index]);
-                        $fileContent = "文件状态：不存在或已删除";
+            if (preg_match_all("/<a class=\"mention ([^'\"]*)\" href=\"([^\"']+?)\"[^>]*?>[~%]([^>]*)<\/a>/", $original, $match)) {
+                $urlPaths = $match[2];
+                foreach ($urlPaths as $index => $urlPath) {
+                    $pathTag = null;
+                    $pathName = null;
+                    $pathContent = null;
+                    if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
+                        $pathTag = "file_content";
+                        $pathName = addslashes($match[3][$index]);
+                        $pathContent = "文件状态：不存在或已删除";
                         $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
                         if ($fileInfo && isset($fileInfo->content['url'])) {
-                            $filePath = public_path($fileInfo->content['url']);
-                            if (file_exists($filePath)) {
-                                $fileName .= " (ID:{$fileInfo->id})";
-                                $fileContent = TextExtractor::getFileContent($filePath);
+                            $urlPath = public_path($fileInfo->content['url']);
+                            if (file_exists($urlPath)) {
+                                $pathName .= " (ID:{$fileInfo->id})";
+                                $pathContent = TextExtractor::getFileContent($urlPath);
                             }
                         }
-                        $aiContents[] = "<file_content path=\"{$fileName}\">\n{$fileContent}\n</file_content>";
-                        $original = str_replace($match[0][$index], "'{$fileName}' (see below for file_content tag)", $original);
+                    } elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
+                        $pathTag = "report_content";
+                        $pathName = addslashes($match[3][$index]);
+                        $pathContent = "报告状态：不存在或已删除";
+                        $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
+                        if ($reportInfo) {
+                            $pathName .= " (ID:{$reportInfo->id})";
+                            $pathContent = $reportInfo->content;
+                        }
+                    }
+                    if ($pathTag) {
+                        $aiContents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
+                        $original = str_replace($match[0][$index], "'{$pathName}' (see below for {$pathTag} tag)", $original);
                     }
                 }
             }

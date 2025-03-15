@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\ApiException;
+use App\Module\Base;
 use Carbon\Carbon;
 use Carbon\Traits\Creator;
 use Illuminate\Database\Eloquent\Builder;
@@ -93,6 +94,24 @@ class Report extends AbstractModel
             $this->appendattrs['receives'] = empty( $this->receivesUser ) ? [] : array_column($this->receivesUser->toArray(), "userid");
         }
         return $this->appendattrs['receives'];
+    }
+
+    /**
+     * 获取汇报内容
+     * @param $id
+     * @return self|null
+     */
+    public static function idOrCodeToContent($id)
+    {
+        if (Base::isNumber($id)) {
+            return self::find($id);
+        } elseif ($id) {
+            $reportLink = ReportLink::whereCode($id)->first();
+            if ($reportLink) {
+                return self::find($reportLink->rid);
+            }
+        }
+        return null;
     }
 
     /**
