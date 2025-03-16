@@ -905,6 +905,10 @@ import {convertLocalResourcePath} from "../components/Replace/utils";
             $A.Message.success($A.L(msg));
         },
 
+        messageInfo(msg) {
+            $A.Message.info($A.L(msg));
+        },
+
         messageWarning(msg) {
             if (msg === false) {
                 return;

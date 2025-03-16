@@ -1074,19 +1074,7 @@ export default {
             this.__notificationId = id;
             //
             const notificationFuncA = async (title) => {
-                let tempUser = this.cacheUserBasic.find(item => item.userid == userid);
-                if (!tempUser) {
-                    try {
-                        const {data} = await this.$store.dispatch("call", {
-                            url: 'users/basic',
-                            data: {
-                                userid: [userid]
-                            },
-                            checkAuth: false
-                        });
-                        tempUser = data.find(item => item.userid == userid);
-                    } catch (_) {}
-                }
+                const tempUser = (await this.$store.dispatch("getUserData", userid).catch(_ => {}))?.data;
                 if (dialog_type === 'group' && tempUser) {
                     title = `${title} (${tempUser.nickname})`
                 }

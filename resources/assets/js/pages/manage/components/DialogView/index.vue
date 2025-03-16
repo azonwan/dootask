@@ -76,7 +76,7 @@
                 {{msgData.reply_num}}条回复
             </div>
             <!--标注-->
-            <div v-if="msgData.tag" class="tag">
+            <div v-if="msgData.tag" class="tag" @click="openTag">
                 <i class="taskfont">&#xe61e;</i>
             </div>
             <!--待办-->
@@ -397,6 +397,20 @@ export default {
                 this.dotClicks.push(this.msgData.id);
                 this.$store.dispatch("dialogMsgDot", this.msgData);
             }
+        },
+
+        openTag() {
+            if (!this.msgData.tag) {
+                return
+            }
+            this.$store.dispatch("showSpinner", 600)
+            this.$store.dispatch("getUserData", this.msgData.tag).then(user => {
+                $A.messageInfo(`标注人员：${user.nickname} (ID: ${user.userid})`)
+            }).catch(_ => {
+                $A.messageError('标注人员不存在')
+            }).finally(_ => {
+                this.$store.dispatch("hiddenSpinner")
+            });
         },
 
         openTodo() {

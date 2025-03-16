@@ -796,6 +796,36 @@ export default {
     },
 
     /**
+     * 获取用户基础信息（缓存没有则请求网络）
+     * @param state
+     * @param dispatch
+     * @param userid
+     * @returns {Promise<unknown>}
+     */
+    getUserData({state, dispatch}, userid) {
+        return new Promise(async (resolve, reject) => {
+            let tempUser = state.cacheUserBasic.find(item => item.userid == userid);
+            if (!tempUser) {
+                try {
+                    const {data} = await dispatch("call", {
+                        url: 'users/basic',
+                        data: {
+                            userid: [userid]
+                        },
+                        checkAuth: false
+                    });
+                    tempUser = data.find(item => item.userid == userid);
+                } catch (_) {}
+            }
+            if (tempUser) {
+                resolve(tempUser);
+            } else {
+                reject();
+            }
+        })
+    },
+
+    /**
      * 保存用户基础信息
      * @param commit
      * @param state
