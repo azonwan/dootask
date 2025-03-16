@@ -535,7 +535,7 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @api {get} api/report/share          06. 分享报告到消息
+     * @api {get} api/report/share          07. 分享报告到消息
      *
      * @apiDescription 需要token身份
      * @apiVersion 1.0.0
@@ -596,7 +596,7 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @api {get} api/report/last_submitter          07. 获取最后一次提交的接收人
+     * @api {get} api/report/last_submitter          08. 获取最后一次提交的接收人
      *
      * @apiDescription 需要token身份
      * @apiVersion 1.0.0
@@ -614,7 +614,7 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @api {get} api/report/unread          08. 获取未读
+     * @api {get} api/report/unread          09. 获取未读
      *
      * @apiDescription 需要token身份
      * @apiVersion 1.0.0
@@ -639,7 +639,7 @@ class ReportController extends AbstractController
     }
 
     /**
-     * @api {get} api/report/read          09. 标记汇报已读，可批量
+     * @api {get} api/report/read          10. 标记汇报已读，可批量
      *
      * @apiDescription 需要token身份
      * @apiVersion 1.0.0
