@@ -1547,42 +1547,7 @@ class DialogController extends AbstractController
             $fileMsg .= "<p>{$leave_message}</p>";
         }
         //
-        return AbstractModel::transaction(function() use ($user, $fileMsg, $userids, $dialogids) {
-            $msgs = [];
-            $already = [];
-            if ($dialogids) {
-                if (!is_array($dialogids)) {
-                    $dialogids = [$dialogids];
-                }
-                foreach ($dialogids as $dialogid) {
-                    $res = WebSocketDialogMsg::sendMsg(null, $dialogid, 'text', ['text' => $fileMsg], $user->userid);
-                    if (Base::isSuccess($res)) {
-                        $msgs[] = $res['data'];
-                        $already[] = $dialogid;
-                    }
-                }
-            }
-            if ($userids) {
-                if (!is_array($userids)) {
-                    $userids = [$userids];
-                }
-                foreach ($userids as $userid) {
-                    if (!User::whereUserid($userid)->exists()) {
-                        continue;
-                    }
-                    $dialog = WebSocketDialog::checkUserDialog($user, $userid);
-                    if ($dialog && !in_array($dialog->id, $already)) {
-                        $res = WebSocketDialogMsg::sendMsg(null, $dialog->id, 'text', ['text' => $fileMsg], $user->userid);
-                        if (Base::isSuccess($res)) {
-                            $msgs[] = $res['data'];
-                        }
-                    }
-                }
-            }
-            return Base::retSuccess('发送成功', [
-                'msgs' => $msgs
-            ]);
-        });
+        return WebSocketDialogMsg::sendMsgBatch($user, $userids, $dialogids, $fileMsg);
     }
 
     /**

@@ -9,7 +9,6 @@ use App\Models\Report;
 use App\Models\ReportLink;
 use App\Models\ReportReceive;
 use App\Models\User;
-use App\Models\WebSocketDialog;
 use App\Models\WebSocketDialogMsg;
 use App\Module\Base;
 use App\Module\Doo;
@@ -592,42 +591,7 @@ class ReportController extends AbstractController
         }
         $msgText = implode("", $reportMsgs);
         //
-        return AbstractModel::transaction(function() use ($user, $msgText, $userids, $dialogids) {
-            $msgs = [];
-            $already = [];
-            if ($dialogids) {
-                if (!is_array($dialogids)) {
-                    $dialogids = [$dialogids];
-                }
-                foreach ($dialogids as $dialogid) {
-                    $res = WebSocketDialogMsg::sendMsg(null, $dialogid, 'text', ['text' => $msgText], $user->userid);
-                    if (Base::isSuccess($res)) {
-                        $msgs[] = $res['data'];
-                        $already[] = $dialogid;
-                    }
-                }
-            }
-            if ($userids) {
-                if (!is_array($userids)) {
-                    $userids = [$userids];
-                }
-                foreach ($userids as $userid) {
-                    if (!User::whereUserid($userid)->exists()) {
-                        continue;
-                    }
-                    $dialog = WebSocketDialog::checkUserDialog($user, $userid);
-                    if ($dialog && !in_array($dialog->id, $already)) {
-                        $res = WebSocketDialogMsg::sendMsg(null, $dialog->id, 'text', ['text' => $msgText], $user->userid);
-                        if (Base::isSuccess($res)) {
-                            $msgs[] = $res['data'];
-                        }
-                    }
-                }
-            }
-            return Base::retSuccess('发送成功', [
-                'msgs' => $msgs
-            ]);
-        });
+        return WebSocketDialogMsg::sendMsgBatch($user, $userids, $dialogids, $msgText);
     }
 
     /**

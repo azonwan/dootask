@@ -1262,6 +1262,55 @@ class WebSocketDialogMsg extends AbstractModel
     }
 
     /**
+     * 批量发送消息
+     * @param User $user        发送的会员
+     * @param array $userids    接收的会员ID
+     * @param array $dialogids  接收的会话ID
+     * @param string $msgText   发送的消息
+     * @return array
+     */
+    public static function sendMsgBatch($user, $userids, $dialogids, $msgText)
+    {
+        return AbstractModel::transaction(function() use ($user, $userids, $dialogids, $msgText) {
+            $msgs = [];
+            $already = [];
+            if ($dialogids) {
+                if (!is_array($dialogids)) {
+                    $dialogids = [$dialogids];
+                }
+                foreach ($dialogids as $dialogid) {
+                    $res = WebSocketDialogMsg::sendMsg(null, $dialogid, 'text', ['text' => $msgText], $user->userid);
+                    if (Base::isSuccess($res)) {
+                        $msgs[] = $res['data'];
+                        $already[] = $dialogid;
+                    }
+                }
+            }
+            if ($userids) {
+                if (!is_array($userids)) {
+                    $userids = [$userids];
+                }
+                foreach ($userids as $userid) {
+                    if (!User::whereUserid($userid)->exists()) {
+                        continue;
+                    }
+                    $dialog = WebSocketDialog::checkUserDialog($user, $userid);
+                    if ($dialog && !in_array($dialog->id, $already)) {
+                        $res = WebSocketDialogMsg::sendMsg(null, $dialog->id, 'text', ['text' => $msgText], $user->userid);
+                        if (Base::isSuccess($res)) {
+                            $msgs[] = $res['data'];
+                        }
+                    }
+                }
+            }
+            return Base::retSuccess('发送成功', [
+                'msgs' => $msgs
+            ]);
+        });
+    }
+
+
+    /**
      * 将被@的人加入群
      * @param WebSocketDialog $dialog 对话
      * @return array
