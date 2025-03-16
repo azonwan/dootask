@@ -486,6 +486,7 @@ class ReportController extends AbstractController
             }
             $one = Report::getOne($link->rid);
             $one->report_link = $link;
+            $link->increment("num");
         }
         return Base::retSuccess("success", $one);
     }

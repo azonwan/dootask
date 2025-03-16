@@ -295,7 +295,7 @@ import TransferDom from "../../../../directives/transfer-dom";
 import clickoutside from "../../../../directives/clickoutside";
 import longpress from "../../../../directives/longpress";
 import {inputLoadAdd, inputLoadIsLast, inputLoadRemove} from "./one";
-import {getLanguage, languageList} from "../../../../language";
+import {languageList} from "../../../../language";
 import {isMarkdownFormat} from "../../../../store/markdown";
 import emitter from "../../../../store/events";
 

@@ -939,7 +939,7 @@ class WebSocketDialogMsg extends AbstractModel
                 }
             }
         }
-        // @成员、#任务、~文件
+        // @成员、#任务、~文件、%报告
         preg_match_all("/<span\s+class=\"mention\"(.*?)>.*?<\/span>.*?<\/span>.*?<\/span>/s", $text, $matchs);
         foreach ($matchs[1] as $key => $str) {
             preg_match("/data-denotation-char=\"(.*?)\"/", $str, $matchChar);
@@ -947,6 +947,7 @@ class WebSocketDialogMsg extends AbstractModel
             preg_match("/data-value=\"(.*?)\"/s", $str, $matchValye);
             $keyId = $matchId[1];
             if ($matchChar[1] === "~") {
+                // 文件特殊处理
                 if (Base::isNumber($keyId)) {
                     $file = File::permissionFind($keyId, User::auth());
                     if ($file->type == 'folder') {
@@ -963,6 +964,7 @@ class WebSocketDialogMsg extends AbstractModel
                     }
                 }
             } elseif ($matchChar[1] === "%") {
+                // 报告特殊处理
                 if (Base::isNumber($keyId)) {
                     $reportLink = ReportLink::generateLink($keyId, User::userid());
                     $keyId = $reportLink['code'];
@@ -1002,31 +1004,18 @@ class WebSocketDialogMsg extends AbstractModel
         foreach ($matchs[0] as $key => $str) {
             $herf = $matchs[2][$key];
             $title = $matchs[3][$key] ?: $herf;
-            preg_match("/\/single\/file\/(.*?)$/i", strip_tags($title), $match);
-            if ($match && strlen($match[1]) >= 8) {
-                $file = File::select(['files.id', 'files.name', 'files.ext'])->join('file_links as L', 'files.id', '=', 'L.file_id')->where('L.code', $match[1])->first();
-                if ($file && $file->name) {
-                    $name = $file->ext ? "{$file->name}.{$file->ext}" : $file->name;
-                    $text = str_replace($str, "[:~:{$match[1]}:{$name}:]", $text);
-                    continue;
-                }
+            if (self::formatLink($str, strip_tags($title), $text)) {
+                continue;
             }
             $herf = base64_encode($herf);
             $title = base64_encode($title);
             $text = str_replace($str, "[:LINK:{$herf}:{$title}:]", $text);
         }
-        // 文件分享链接
+        // 分享链接
         preg_match_all("/(https?:\/\/)((\w|=|\?|\.|\/|&|-|:|\+|%|;|#|@|,|!)+)/i", $text, $matchs);
         if ($matchs) {
             foreach ($matchs[0] as $str) {
-                preg_match("/\/single\/file\/(.*?)$/i", $str, $match);
-                if ($match && strlen($match[1]) >= 8) {
-                    $file = File::select(['files.id', 'files.name', 'files.ext'])->join('file_links as L', 'files.id', '=', 'L.file_id')->where('L.code', $match[1])->first();
-                    if ($file && $file->name) {
-                        $name = $file->ext ? "{$file->name}.{$file->ext}" : $file->name;
-                        $text = str_replace($str, "[:~:{$match[1]}:{$name}:]", $text);
-                    }
-                }
+                self::formatLink($str, $str, $text);
             }
         }
         // 过滤标签
@@ -1059,6 +1048,36 @@ class WebSocketDialogMsg extends AbstractModel
         $text = preg_replace("/\[:%:(.*?):(.*?):\]/i", "<a class=\"mention report\" href=\"{{RemoteURL}}single/report/detail/$1\" target=\"_blank\">%$2</a>", $text);
         $text = preg_replace("/\[:QUICK:(.*?):(.*?):\]/i", "<span data-quick-key=\"$1\">$2</span>", $text);
         return preg_replace("/^(<p><\/p>)+|(<p><\/p>)+$/i", "", $text);
+    }
+
+    /**
+     * 链接转换处理
+     * @param $search
+     * @param $subject
+     * @param $content
+     * @return bool
+     */
+    public static function formatLink($search, $subject, &$content)
+    {
+        $ret = false;
+        preg_match("/\/single\/file\/(.*?)$/i", $subject, $match);
+        if ($match && strlen($match[1]) >= 8) {
+            $file = File::select(['files.id', 'files.name', 'files.ext'])->join('file_links as L', 'files.id', '=', 'L.file_id')->where('L.code', $match[1])->first();
+            if ($file && $file->name) {
+                $name = $file->ext ? "{$file->name}.{$file->ext}" : $file->name;
+                $content = str_replace($search, "[:~:{$match[1]}:{$name}:]", $content);
+                $ret = true;
+            }
+        }
+        preg_match("/\/single\/report\/detail\/(.*?)$/i", $subject, $match);
+        if ($match && strlen($match[1]) >= 8) {
+            $report = Report::select(['reports.id', 'reports.title'])->join('report_links as L', 'reports.id', '=', 'L.rid')->where('L.code', $match[1])->first();
+            if ($report && $report->title) {
+                $content = str_replace($search, "[:%:{$match[1]}:{$report->title}:]", $content);
+                $ret = true;
+            }
+        }
+        return $ret;
     }
 
     /**

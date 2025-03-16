@@ -87,6 +87,7 @@ class FileController extends AbstractController
                 }
                 return Base::retError($msg, $data);
             }
+            $fileLink->increment("num");
         } else {
             return Base::retError('参数错误');
         }
