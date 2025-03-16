@@ -9,6 +9,8 @@ use App\Models\Report;
 use App\Models\ReportLink;
 use App\Models\ReportReceive;
 use App\Models\User;
+use App\Models\WebSocketDialog;
+use App\Models\WebSocketDialogMsg;
 use App\Module\Base;
 use App\Module\Doo;
 use App\Tasks\PushTask;
@@ -29,6 +31,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/my          01. 我发送的汇报
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName my
@@ -75,6 +78,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/receive          02. 我接收的汇报
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName receive
@@ -142,6 +146,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/store          03. 保存并发送工作汇报
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName store
@@ -267,6 +272,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/template          04. 生成汇报模板
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName template
@@ -438,6 +444,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/detail          05. 报告详情
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName detail
@@ -487,6 +494,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/mark          06. 标记已读/未读
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName mark
@@ -527,8 +535,105 @@ class ReportController extends AbstractController
     }
 
     /**
+     * @api {get} api/report/share          06. 分享报告到消息
+     *
+     * @apiDescription 需要token身份
+     * @apiVersion 1.0.0
+     * @apiGroup report
+     * @apiName share
+     *
+     * @apiParam {Number} id                报告id（组）
+     * @apiParam {Array} dialogids          转发给的对话ID
+     * @apiParam {Array} userids            转发给的成员ID
+     * @apiParam {String} leave_message     转发留言
+     *
+     * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
+     * @apiSuccess {String} msg     返回信息（错误描述）
+     * @apiSuccess {Object} data    返回数据
+     */
+    public function share()
+    {
+        $user = User::auth();
+        //
+        $id = Request::input('id');
+        $dialogids = Request::input('dialogids');
+        $userids = Request::input('userids');
+        $leave_message = Request::input('leave_message');
+        //
+        if (is_array($id)) {
+            if (count(Base::arrayRetainInt($id)) > 20) {
+                return Base::retError("最多只能操作20条数据");
+            }
+            $builder = Report::whereIn("id", Base::arrayRetainInt($id));
+        } else {
+            $builder = Report::whereId(intval($id));
+        }
+        $reportMsgs = [];
+        $builder ->chunkById(100, function ($list) use (&$reportMsgs, $user) {
+            /** @var Report $item */
+            foreach ($list as $item) {
+                $reportLink = ReportLink::generateLink($item->id, $user->userid);
+                $reportMsgs[] = "<a class=\"mention report\" href=\"{{RemoteURL}}single/report/detail/{$reportLink['code']}\" target=\"_blank\">%{$item->title}</a>";
+            }
+        });
+        if (empty($reportMsgs)) {
+            return Base::retError("报告不存在或已被删除");
+        }
+        $reportTag = count($reportMsgs) > 1 ? 'li' : 'p';
+        $reportMsgs = array_map(function ($item) use ($reportTag) {
+            return "<{$reportTag}>{$item}</{$reportTag}>";
+        }, $reportMsgs);
+        if ($reportTag === 'li') {
+            array_unshift($reportMsgs, "<ol>");
+            $reportMsgs[] = "</ol>";
+        }
+        if ($leave_message) {
+            $reportMsgs[] = "<p>{$leave_message}</p>";
+        }
+        $msgText = implode("", $reportMsgs);
+        //
+        return AbstractModel::transaction(function() use ($user, $msgText, $userids, $dialogids) {
+            $msgs = [];
+            $already = [];
+            if ($dialogids) {
+                if (!is_array($dialogids)) {
+                    $dialogids = [$dialogids];
+                }
+                foreach ($dialogids as $dialogid) {
+                    $res = WebSocketDialogMsg::sendMsg(null, $dialogid, 'text', ['text' => $msgText], $user->userid);
+                    if (Base::isSuccess($res)) {
+                        $msgs[] = $res['data'];
+                        $already[] = $dialogid;
+                    }
+                }
+            }
+            if ($userids) {
+                if (!is_array($userids)) {
+                    $userids = [$userids];
+                }
+                foreach ($userids as $userid) {
+                    if (!User::whereUserid($userid)->exists()) {
+                        continue;
+                    }
+                    $dialog = WebSocketDialog::checkUserDialog($user, $userid);
+                    if ($dialog && !in_array($dialog->id, $already)) {
+                        $res = WebSocketDialogMsg::sendMsg(null, $dialog->id, 'text', ['text' => $msgText], $user->userid);
+                        if (Base::isSuccess($res)) {
+                            $msgs[] = $res['data'];
+                        }
+                    }
+                }
+            }
+            return Base::retSuccess('发送成功', [
+                'msgs' => $msgs
+            ]);
+        });
+    }
+
+    /**
      * @api {get} api/report/last_submitter          07. 获取最后一次提交的接收人
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName last_submitter
@@ -546,6 +651,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/unread          08. 获取未读
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName unread
@@ -570,6 +676,7 @@ class ReportController extends AbstractController
     /**
      * @api {get} api/report/read          09. 标记汇报已读，可批量
      *
+     * @apiDescription 需要token身份
      * @apiVersion 1.0.0
      * @apiGroup report
      * @apiName read

@@ -95,6 +95,7 @@
                     <Select v-model="selectAction" :disabled="selectIds.length==0" @on-change="groupSelect=true" :placeholder="$L('请选择')" transfer>
                         <Option value="read">{{ $L('标记已读') }}</Option>
                         <Option value="unread">{{ $L('标记未读') }}</Option>
+                        <Option value="share">{{ $L('分享到消息') }}</Option>
                     </Select>
                     <Button :loading="loadIng > 0" type="primary" @click="selectClick" :disabled="selectAction=='' || selectIds.length==0">{{$L('执行')}}</Button>
                 </div>
@@ -113,107 +114,121 @@
                     @on-page-size-change="setPageSize"/>
             </div>
         </div>
+
+        <!-- 分享到消息 -->
+        <Forwarder
+            ref="forwarder"
+            :title="$L('分享报告到消息')"
+            :confirm-title="$L('确认分享')"
+            :multiple-max="50"
+            :before-submit="onShare"
+            sender-hidden/>
     </div>
 </template>
 
 <script>
+import Forwarder from "./Forwarder/index.vue";
+
 export default {
     name: "ReportReceive",
+    components: {Forwarder},
     data() {
         return {
             loadIng: 0,
-            columns: [{
-                type: 'selection',
-                width: 50,
-                align: 'right'
-            }, {
-                title: this.$L("标题"),
-                key: 'title',
-                sortable: true,
-                minWidth: 180,
-                render: (h, {row}) => {
-                    const displayTitle = `${row.title || ""}`.replace(/(\[([^\[\]]*)\]\s*){0,2}$/, '');
-                    const arr = []
-                    const myUser = row.receives_user.find(({userid}) => userid == this.userId)
-                    if (myUser && myUser.pivot.read == 0) {
-                        arr.push(
-                            h('Tag', {
-                                props: {   //传递参数
-                                    color: "orange",
-                                },
-                                style: {
-                                    flexShrink: 0,
-                                }
-                            }, this.$L("未读")),
-                            h('AutoTip', displayTitle)
-                        )
-                    } else {
-                        arr.push(
-                            h('AutoTip', displayTitle)
-                        )
-                    }
-                    return h('div', {
-                        style: {
-                            display: 'flex',
-                            alignItems: 'center',
+            columns: [
+                {
+                    type: 'selection',
+                    width: 50,
+                    align: 'right'
+                }, {
+                    title: this.$L("标题"),
+                    key: 'title',
+                    sortable: true,
+                    minWidth: 180,
+                    render: (h, {row}) => {
+                        const displayTitle = `${row.title || ""}`.replace(/(\[([^\[\]]*)\]\s*){0,2}$/, '');
+                        const arr = []
+                        const myUser = row.receives_user.find(({userid}) => userid == this.userId)
+                        if (myUser && myUser.pivot.read == 0) {
+                            arr.push(
+                                h('Tag', {
+                                    props: {   //传递参数
+                                        color: "orange",
+                                    },
+                                    style: {
+                                        flexShrink: 0,
+                                    }
+                                }, this.$L("未读")),
+                                h('AutoTip', displayTitle)
+                            )
+                        } else {
+                            arr.push(
+                                h('AutoTip', displayTitle)
+                            )
                         }
-                    }, arr)
-                }
-            }, {
-                title: this.$L("时间"),
-                key: 'time',
-                sortable: true,
-                minWidth: 180,
-                render: (h, {row}) => {
-                    return h('AutoTip', $A.reportExtractTime(row.title) || '-');
-                }
-            }, {
-                title: this.$L("类型"),
-                key: 'type',
-                sortable: true,
-                width: 90,
-                render: (h, {row}) => {
-                    return h('AutoTip', this.$L(row.type === 'daily' ? '日报' : '周报'))
-                }
-            }, {
-                title: this.$L("接收时间"),
-                key: 'receive_at',
-                align: 'center',
-                sortable: true,
-                width: 180,
-            }, {
-                title: this.$L("操作"),
-                align: 'center',
-                width: 90,
-                minWidth: 90,
-                render: (h, {column, row}) => {
-                    if (!row.id) {
-                        return null;
+                        return h('div', {
+                            style: {
+                                display: 'flex',
+                                alignItems: 'center',
+                            }
+                        }, arr)
                     }
-                    return h('TableAction', {
-                        props: {
-                            column,
-                            menu: [
-                                {
-                                    icon: "md-eye",
-                                    action: "view",
-                                }
-                            ]
-                        },
-                        on: {
-                            action: (name) => {
-                                if (name === 'view') {
-                                    this.$emit("on-view", row)
-                                    const myUser = row.receives_user.find(({userid}) => userid == this.userId)
-                                    if (myUser) {
-                                        this.$set(myUser.pivot, 'read', 1)
+                }, {
+                    title: this.$L("时间"),
+                    key: 'time',
+                    sortable: true,
+                    minWidth: 180,
+                    render: (h, {row}) => {
+                        return h('AutoTip', $A.reportExtractTime(row.title) || '-');
+                    }
+                }, {
+                    title: this.$L("类型"),
+                    key: 'type',
+                    sortable: true,
+                    width: 90,
+                    render: (h, {row}) => {
+                        return h('AutoTip', this.$L(row.type === 'daily' ? '日报' : '周报'))
+                    }
+                }, {
+                    title: this.$L("接收时间"),
+                    key: 'receive_at',
+                    align: 'center',
+                    sortable: true,
+                    width: 180,
+                }, {
+                    title: this.$L("操作"),
+                    align: 'center',
+                    width: 90,
+                    minWidth: 90,
+                    render: (h, {column, row}) => {
+                        if (!row.id) {
+                            return null;
+                        }
+                        return h('TableAction', {
+                            props: {
+                                column,
+                                menu: [
+                                    {
+                                        icon: "md-eye",
+                                        action: "view",
+                                    }
+                                ]
+                            },
+                            on: {
+                                action: (name) => {
+                                    if (name === 'view') {
+                                        this.$emit("on-view", row)
+                                        const myUser = row.receives_user.find(({userid}) => userid == this.userId)
+                                        if (myUser) {
+                                            this.$set(myUser.pivot, 'read', 1)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
-                },
-            }],
+                        });
+                    },
+                }
+            ],
             lists: [],
             listPage: 1,
             listTotal: 0,
@@ -310,6 +325,13 @@ export default {
                 case 'unread':
                     this.readReport(this.selectIds, this.selectAction)
                     break;
+                case 'share':
+                    if (this.selectIds.length > 20) {
+                        $A.messageWarning('每次最多分享20个');
+                        return;
+                    }
+                    this.$refs.forwarder.onSelection()
+                    break;
                 default:
                     $A.messageWarning('请选择执行方式');
                     break;
@@ -342,6 +364,28 @@ export default {
                 }
             });
         },
+
+        onShare({dialogids, userids, message}) {
+            return new Promise((resolve, reject) => {
+                this.$store.dispatch("call", {
+                    url: 'report/share',
+                    data: {
+                        id: this.selectIds,
+                        dialogids,
+                        userids,
+                        leave_message: message,
+                    }
+                }).then(({data, msg}) => {
+                    this.$store.dispatch("saveDialogMsg", data.msgs);
+                    this.$store.dispatch("updateDialogLastMsg", data.msgs);
+                    $A.messageSuccess(msg);
+                    resolve();
+                }).catch(({msg}) => {
+                    $A.modalError(msg);
+                    reject();
+                });
+            })
+        }
     }
 }
 </script>
