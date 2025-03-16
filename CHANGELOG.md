@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.53]
+
+### Bug Fixes
+
+- 工作流存在已离职人员
+
+### Features
+
+- 可点击标注图标查看标注人员
+- 支持分享工作报告到消息
+- 支持AI分析工作报告
+- 支持使用%发送工作报告
+- 新增自定义撤回及修改消息时限
+
+### Performance
+
+- 优化转发消息
+- 优化工作报告列表
+- 优化引用消息
+- 优化全局提示
+- 优化草稿消息
+
 ## [0.44.19]
 
 ### Bug Fixes

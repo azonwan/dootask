@@ -16008,18 +16008,6 @@
         "ru": "Не отображать информацию об исходном отправителе"
     },
     {
-        "key": "转发给",
-        "zh": "",
-        "zh-CHT": "轉發給",
-        "en": "Forward to",
-        "ko": "전달 대상",
-        "ja": "転送先",
-        "de": "Weiterleiten an",
-        "fr": "Transférer à",
-        "id": "Teruskan ke",
-        "ru": "Переслать"
-    },
-    {
         "key": "留言",
         "zh": "",
         "zh-CHT": "留言",
@@ -20602,18 +20590,6 @@
         "fr": "Le temps de parole est trop court",
         "id": "Waktu berbicara terlalu singkat",
         "ru": "Время разговора слишком короткое"
-    },
-    {
-        "key": "请选择转发对话或成员",
-        "zh": "",
-        "zh-CHT": "請選擇轉發對話或成員",
-        "en": "Please select a conversation or member to forward",
-        "ko": "전달할 대화 또는 멤버를 선택하세요",
-        "ja": "転送する会話またはメンバーを選択してください",
-        "de": "Bitte wählen Sie ein Gespräch oder ein Mitglied zum Weiterleiten aus",
-        "fr": "Veuillez sélectionner une conversation ou un membre à transférer",
-        "id": "Silakan pilih percakapan atau anggota untuk diteruskan",
-        "ru": "Пожалуйста, выберите разговор или участника для пересылки"
     },
     {
         "key": "文件不存在",
@@ -29026,5 +29002,125 @@
         "fr": "(%T1) minutes",
         "id": "(%T1) menit",
         "ru": "(%T1) минут"
+    },
+    {
+        "key": "确认转发",
+        "zh": "",
+        "zh-CHT": "確認轉發",
+        "en": "Confirm forwarding",
+        "ko": "전달 확인",
+        "ja": "転送を確認する",
+        "de": "Weiterleitung bestätigen",
+        "fr": "Confirmer le transfert",
+        "id": "Konfirmasi penerusan",
+        "ru": "Подтвердить пересылку"
+    },
+    {
+        "key": "确认发送",
+        "zh": "",
+        "zh-CHT": "確認發送",
+        "en": "Confirm sending",
+        "ko": "발송 확인",
+        "ja": "送信を確認する",
+        "de": "Senden bestätigen",
+        "fr": "Confirmer l'envoi",
+        "id": "Konfirmasi pengiriman",
+        "ru": "Подтвердить отправку"
+    },
+    {
+        "key": "分享到消息",
+        "zh": "",
+        "zh-CHT": "分享到消息",
+        "en": "Share to message",
+        "ko": "메시지에 공유",
+        "ja": "メッセージに共有",
+        "de": "Teilen zur Nachricht",
+        "fr": "Partager dans le message",
+        "id": "Bagikan ke pesan",
+        "ru": "Поделиться в сообщении"
+    },
+    {
+        "key": "分享报告到消息",
+        "zh": "",
+        "zh-CHT": "分享報告到消息",
+        "en": "Share report to message",
+        "ko": "보고서를 메시지에 공유",
+        "ja": "レポートをメッセージに共有",
+        "de": "Bericht zur Nachricht teilen",
+        "fr": "Partager le rapport dans le message",
+        "id": "Bagikan laporan ke pesan",
+        "ru": "Поделиться отчетом в сообщении"
+    },
+    {
+        "key": "确认分享",
+        "zh": "",
+        "zh-CHT": "確認分享",
+        "en": "Confirm sharing",
+        "ko": "공유 확인",
+        "ja": "共有を確認する",
+        "de": "Teilen bestätigen",
+        "fr": "Confirmer le partage",
+        "id": "Konfirmasi berbagi",
+        "ru": "Подтвердить общий доступ"
+    },
+    {
+        "key": "每次最多分享(%T1)个",
+        "zh": "",
+        "zh-CHT": "每次最多分享(%T1)個",
+        "en": "Share up to (%T1) items at a time",
+        "ko": "한 번에 최대 (%T1)개 공유",
+        "ja": "一度に最大(%T1)個共有",
+        "de": "Bis zu (%T1) Elemente gleichzeitig teilen",
+        "fr": "Partager jusqu'à (%T1) éléments à la fois",
+        "id": "Bagikan maksimum (%T1) item sekaligus",
+        "ru": "Можно поделиться максимум (%T1) элементами за раз"
+    },
+    {
+        "key": "标注人员：(%T1) (ID: (%T2))",
+        "zh": "",
+        "zh-CHT": "標註人員：(%T1) (ID: (%T2))",
+        "en": "Tagged personnel: (%T1) (ID: (%T2))",
+        "ko": "태그된 인원: (%T1) (ID: (%T2))",
+        "ja": "タグ付けされた担当者: (%T1) (ID: (%T2))",
+        "de": "Markiertes Personal: (%T1) (ID: (%T2))",
+        "fr": "Personnel marqué : (%T1) (ID : (%T2))",
+        "id": "Personel yang ditandai: (%T1) (ID: (%T2))",
+        "ru": "Отмеченный персонал: (%T1) (ID: (%T2))"
+    },
+    {
+        "key": "标注人员不存在",
+        "zh": "",
+        "zh-CHT": "標註人員不存在",
+        "en": "Tagged personnel does not exist",
+        "ko": "태그된 인원이 존재하지 않습니다",
+        "ja": "タグ付けされた担当者が存在しません",
+        "de": "Markiertes Personal existiert nicht",
+        "fr": "Le personnel marqué n'existe pas",
+        "id": "Personel yang ditandai tidak ada",
+        "ru": "Отмеченный персонал не существует"
+    },
+    {
+        "key": "请选择对话或成员",
+        "zh": "",
+        "zh-CHT": "請選擇對話或成員",
+        "en": "Please select a conversation or member",
+        "ko": "대화 또는 구성원을 선택하세요",
+        "ja": "会話またはメンバーを選択してください",
+        "de": "Bitte wählen Sie ein Gespräch oder ein Mitglied aus",
+        "fr": "Veuillez sélectionner une conversation ou un membre",
+        "id": "Silakan pilih percakapan atau anggota",
+        "ru": "Пожалуйста, выберите беседу или участника"
+    },
+    {
+        "key": "报告不存在或已被删除",
+        "zh": "",
+        "zh-CHT": "報告不存在或已被刪除",
+        "en": "Report does not exist or has been deleted",
+        "ko": "보고서가 존재하지 않거나 삭제되었습니다",
+        "ja": "レポートが存在しないか削除されました",
+        "de": "Bericht existiert nicht oder wurde gelöscht",
+        "fr": "Le rapport n'existe pas ou a été supprimé",
+        "id": "Laporan tidak ada atau sudah dihapus",
+        "ru": "Отчет не существует или был удален"
     }
 ]
