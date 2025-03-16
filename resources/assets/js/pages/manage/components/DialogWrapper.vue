@@ -466,89 +466,14 @@
             </div>
         </Modal>
 
-        <!-- 转发选择 -->
-        <UserSelect
-            ref="forwardSelect"
-            :multiple-max="50"
+        <!-- 转发 -->
+        <Forwarder
+            ref="forwarder"
             :title="$L('转发')"
-            :before-submit="onForwardBefore"
-            :show-select-all="false"
-            show-dialog
-            module/>
-
-        <!-- 转发确认 -->
-        <Modal
-            v-model="forwardhow"
-            :title="`${$L('转发给')}:`"
-            class-name="common-user-select-modal dialog-forward-message-modal"
-            :mask-closable="false"
-            width="420">
-            <div class="user-modal-search">
-                <Scrollbar class="search-selected" enable-x :enable-y="false">
-                    <ul>
-                        <li v-for="item in forwardData" :data-id="item.userid">
-                            <div v-if="item.type=='group'" class="user-modal-avatar">
-                                <EAvatar v-if="item.avatar" class="img-avatar" :src="item.avatar" :size="32"></EAvatar>
-                                <i v-else-if="item.group_type=='department'" class="taskfont icon-avatar department">&#xe75c;</i>
-                                <i v-else-if="item.group_type=='project'" class="taskfont icon-avatar project">&#xe6f9;</i>
-                                <i v-else-if="item.group_type=='task'" class="taskfont icon-avatar task">&#xe6f4;</i>
-                                <i v-else-if="item.group_type=='okr'" class="taskfont icon-avatar task">&#xe6f4;</i>
-                                <Icon v-else class="icon-avatar" type="ios-people" />
-                                <div v-if="forwardData.length == 1" class="avatar-name">
-                                    <span>{{item.name}}</span>
-                                </div>
-                            </div>
-                            <UserAvatar v-else :userid="item.userid" :size="32" :show-name="forwardData.length == 1"/>
-                        </li>
-                    </ul>
-                </Scrollbar>
-            </div>
-            <div class="twice-affirm-body-extend">
-                <div class="dialog-wrapper-forward-body">
-                    <div class="dialog-wrapper inde-list">
-                        <Scrollbar class-name="dialog-scroller">
-                            <DialogItem
-                                :source="operateItem"
-                                @on-view-text="onViewText"
-                                @on-view-file="onViewFile"
-                                @on-down-file="onDownFile"
-                                @on-emoji="onEmoji"
-                                @on-other="onOther"
-                                simpleView/>
-                        </Scrollbar>
-                    </div>
-                    <div class="leave-message">
-                        <ChatInput
-                            v-if="forwardDialogId > 0"
-                            v-model="forwardMessage"
-                            :dialog-id="forwardDialogId"
-                            :emoji-bottom="windowPortrait"
-                            :maxlength="200000"
-                            :placeholder="$L('留言')"
-                            disabled-record
-                            simple-mode/>
-                        <Input
-                            v-else
-                            type="textarea"
-                            :autosize="{minRows: 1,maxRows: 3}"
-                            v-model="forwardMessage"
-                            :maxlength="200000"
-                            :placeholder="$L('留言')"
-                            clearable/>
-                    </div>
-                </div>
-            </div>
-            <template #footer>
-                <div class="dialog-wrapper-forward-footer" :class="{selected: !forwardSource}" @click="forwardSource = !forwardSource">
-                    <Icon class="user-modal-icon" :type="forwardSource ? 'ios-radio-button-off' : 'ios-checkmark-circle'" />
-                    <span class="forward-text-tip">{{$L('不显示原发送者信息')}}</span>
-                </div>
-                <Button type="primary" :loading="forwardLoad > 0" @click="onForwardAffirm">
-                    {{$L('确定')}}
-                    <template v-if="forwardData.length > 0">({{forwardData.length}})</template>
-                </Button>
-            </template>
-        </Modal>
+            :confirm-title="$L('转发确认')"
+            :multiple-max="50"
+            :msg-detail="operateItem"
+            :before-submit="onForward"/>
 
         <!-- 设置待办 -->
         <Modal
@@ -724,10 +649,12 @@ import touchclick from "../../../directives/touchclick";
 import {languageList} from "../../../language";
 import {isLocalResourcePath} from "../../../components/Replace/utils";
 import emitter from "../../../store/events";
+import Forwarder from "./Forwarder/index.vue";
 
 export default {
     name: "DialogWrapper",
     components: {
+        Forwarder,
         UserAvatarTip,
         UserSelect,
         ImgUpload,
@@ -804,13 +731,6 @@ export default {
             modifyAiShow: false,
             modifyData: {},
             modifyLoad: 0,
-
-            forwardhow: false,
-            forwardData: [],
-            forwardLoad: 0,
-            forwardDialogId: 0,
-            forwardMessage: '',
-            forwardSource: true,
 
             openId: 0,
             errorId: 0,
@@ -2944,55 +2864,26 @@ export default {
             });
         },
 
-        onForwardBefore() {
+        onForward(forwardData) {
             return new Promise((resolve, reject) => {
-                this.forwardData = this.$refs.forwardSelect.formatSelect(this.$refs.forwardSelect.selects);
-                if (this.forwardData.length === 0) {
-                    $A.messageError("请选择转发对话或成员");
-                } else {
-                    this.forwardDialogId = 0;
-                    if (this.forwardData.length === 1) {
-                        const {type, userid} = this.forwardData[0];
-                        if (type === "group" && /^d:/.test(userid)) {
-                            this.forwardDialogId = parseInt(userid.replace(/^d:/, ''));
-                        }
+                this.$store.dispatch("call", {
+                    url: 'dialog/msg/forward',
+                    data: {
+                        dialogids: forwardData.dialogids,
+                        userids: forwardData.userids,
+                        msg_id: forwardData.msg_id,
+                        show_source: forwardData.sender ? 1 : 0,
+                        leave_message: forwardData.message
                     }
-                    this.forwardMessage = '';
-                    this.forwardSource = true;
-                    this.forwardhow = true;
-                }
-                reject();
-            })
-        },
-
-        onForwardAffirm() {
-            const selects = this.$refs.forwardSelect.selects;
-            if (selects.length === 0) {
-                $A.messageError("请选择转发对话或成员");
-                return
-            }
-            const dialogids = selects.filter(value => $A.leftExists(value, 'd:')).map(value => value.replace('d:', ''));
-            const userids = selects.filter(value => !$A.leftExists(value, 'd:'));
-            this.forwardLoad++;
-            this.$store.dispatch("call", {
-                url: 'dialog/msg/forward',
-                data: {
-                    dialogids,
-                    userids,
-                    msg_id: this.operateItem.id,
-                    show_source: this.forwardSource ? 1 : 0,
-                    leave_message: this.forwardMessage
-                }
-            }).then(({data, msg}) => {
-                this.$store.dispatch("saveDialogMsg", data.msgs);
-                this.$store.dispatch("updateDialogLastMsg", data.msgs);
-                $A.messageSuccess(msg);
-                this.$refs.forwardSelect.hide()
-                this.forwardhow = false;
-            }).catch(({msg}) => {
-                $A.modalError(msg);
-            }).finally(_ => {
-                this.forwardLoad--;
+                }).then(({data, msg}) => {
+                    this.$store.dispatch("saveDialogMsg", data.msgs);
+                    this.$store.dispatch("updateDialogLastMsg", data.msgs);
+                    $A.messageSuccess(msg);
+                    resolve()
+                }).catch(({msg}) => {
+                    $A.modalError(msg);
+                    reject()
+                });
             });
         },
 
@@ -3240,7 +3131,7 @@ export default {
                         break;
 
                     case "forward":
-                        this.$refs.forwardSelect.onSelection()
+                        this.$refs.forwarder.onSelection()
                         break;
 
                     case "withdraw":

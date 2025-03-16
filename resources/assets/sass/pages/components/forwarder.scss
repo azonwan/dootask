@@ -1,0 +1,129 @@
+.forwarder-message-modal {
+    .ivu-modal {
+        margin: 10px auto;
+
+        .ivu-modal-body {
+            .user-modal-search {
+                padding-bottom: 16px;
+
+                .search-selected {
+                    max-width: 100%;
+                }
+
+                .user-modal-avatar {
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+
+                    .avatar-name {
+                        max-width: 90%;
+                    }
+                }
+            }
+
+            .twice-affirm-body-extend {
+                margin: 0 24px;
+
+                .forwarder-wrapper-body {
+                    .dialog-wrapper {
+                        position: relative;
+                        z-index: 1;
+
+                        &.inde-list {
+                            border-radius: 0;
+                        }
+
+                        .dialog-scroller {
+                            position: relative;
+                            padding: 0;
+
+                            .dialog-item {
+                                .dialog-view {
+                                    width: 100%;
+                                    max-width: 100%;
+                                    margin: 0;
+
+                                    &.record {
+                                        width: auto;
+                                    }
+
+                                    .dialog-head {
+                                        width: 100%;
+                                        border-radius: 8px;
+
+                                        .dialog-content {
+                                            .content-file.file {
+                                                width: 100%;
+
+                                                .file-box {
+                                                    width: 100%;
+                                                }
+                                            }
+                                        }
+
+                                        .dialog-emoji {
+                                            display: none;
+                                        }
+                                    }
+
+                                    .dialog-foot {
+                                        display: none;
+                                    }
+                                }
+
+                                .dialog-avatar {
+                                    display: none;
+                                }
+
+                            }
+                        }
+                    }
+
+                    .leave-message {
+                        position: relative;
+                        z-index: 2;
+                        padding-bottom: 16px;
+
+                        textarea {
+                            background: #f7f7f7;
+                        }
+                    }
+                }
+            }
+        }
+
+        .ivu-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+
+            .forwarder-wrapper-footer {
+                flex: 1;
+                width: 0;
+                display: flex;
+                line-height: 34px;
+                cursor: pointer;
+
+                .user-modal-icon {
+                    flex-shrink: 0;
+                    font-size: 22px;
+                    margin-right: 5px;
+                    color: rgba($primary-desc-color, 0.7);
+                    margin-top: 6px;
+                }
+
+                .forward-text-tip {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+
+                &.selected {
+                    .user-modal-icon {
+                        color: $primary-color;
+                    }
+                }
+            }
+        }
+    }
+}
