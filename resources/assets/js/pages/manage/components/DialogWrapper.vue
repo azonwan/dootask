@@ -470,7 +470,7 @@
         <Forwarder
             ref="forwarder"
             :title="$L('转发')"
-            :confirm-title="$L('转发确认')"
+            :confirm-title="$L('确认转发')"
             :multiple-max="50"
             :msg-detail="operateItem"
             :before-submit="onForward"/>

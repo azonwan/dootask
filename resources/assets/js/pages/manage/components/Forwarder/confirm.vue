@@ -1,5 +1,5 @@
 <template>
-    <!-- 转发确认 -->
+    <!-- 确认转发 -->
     <Modal
         v-model="show"
         :title="title"
@@ -28,7 +28,7 @@
         </div>
         <div class="twice-affirm-body-extend">
             <div class="forwarder-wrapper-body">
-                <div class="dialog-wrapper inde-list">
+                <div v-if="msgDetail" class="dialog-wrapper inde-list">
                     <Scrollbar class-name="dialog-scroller">
                         <DialogItem
                             :source="msgDetail"
@@ -64,7 +64,7 @@
             </div>
         </div>
         <template #footer>
-            <div class="forwarder-wrapper-footer" :class="{selected: !sender}" @click="onSender">
+            <div v-if="!senderHidden" class="forwarder-wrapper-footer" :class="{selected: !sender}" @click="onSender">
                 <Icon class="user-modal-icon" :type="sender ? 'ios-radio-button-off' : 'ios-checkmark-circle'" />
                 <span class="forward-text-tip">{{$L('不显示原发送者信息')}}</span>
             </div>
@@ -113,7 +113,7 @@ export default {
         // 消息详情
         msgDetail: {
             type: Object,
-            default: () => ({})
+            default: null
         },
     },
 
@@ -177,10 +177,13 @@ export default {
                 this.hide()
                 return
             }
-            const before = this.beforeSubmit({
+            const data = {
                 message: this.message,
-                sender: this.sender,
-            });
+            }
+            if (!this.senderHidden) {
+                data.sender = this.sender
+            }
+            const before = this.beforeSubmit(data);
             if (before && before.then) {
                 this.loading = true
                 before.then(() => {

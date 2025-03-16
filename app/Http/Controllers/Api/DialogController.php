@@ -1521,6 +1521,7 @@ class DialogController extends AbstractController
      * @apiParam {Number} file_id           消息ID
      * @apiParam {Array} dialogids          转发给的对话ID
      * @apiParam {Array} userids            转发给的成员ID
+     * @apiParam {String} leave_message     转发留言
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -1533,14 +1534,18 @@ class DialogController extends AbstractController
         $file_id = intval(Request::input("file_id"));
         $dialogids = Request::input('dialogids');
         $userids = Request::input('userids');
+        $leave_message = Request::input('leave_message');
         //
         if (empty($dialogids) && empty($userids)) {
-            return Base::retError("请选择转发对话或成员");
+            return Base::retError("请选择对话或成员");
         }
         //
         $file = File::permissionFind($file_id, $user);
         $fileLink = $file->getShareLink($user->userid);
-        $fileMsg = "<a class=\"mention file\" href=\"{{RemoteURL}}single/file/{$fileLink['code']}\" target=\"_blank\">~{$file->getNameAndExt()}</a>";
+        $fileMsg = "<p><a class=\"mention file\" href=\"{{RemoteURL}}single/file/{$fileLink['code']}\" target=\"_blank\">~{$file->getNameAndExt()}</a></p>";
+        if ($leave_message) {
+            $fileMsg .= "<p>{$leave_message}</p>";
+        }
         //
         return AbstractModel::transaction(function() use ($user, $fileMsg, $userids, $dialogids) {
             $msgs = [];
@@ -2115,7 +2120,7 @@ class DialogController extends AbstractController
      * @apiParam {Array} dialogids              转发给的对话ID
      * @apiParam {Array} userids                转发给的成员ID
      * @apiParam {Number} show_source           是否显示原发送者信息
-     * @apiParam {Array} leave_message          转发留言
+     * @apiParam {String} leave_message         转发留言
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -2132,7 +2137,7 @@ class DialogController extends AbstractController
         $leave_message = Request::input('leave_message');
         //
         if (empty($dialogids) && empty($userids)) {
-            return Base::retError("请选择转发对话或成员");
+            return Base::retError("请选择对话或成员");
         }
         //
         $msg = WebSocketDialogMsg::whereId($msg_id)->first();

@@ -373,15 +373,13 @@
         </Modal>
 
         <!-- 文件发送 -->
-        <UserSelect
-            ref="sendFile"
-            v-model="sendData"
-            :multiple-max="50"
+        <Forwarder
+            ref="forwarder"
             :title="$L('发送文件')"
+            :confirm-title="$L('确认发送')"
+            :multiple-max="50"
             :before-submit="onSendFile"
-            :show-select-all="false"
-            show-dialog
-            module/>
+            sender-hidden/>
 
         <!--文件链接-->
         <Modal
@@ -448,13 +446,14 @@ import DrawerOverlay from "../../components/DrawerOverlay";
 import longpress from "../../directives/longpress";
 import UserSelect from "../../components/UserSelect.vue";
 import UserAvatarTip from "../../components/UserAvatar/tip.vue";
+import Forwarder from "./components/Forwarder/index.vue";
 
 const FilePreview = () => import('./components/FilePreview');
 const FileContent = () => import('./components/FileContent');
 const FileObject = {sort: null, mode: null, shared: null};
 
 export default {
-    components: {UserAvatarTip, UserSelect, FilePreview, DrawerOverlay, FileContent},
+    components: {Forwarder, UserAvatarTip, UserSelect, FilePreview, DrawerOverlay, FileContent},
     directives: {longpress},
     data() {
         return {
@@ -527,7 +526,6 @@ export default {
             shareLoad: 0,
 
             sendFileId: 0,
-            sendData: [],
 
             linkShow: false,
             linkData: {},
@@ -1253,8 +1251,7 @@ export default {
 
                 case 'send':
                     this.sendFileId = item.id;
-                    this.sendData = [];
-                    this.$refs.sendFile.onSelection()
+                    this.$refs.forwarder.onSelection()
                     break;
 
                 case 'share':
@@ -1325,20 +1322,14 @@ export default {
             }
         },
 
-        onSendFile() {
+        onSendFile({dialogids, userids, message}) {
             return new Promise((resolve, reject) => {
-                if (this.sendData.length === 0) {
-                    $A.messageError("请选择转发对话或成员");
-                    reject();
-                    return
-                }
-                const dialogids = this.sendData.filter(value => $A.leftExists(value, 'd:')).map(value => value.replace('d:', ''));
-                const userids = this.sendData.filter(value => !$A.leftExists(value, 'd:'));
                 this.$store.dispatch("call", {
                     url: 'dialog/msg/sendfileid',
                     data: {
                         dialogids,
                         userids,
+                        leave_message: message,
                         file_id: this.sendFileId
                     }
                 }).then(({data, msg}) => {

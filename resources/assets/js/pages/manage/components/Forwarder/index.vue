@@ -10,7 +10,7 @@
             show-dialog
             module/>
 
-        <!-- 转发确认 -->
+        <!-- 确认转发 -->
         <ForwardConfirm
             ref="forwardConfirm"
             v-model="confirmShow"
@@ -58,7 +58,7 @@ export default {
         // 消息详情
         msgDetail: {
             type: Object,
-            default: () => ({})
+            default: null
         },
     },
 
@@ -105,7 +105,9 @@ export default {
                 //
                 data.dialogids = selects.filter(value => $A.leftExists(value, 'd:')).map(value => value.replace('d:', ''));
                 data.userids = selects.filter(value => !$A.leftExists(value, 'd:'));
-                data.msg_id = this.msgDetail.id;
+                if (this.msgDetail) {
+                    data.msg_id = this.msgDetail.id;
+                }
                 //
                 const success = () => {
                     this.$refs.forwardSelect.hide();
@@ -115,6 +117,15 @@ export default {
                     success()
                     return
                 }
+                /**
+                 * data = {
+                 *    dialogids: [],    // 对话ID
+                 *    userids: [],      // 用户ID
+                 *    message: '',      // 留言内容
+                 *    msg_id: 0         // 消息ID（msgDetail != null 时有此参数）
+                 *    sender: true      // 是否隐藏原发送者信息（senderHidden != true 时有此参数）
+                 *    }
+                 */
                 const before = this.beforeSubmit(data);
                 if (before && before.then) {
                     before.then(success).catch(reject)
