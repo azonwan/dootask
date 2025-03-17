@@ -137,7 +137,11 @@ export default {
         },
 
         flow() {
-            return this.taskFlows.find(({task_id}) => task_id == this.task.id);
+            const item = this.taskFlows.find(({task_id}) => task_id == this.task.id);
+            if (item) {
+                return item;
+            }
+            return this.taskFlows.find(({flow_item_id}) => flow_item_id == this.task.flow_item_id);
         },
 
         turns() {

@@ -2307,8 +2307,8 @@ class ProjectController extends AbstractController
      * @apiGroup project
      * @apiName task__flow
      *
-     * @apiParam {Number} task_id               任务ID
-     * @apiParam {Number} project_id            项目ID - 存在时只返回这个项目的
+     * @apiParam {Number} [task_id]             任务ID
+     * @apiParam {Number} [project_id]          项目ID（存在时只返回这个项目的工作流，主要用于任务移动到其他项目时）
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
