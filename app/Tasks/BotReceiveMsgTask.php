@@ -17,6 +17,7 @@ use App\Module\Doo;
 use App\Module\Ihttp;
 use App\Module\TextExtractor;
 use Carbon\Carbon;
+use League\HTMLToMarkdown\HtmlConverter;
 use DB;
 
 @error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
@@ -439,6 +440,12 @@ class BotReceiveMsgTask extends AbstractTask
             if ($msg->msg['model_name']) {
                 $extras['model_name'] = $msg->msg['model_name'];
             }
+            if (preg_match("/(.*?)(\s+|\s*[_-]\s*)(think|thinking|reasoning)\s*$/", $extras['model_name'], $match)) {
+                $extras['model_name'] = $match[1];
+                $extras['max_tokens'] = 20000;
+                $extras['thinking'] = 4096;
+                $extras['temperature'] = 1.0;
+            }
             if ($dialog->session_id) {
                 $extras['context_key'] = 'session_' . $dialog->session_id;
             }
@@ -580,7 +587,8 @@ class BotReceiveMsgTask extends AbstractTask
         if ($msg->type !== 'text') {
             return '';
         }
-        $original = $msg->msg['text'];
+
+        $original = $msg->msg['text'] ?: '';
         if ($mention) {
             $original = preg_replace("/<span class=\"mention user\" data-id=\"(\d+)\">(.*?)<\/span>/", "", $original);
         }
@@ -591,62 +599,76 @@ class BotReceiveMsgTask extends AbstractTask
             }
             return $command;
         }
-        $aiContents = [];
-        if ($isAiBot) {
-            if (preg_match_all("/<span class=\"mention task\" data-id=\"(\d+)\">(.*?)<\/span>/", $original, $match)) {
-                $taskIds = Base::newIntval($match[1]);
-                foreach ($taskIds as $index => $taskId) {
-                    $taskName = addslashes($match[2][$index]) . " (ID:{$taskId})";
-                    $taskContext = "任务状态：不存在或已删除";
-                    $taskInfo = ProjectTask::with(['content'])->whereId($taskId)->first();
-                    if ($taskInfo) {
-                        $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
-                        $taskContext = implode("\n", $taskInfo->AIContext());
-                    }
-                    $aiContents[] = "<task_content path=\"{$taskName}\">\n{$taskContext}\n</task_content>";
-                    $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
+        if (!$isAiBot) {
+            return trim(strip_tags($original));
+        }
+
+        $contents = [];
+        // 任务
+        if (preg_match_all("/<span class=\"mention task\" data-id=\"(\d+)\">(.*?)<\/span>/", $original, $match)) {
+            $taskIds = Base::newIntval($match[1]);
+            foreach ($taskIds as $index => $taskId) {
+                $taskName = addslashes($match[2][$index]) . " (ID:{$taskId})";
+                $taskContext = "任务状态：不存在或已删除";
+                $taskInfo = ProjectTask::with(['content'])->whereId($taskId)->first();
+                if ($taskInfo) {
+                    $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
+                    $taskContext = implode("\n", $taskInfo->AIContext());
                 }
+                $contents[] = "<task_content path=\"{$taskName}\">\n{$taskContext}\n</task_content>";
+                $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
             }
-            if (preg_match_all("/<a class=\"mention ([^'\"]*)\" href=\"([^\"']+?)\"[^>]*?>[~%]([^>]*)<\/a>/", $original, $match)) {
-                $urlPaths = $match[2];
-                foreach ($urlPaths as $index => $urlPath) {
-                    $pathTag = null;
-                    $pathName = null;
-                    $pathContent = null;
-                    if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
-                        $pathTag = "file_content";
-                        $pathName = addslashes($match[3][$index]);
-                        $pathContent = "文件状态：不存在或已删除";
-                        $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
-                        if ($fileInfo && isset($fileInfo->content['url'])) {
-                            $urlPath = public_path($fileInfo->content['url']);
-                            if (file_exists($urlPath)) {
-                                $pathName .= " (ID:{$fileInfo->id})";
-                                $pathContent = TextExtractor::getFileContent($urlPath);
-                            }
-                        }
-                    } elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
-                        $pathTag = "report_content";
-                        $pathName = addslashes($match[3][$index]);
-                        $pathContent = "报告状态：不存在或已删除";
-                        $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
-                        if ($reportInfo) {
-                            $pathName .= " (ID:{$reportInfo->id})";
-                            $pathContent = $reportInfo->content;
+        }
+        // 文件、报告
+        if (preg_match_all("/<a class=\"mention ([^'\"]*)\" href=\"([^\"']+?)\"[^>]*?>[~%]([^>]*)<\/a>/", $original, $match)) {
+            $urlPaths = $match[2];
+            foreach ($urlPaths as $index => $urlPath) {
+                $pathTag = null;
+                $pathName = null;
+                $pathContent = null;
+                // 文件
+                if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
+                    $pathTag = "file_content";
+                    $pathName = addslashes($match[3][$index]);
+                    $pathContent = "文件状态：不存在或已删除";
+                    $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
+                    if ($fileInfo && isset($fileInfo->content['url'])) {
+                        $urlPath = public_path($fileInfo->content['url']);
+                        if (file_exists($urlPath)) {
+                            $pathName .= " (ID:{$fileInfo->id})";
+                            $pathContent = TextExtractor::getFileContent($urlPath);
                         }
                     }
-                    if ($pathTag) {
-                        $aiContents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
-                        $original = str_replace($match[0][$index], "'{$pathName}' (see below for {$pathTag} tag)", $original);
+                }
+                // 报告
+                elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
+                    $pathTag = "report_content";
+                    $pathName = addslashes($match[3][$index]);
+                    $pathContent = "报告状态：不存在或已删除";
+                    $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
+                    if ($reportInfo) {
+                        $pathName .= " (ID:{$reportInfo->id})";
+                        $pathContent = $reportInfo->content;
                     }
+                }
+                if ($pathTag) {
+                    $contents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
+                    $original = str_replace($match[0][$index], "'{$pathName}' (see below for {$pathTag} tag)", $original);
                 }
             }
         }
-        $command = trim(strip_tags($original));
-        if ($aiContents) {
-            $command .= "\n\n" . implode("\n\n", $aiContents);
+        if ($msg->msg['type'] !== 'md') {
+            // 转换为Markdown
+            try {
+                $converter = new HtmlConverter();
+                $original = $converter->convert($original);
+            } catch (\Exception) { }
         }
-        return $command ?: '';
+        if ($contents) {
+            // 添加tag内容
+            $original .= "\n\n" . implode("\n\n", $contents);
+        }
+        return $original ?: '';
     }
 
     /**

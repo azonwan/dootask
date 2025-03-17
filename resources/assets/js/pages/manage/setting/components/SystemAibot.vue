@@ -17,7 +17,7 @@
                     </template>
                     <template v-else-if="field.type === 'model'">
                         <Select v-model="formData[field.prop]" transfer>
-                            <Option v-for="item in modelOption(field.prop)" :value="item.value" :key="item.value">{{ item.label }}</Option>
+                            <Option v-for="(item, key) in modelOption(field.prop)" :value="item.value" :key="key">{{ item.label }}</Option>
                         </Select>
                     </template>
                     <template v-else-if="field.type === 'textarea'">

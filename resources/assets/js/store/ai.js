@@ -88,6 +88,7 @@ const AISystemConfig = {
             label: "模型列表",
             prop: "models",
             type: "textarea",
+            maxlength: 1000,
             placeholder: "一行一个模型名称",
             functions: "使用默认模型列表"
         },
