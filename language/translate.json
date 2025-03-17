@@ -29122,5 +29122,17 @@
         "fr": "Le rapport n'existe pas ou a été supprimé",
         "id": "Laporan tidak ada atau sudah dihapus",
         "ru": "Отчет не существует или был удален"
+    },
+    {
+        "key": "附言",
+        "zh": "",
+        "zh-CHT": "附言",
+        "en": "PS",
+        "ko": "추신",
+        "ja": "追伸",
+        "de": "PS",
+        "fr": "P.S.",
+        "id": "PS",
+        "ru": "P.S."
     }
 ]
