@@ -377,6 +377,7 @@
             ref="forwarder"
             :title="$L('发送文件')"
             :confirm-title="$L('确认发送')"
+            :confirm-placeholder="$L('说明')"
             :multiple-max="50"
             :before-submit="onSendFile"
             sender-hidden/>

@@ -120,6 +120,7 @@
             ref="forwarder"
             :title="$L('分享报告到消息')"
             :confirm-title="$L('确认分享')"
+            :confirm-placeholder="$L('说明')"
             :multiple-max="50"
             :before-submit="onShare"
             sender-hidden/>

@@ -4,6 +4,7 @@
         <UserSelect
             ref="forwardSelect"
             :title="title"
+            :show-bot="showBot"
             :multiple-max="userMaxSelect"
             :before-submit="onSelectBefore"
             :show-select-all="false"
@@ -15,6 +16,7 @@
             ref="forwardConfirm"
             v-model="confirmShow"
             :title="confirmTitle"
+            :placeholder="confirmPlaceholder"
             :sender-hidden="senderHidden"
             :before-submit="onConfirmBefore"
 
@@ -42,10 +44,20 @@ export default {
             type: String,
             default: 'Forward Confirm'
         },
+        // 确认输入框占位符
+        confirmPlaceholder: {
+            type: String,
+            default: null
+        },
         // 隐藏（不显示原发送者信息）选项
         senderHidden: {
             type: Boolean,
             default: false
+        },
+        // 是否显示机器人
+        showBot: {
+            type: Boolean,
+            default: true
         },
         // 最大选择数量
         userMaxSelect: {

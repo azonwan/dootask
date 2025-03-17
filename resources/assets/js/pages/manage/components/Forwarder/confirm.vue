@@ -47,7 +47,7 @@
                         :dialog-id="dialogId"
                         :emoji-bottom="windowPortrait"
                         :maxlength="200000"
-                        :placeholder="$L('留言')"
+                        :placeholder="placeholder || $L('留言')"
                         :disabled="loading"
                         disabled-record
                         simple-mode/>
@@ -57,7 +57,7 @@
                         :autosize="{minRows: 1,maxRows: 3}"
                         v-model="message"
                         :maxlength="200000"
-                        :placeholder="$L('留言')"
+                        :placeholder="placeholder || $L('留言')"
                         :disabled="loading"
                         clearable/>
                 </div>
@@ -91,6 +91,11 @@ export default {
         title: {
             type: String,
             default: ''
+        },
+        // 输入框占位符
+        placeholder: {
+            type: String,
+            default: null
         },
         // 隐藏（不显示原发送者信息）选项
         senderHidden: {
