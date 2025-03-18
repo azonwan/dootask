@@ -943,6 +943,7 @@ class ProjectController extends AbstractController
      * @apiParam {Object} [keys]             搜索条件
      * - keys.name: ID、任务名称、任务描述
      * - keys.tag: 标签名称
+     * - keys.status: 任务状态 (completed: 已完成、uncompleted: 未完成、flow-xx: 流程状态ID)
      *
      * @apiParam {Number} [project_id]       项目ID
      * @apiParam {Number} [parent_id]        主任务ID（project_id && parent_id ≤ 0 时 仅查询自己参与的任务）
@@ -1005,6 +1006,20 @@ class ProjectController extends AbstractController
             $builder->whereHas('taskTag', function ($query) use ($keys) {
                 $query->where('project_task_tags.name', $keys['tag']);
             });
+        }
+        if ($keys['status']) {
+            if ($keys['status'] == 'completed') {
+                $builder->whereNotNull('project_tasks.complete_at');
+            } elseif ($keys['status'] == 'uncompleted') {
+                $builder->whereNull('project_tasks.complete_at');
+            } elseif (str_starts_with($keys['status'], 'flow-')) {
+                $flow = str_replace('flow-', '', $keys['status']);
+                if (Base::isNumber($flow)) {
+                    $builder->where('project_tasks.flow_item_id', intval($flow));
+                } elseif ($flow) {
+                    $builder->where('project_tasks.flow_item_name', 'like', "%{$flow}%");
+                }
+            }
         }
         //
         $scopeAll = false;

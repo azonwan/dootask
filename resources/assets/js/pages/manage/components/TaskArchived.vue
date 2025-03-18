@@ -16,7 +16,20 @@
                         <Input v-model="keys.name" :placeholder="$L('ID、名称、描述...')" clearable/>
                     </div>
                 </li>
-                <li v-if="tags.length > 0">
+                <li>
+                    <div class="search-label">
+                        {{$L("任务状态")}}
+                    </div>
+                    <div class="search-content">
+                        <Select v-model="keys.status" :placeholder="$L('全部')">
+                            <Option value="">{{$L('全部')}}</Option>
+                            <Option v-for="flow in flows" :key="flow.id" :value="flow.id" :label="flow.name">
+                                <div class="tag-dot" :class="flow.status">{{flow.name}}</div>
+                            </Option>
+                        </Select>
+                    </div>
+                </li>
+                <li>
                     <div class="search-label">
                         {{$L("任务标签")}}
                     </div>
@@ -118,6 +131,22 @@ export default {
                     }
                 },
                 {
+                    title: this.$L('任务状态'),
+                    key: 'status',
+                    minWidth: 100,
+                    render: (h, {row}) => {
+                        let flow_item_name = row.flow_item_name;
+                        if (flow_item_name && flow_item_name.indexOf("|") !== -1) {
+                            [, flow_item_name] = flow_item_name.split("|")
+                        } else if (row.complete_at) {
+                            flow_item_name = this.$L('已完成');
+                        } else {
+                            flow_item_name = this.$L('未完成');
+                        }
+                        return h('AutoTip', flow_item_name);
+                    }
+                },
+                {
                     title: this.$L('任务标签'),
                     key: 'tags',
                     minWidth: 100,
@@ -125,13 +154,7 @@ export default {
                         if (row.task_tag.length == 0) {
                             return h('div', '-');
                         }
-                        return h('AutoTip', {
-                            on: {
-                                'on-click': () => {
-                                    this.$store.dispatch("openTask", row);
-                                }
-                            }
-                        }, row.task_tag.map(({name}) => name).join('、'));
+                        return h('AutoTip', row.task_tag.map(({name}) => name).join('、'));
                     }
                 },
                 {
@@ -285,6 +308,7 @@ export default {
             ],
             list: [],
 
+            flowList: [],
             tags: [],
 
             page: 1,
@@ -294,10 +318,39 @@ export default {
         }
     },
     mounted() {
-        this.loadTags()
+        this.getFlowData()
+        this.getTagData()
     },
     computed: {
-        ...mapState(['cacheTasks'])
+        ...mapState(['cacheTasks']),
+
+        flows({flowList}) {
+            const list = [
+                {
+                    id: 'completed',
+                    name: this.$L('已完成'),
+                    status: 'completed',
+                    label: this.$L('已完成'),
+                },
+                {
+                    id: 'uncompleted',
+                    name: this.$L('未完成'),
+                    status: 'uncompleted',
+                    label: this.$L('未完成'),
+                }
+            ];
+            flowList.forEach(item1 => {
+                item1.project_flow_item.forEach(item2 => {
+                    const label = flowList.length > 1 ? item1.name + ' - ' + item2.name : item2.name;
+                    list.push({
+                        ...item2,
+                        id: 'flow-' + item2.id,
+                        label,
+                    })
+                })
+            });
+            return list;
+        }
     },
     watch: {
         projectId: {
@@ -319,7 +372,24 @@ export default {
             this.getLists();
         },
 
-        async loadTags() {
+        async getFlowData() {
+            let flowList = [];
+            const project_id = this.projectId
+            try {
+                const {data} = await this.$store.dispatch("call", {
+                    url: 'project/flow/list',
+                    data: {project_id},
+                })
+                flowList = data || []
+            } catch (e) {
+                flowList = [];
+            }
+            if (project_id === this.projectId) {
+                this.flowList = flowList
+            }
+        },
+
+        async getTagData() {
             let tags = [];
             const project_id = this.projectId
             try {
