@@ -1066,6 +1066,9 @@ export default {
         msgUnreadOnly() {
             let num = 0;
             this.cacheDialogs.some(dialog => {
+                if (dialog.id == this.dialogId) {
+                    return false;
+                }
                 num += $A.getDialogNum(dialog);
             })
             if (num <= 0) {
