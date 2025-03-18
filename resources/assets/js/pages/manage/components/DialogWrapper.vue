@@ -457,7 +457,7 @@
                         :autosize="{minRows:3,maxRows:5}"
                         v-model="modifyData.value"
                         :placeholder="$L('例如：你是一个人开发的AI助手')"
-                        show-word-limit/>
+                        :show-word-limit="0.9"/>
                 </FormItem>
             </Form>
             <div slot="footer" class="adaption">

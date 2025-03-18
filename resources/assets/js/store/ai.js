@@ -89,6 +89,7 @@ const AISystemConfig = {
             prop: "models",
             type: "textarea",
             maxlength: 1000,
+            showWordLimit: 0.9,
             placeholder: "一行一个模型名称",
             functions: "使用默认模型列表"
         },
@@ -122,7 +123,7 @@ const AISystemConfig = {
             prop: "system",
             type: "textarea",
             maxlength: 20000,
-            showWordLimit: true,
+            showWordLimit: 0.9,
             placeholder: "请输入默认提示词",
             tip: "例如：你是一个人开发的AI助手"
         }

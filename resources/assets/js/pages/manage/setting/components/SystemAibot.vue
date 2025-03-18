@@ -10,10 +10,11 @@
                 <FormItem :label="$L(field.label)" :prop="field.prop">
                     <template v-if="field.type === 'password'">
                         <Input
-                            :maxlength="255"
+                            :maxlength="field.maxlength || 255"
                             v-model="formData[field.prop]"
                             type="password"
-                            :placeholder="$L(field.placeholder)"/>
+                            :placeholder="$L(field.placeholder)"
+                            :show-word-limit="typeof field.showWordLimit === 'undefined' ? 0.9 : field.showWordLimit"/>
                     </template>
                     <template v-else-if="field.type === 'model'">
                         <Select v-model="formData[field.prop]" transfer>
@@ -27,13 +28,14 @@
                             :autosize="{minRows:2,maxRows:6}"
                             v-model="formData[field.prop]"
                             :placeholder="$L(field.placeholder)"
-                            :show-word-limit="!!field.showWordLimit"/>
+                            :show-word-limit="typeof field.showWordLimit === 'undefined' ? 0.9 : field.showWordLimit"/>
                     </template>
                     <template v-else>
                         <Input
-                            :maxlength="500"
+                            :maxlength="field.maxlength || 255"
                             v-model="formData[field.prop]"
-                            :placeholder="$L(field.placeholder)"/>
+                            :placeholder="$L(field.placeholder)"
+                            :show-word-limit="typeof field.showWordLimit === 'undefined' ? 0.9 : field.showWordLimit"/>
                     </template>
                     <div v-if="field.link || field.tip" class="form-tip">
                         <template v-if="field.link">
