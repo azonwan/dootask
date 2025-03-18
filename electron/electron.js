@@ -1272,6 +1272,19 @@ ipcMain.on('sendForwardMain', (event, args) => {
 })
 
 /**
+ * 窗口数据同步
+ * @param args {type, payload}
+ */
+ipcMain.on('syncStore', (event, args) => {
+    BrowserWindow.getAllWindows().forEach(window => {
+        if (window.webContents.id !== event.sender.id) {
+            window.webContents.send('syncStore', args)
+        }
+    })
+    event.returnValue = "ok"
+})
+
+/**
  * 设置Dock标记（window闪烁、macos标记）
  * @param args
  */

@@ -776,8 +776,8 @@ export default {
             if (!this.taskId) {
                 return "";
             }
-            let content = this.taskContents.find(({task_id}) => task_id == this.taskId)
-            return content ? content.content : ''
+            const content = this.taskContents.find(({task_id}) => task_id == this.taskId)
+            return content?.content || ''
         },
 
         fileList() {

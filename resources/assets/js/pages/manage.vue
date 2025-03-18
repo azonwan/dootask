@@ -1282,8 +1282,8 @@ export default {
                     method: 'post',
                 }).then(({data}) => {
                     this.$store.dispatch("saveDialogMsg", data);
-                    this.$store.dispatch("increaseTaskMsgNum", data);
-                    this.$store.dispatch("increaseMsgReplyNum", data);
+                    this.$store.dispatch("increaseTaskMsgNum", data.dialog_id);
+                    this.$store.dispatch("increaseMsgReplyNum", data.reply_id);
                     this.$store.dispatch("updateDialogLastMsg", data);
                 }).catch(({msg}) => {
                     $A.modalError(msg)

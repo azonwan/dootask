@@ -464,8 +464,7 @@ export default {
      * @param params
      */
     filePos({state, dispatch}, params) {
-        if ($A.isSubElectron) {
-            $A.execMainDispatch("filePos", params)
+        if ($A.execMainDispatch("filePos", params)) {
             $A.Electron.sendMessage('mainWindowActive');
             return
         }
@@ -478,13 +477,12 @@ export default {
 
     /**
      * 切换面板变量
+     * @param commit
      * @param state
      * @param data
      * @param data|{key, project_id}
      */
-    toggleProjectParameter({state}, data) {
-        $A.execMainDispatch("toggleProjectParameter", data)
-        //
+    toggleProjectParameter({commit, state}, data) {
         let key = data;
         let value = null;
         let project_id = state.projectId;
@@ -496,16 +494,14 @@ export default {
         if (project_id) {
             let index = state.cacheProjectParameter.findIndex(item => item.project_id == project_id)
             if (index === -1) {
-                state.cacheProjectParameter.push($A.projectParameterTemplate(project_id));
+                commit("project/parameter/push", $A.projectParameterTemplate(project_id))
                 index = state.cacheProjectParameter.findIndex(item => item.project_id == project_id)
             }
             const cache = state.cacheProjectParameter[index];
             if (!$A.isJson(key)) {
                 key = {[key]: value || !cache[key]};
             }
-            state.cacheProjectParameter.splice(index, 1, Object.assign(cache, key))
-            //
-            $A.IDBSave("cacheProjectParameter", state.cacheProjectParameter);
+            commit("project/parameter/splice", {index, data: Object.assign(cache, key)})
         }
     },
 
@@ -758,7 +754,6 @@ export default {
             let temp = state.cacheUserBasic.find(({userid}) => userid == item.userid);
             if (temp && time - temp._time <= 30) {
                 setTimeout(() => {
-                    state.cacheUserActive = Object.assign(temp, {__:Math.random()});
                     emitter.emit('userActive', {type: 'cache', data: temp});
                 }, timeout += 5);
                 return false;
@@ -832,8 +827,6 @@ export default {
      * @param data
      */
     saveUserBasic({commit, state}, data) {
-        $A.execMainDispatch("saveUserBasic", data)
-        //
         const index = state.cacheUserBasic.findIndex(({userid}) => userid == data.userid);
         if (index > -1) {
             data = Object.assign({}, state.cacheUserBasic[index], data)
@@ -841,7 +834,6 @@ export default {
         } else {
             commit("user/push", data)
         }
-        state.cacheUserActive = Object.assign(data, {__:Math.random()});
         emitter.emit('userActive', {type: 'cache', data});
     },
 
@@ -1108,8 +1100,7 @@ export default {
      * Electron 页面卸载触发
      */
     onBeforeUnload() {
-        if ($A.isSubElectron && dialogDraftState.subTemp) {
-            $A.execMainDispatch("saveDialogDraft", dialogDraftState.subTemp)
+        if (dialogDraftState.subTemp && $A.execMainDispatch("saveDialogDraft", dialogDraftState.subTemp)) {
             dialogDraftState.subTemp = null;
         }
     },
@@ -1223,13 +1214,12 @@ export default {
 
     /**
      * 保存文件数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveFile({state, dispatch}, data) {
-        $A.execMainDispatch("saveFile", data)
-        //
+    saveFile({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach((file) => {
                 dispatch("saveFile", file);
@@ -1238,32 +1228,29 @@ export default {
             let base = {_load: false, _edit: false};
             const index = state.fileLists.findIndex(({id}) => id == data.id);
             if (index > -1) {
-                state.fileLists.splice(index, 1, Object.assign(base, state.fileLists[index], data));
+                commit("file/splice", {index, data: Object.assign(base, state.fileLists[index], data)})
             } else {
-                state.fileLists.push(Object.assign(base, data))
+                commit("file/push", Object.assign(base, data))
             }
-            $A.IDBSave("fileLists", state.fileLists, 600)
         }
     },
 
     /**
      * 忘记文件数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param file_id
      */
-    forgetFile({state, dispatch}, file_id) {
-        $A.execMainDispatch("forgetFile", file_id)
-        //
+    forgetFile({commit, state, dispatch}, file_id) {
         const ids = $A.isArray(file_id) ? file_id : [file_id];
         ids.some(id => {
-            state.fileLists = state.fileLists.filter(file => file.id != id);
+            commit("file/save", state.fileLists.filter(file => file.id != id))
             state.fileLists.some(file => {
                 if (file.pid == id) {
                     dispatch("forgetFile", file.id);
                 }
             });
-            $A.IDBSave("fileLists", state.fileLists, 600)
         })
     },
 
@@ -1274,25 +1261,23 @@ export default {
      * @param data
      */
     packProgress({state, dispatch}, data) {
-        $A.execMainDispatch("packProgress", data)
-        //
         const index = state.filePackLists.findIndex(({name}) => name == data.name);
         if (index > -1) {
             state.filePackLists[index].progress = data.progress;
         } else {
             state.filePackLists.push(data);
-            $A.IDBSave("filePackLists", state.filePackLists, 600)
         }
     },
 
     /**
      * 获取文件
+     * @param commit
      * @param state
      * @param dispatch
      * @param pid
      * @returns {Promise<unknown>}
      */
-    getFiles({state, dispatch}, pid) {
+    getFiles({commit, state, dispatch}, pid) {
         return new Promise(function (resolve, reject) {
             dispatch("call", {
                 url: 'file/lists',
@@ -1301,8 +1286,7 @@ export default {
                 },
             }).then((result) => {
                 const ids = result.data.map(({id}) => id)
-                state.fileLists = state.fileLists.filter((item) => item.pid != pid || ids.includes(item.id));
-                $A.IDBSave("fileLists", state.fileLists, 600)
+                commit("file/save", state.fileLists.filter((item) => item.pid != pid || ids.includes(item.id)));
                 //
                 dispatch("saveFile", result.data);
                 resolve(result)
@@ -1344,13 +1328,12 @@ export default {
 
     /**
      * 保存项目数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveProject({state, dispatch}, data) {
-        $A.execMainDispatch("saveProject", data)
-        //
+    saveProject({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach((project) => {
                 dispatch("saveProject", project)
@@ -1362,12 +1345,12 @@ export default {
             }
             const index = state.cacheProjects.findIndex(({id}) => id == data.id);
             if (index > -1) {
-                state.cacheProjects.splice(index, 1, Object.assign({}, state.cacheProjects[index], data));
+                commit("project/splice", {index, data: Object.assign({}, state.cacheProjects[index], data)})
             } else {
                 if (typeof data.project_user === "undefined") {
                     data.project_user = []
                 }
-                state.cacheProjects.push(data);
+                commit("project/push", data)
                 state.projectTotal++
             }
             //
@@ -1382,27 +1365,24 @@ export default {
                     }
                 }
             })
-            //
-            $A.IDBSave("cacheProjects", state.cacheProjects);
         }
     },
 
     /**
      * 忘记项目数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param project_id
      */
-    forgetProject({state, dispatch}, project_id) {
-        $A.execMainDispatch("forgetProject", project_id)
-        //
+    forgetProject({commit, state, dispatch}, project_id) {
         const ids = $A.isArray(project_id) ? project_id : [project_id];
         ids.some(id => {
             const index = state.cacheProjects.findIndex(project => project.id == id);
             if (index > -1) {
                 dispatch("forgetTask", state.cacheTasks.filter(item => item.project_id == project_id).map(item => item.id))
                 dispatch("forgetColumn", state.cacheColumns.filter(item => item.project_id == project_id).map(item => item.id))
-                state.cacheProjects.splice(index, 1);
+                commit("project/splice", {index})
                 state.projectTotal = Math.max(0, state.projectTotal - 1)
             }
         })
@@ -1419,8 +1399,6 @@ export default {
                 $A.goForward({name: 'manage-dashboard'});
             }
         }
-        //
-        $A.IDBSave("cacheProjects", state.cacheProjects);
     },
 
     /**
@@ -1597,13 +1575,12 @@ export default {
 
     /**
      * 保存列表数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveColumn({state, dispatch}, data) {
-        $A.execMainDispatch("saveColumn", data)
-        //
+    saveColumn({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach((column) => {
                 dispatch("saveColumn", column)
@@ -1611,24 +1588,21 @@ export default {
         } else if ($A.isJson(data)) {
             const index = state.cacheColumns.findIndex(({id}) => id == data.id);
             if (index > -1) {
-                state.cacheColumns.splice(index, 1, Object.assign({}, state.cacheColumns[index], data));
+                commit("project/column/splice", {index, data: Object.assign({}, state.cacheColumns[index], data)})
             } else {
-                state.cacheColumns.push(data);
+                commit("project/column/push", data)
             }
-            //
-            $A.IDBSave("cacheColumns", state.cacheColumns);
         }
     },
 
     /**
      * 忘记列表数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param column_id
      */
-    forgetColumn({state, dispatch}, column_id) {
-        $A.execMainDispatch("forgetColumn", column_id)
-        //
+    forgetColumn({commit, state, dispatch}, column_id) {
         const ids = $A.isArray(column_id) ? column_id : [column_id];
         const project_ids = [];
         ids.some(id => {
@@ -1636,22 +1610,21 @@ export default {
             if (index > -1) {
                 dispatch("forgetTask", state.cacheTasks.filter(item => item.column_id == column_id).map(item => item.id))
                 project_ids.push(state.cacheColumns[index].project_id)
-                state.cacheColumns.splice(index, 1);
+                commit("project/column/splice", {index})
             }
         })
         Array.from(new Set(project_ids)).some(id => dispatch("getProjectOne", id).catch(() => {}))
-        //
-        $A.IDBSave("cacheColumns", state.cacheColumns);
     },
 
     /**
      * 获取列表
+     * @param commit
      * @param state
      * @param dispatch
      * @param project_id
      * @returns {Promise<unknown>}
      */
-    getColumns({state, dispatch}, project_id) {
+    getColumns({commit, state, dispatch}, project_id) {
         return new Promise(function (resolve, reject) {
             if (state.userId === 0) {
                 state.cacheColumns = [];
@@ -1668,7 +1641,7 @@ export default {
                 state.projectLoad--;
                 //
                 const ids = data.data.map(({id}) => id)
-                state.cacheColumns = state.cacheColumns.filter((item) => item.project_id != project_id || ids.includes(item.id));
+                commit("project/column/save", state.cacheColumns.filter((item) => item.project_id != project_id || ids.includes(item.id)))
                 //
                 dispatch("saveColumn", data.data);
                 resolve(data.data)
@@ -1732,8 +1705,6 @@ export default {
      * @param data
      */
     saveTask({commit, state, dispatch}, data) {
-        $A.execMainDispatch("saveTask", data)
-        //
         if ($A.isArray(data)) {
             data.forEach((task) => {
                 dispatch("saveTask", task)
@@ -1804,8 +1775,6 @@ export default {
      * @param task_id
      */
     forgetTask({commit, state, dispatch}, task_id) {
-        $A.execMainDispatch("forgetTask", task_id)
-        //
         const ids = ($A.isArray(task_id) ? task_id : [task_id]).filter(id => id != state.taskArchiveView);
         const parent_ids = [];
         const project_ids = [];
@@ -1863,56 +1832,45 @@ export default {
     /**
      * 增加任务消息数量
      * @param state
-     * @param data {id, dialog_id}
+     * @param commit
+     * @param dialog_id
      */
-    increaseTaskMsgNum({state}, data) {
-        $A.execMainDispatch("increaseTaskMsgNum", data)
-        //
-        if ($A.execMainCacheJudge(`increaseTaskMsgNum:${data.id}`)) {
-            return
-        }
-        //
-        if (data.dialog_id) {
-            const task = state.cacheTasks.find(({dialog_id}) => dialog_id === data.dialog_id);
-            if (task) task.msg_num++;
+    increaseTaskMsgNum({state, commit}, dialog_id) {
+        const index = state.cacheTasks.findIndex(item => item.dialog_id === dialog_id);
+        if (index !== -1) {
+            const data = $A.cloneJSON(state.cacheTasks[index])
+            data.msg_num++;
+            commit("task/splice", {index, data})
         }
     },
 
     /**
      * 新增回复数量
      * @param state
-     * @param dispatch
-     * @param data {id, reply_id}
+     * @param commit
+     * @param reply_id
      */
-    increaseMsgReplyNum({state, dispatch}, data) {
-        $A.execMainDispatch("increaseMsgReplyNum", data)
-        //
-        if ($A.execMainCacheJudge(`increaseMsgReplyNum:${data.id}`)) {
-            return
-        }
-        //
-        if (data.reply_id > 0) {
-            const msg = state.dialogMsgs.find(({id}) => id == data.reply_id)
-            if (msg) msg.reply_num++;
+    increaseMsgReplyNum({state, commit}, reply_id) {
+        const index = state.dialogMsgs.findIndex(m => m.id == reply_id)
+        if (index !== -1) {
+            const data = $A.cloneJSON(state.dialogMsgs[index])
+            data.reply_num--
+            commit("message/splice", {index, data})
         }
     },
 
     /**
      * 减少回复数量
      * @param state
-     * @param dispatch
-     * @param data {id, reply_id}
+     * @param commit
+     * @param reply_id
      */
-    decrementMsgReplyNum({state, dispatch}, data) {
-        $A.execMainDispatch("decrementMsgReplyNum", data)
-        //
-        if ($A.execMainCacheJudge(`decrementMsgReplyNum:${data.id}`)) {
-            return
-        }
-        //
-        if (data.reply_id > 0) {
-            const msg = state.dialogMsgs.find(({id}) => id == data.reply_id)
-            if (msg) msg.reply_num--;
+    decrementMsgReplyNum({state, commit}, reply_id) {
+        const index = state.dialogMsgs.findIndex(m => m.id == reply_id)
+        if (index !== -1) {
+            const data = $A.cloneJSON(state.dialogMsgs[index])
+            data.reply_num--
+            commit("message/splice", {index, data})
         }
     },
 
@@ -2172,13 +2130,12 @@ export default {
 
     /**
      * 更新任务详情
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveTaskContent({state, dispatch}, data) {
-        $A.execMainDispatch("saveTaskContent", data)
-        //
+    saveTaskContent({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach(item => {
                 dispatch("saveTaskContent", item)
@@ -2186,9 +2143,9 @@ export default {
         } else if ($A.isJson(data)) {
             const index = state.taskContents.findIndex(({task_id}) => task_id == data.task_id);
             if (index > -1) {
-                state.taskContents.splice(index, 1, Object.assign({}, state.taskContents[index], data));
+                commit("task/content/splice", {index, data: Object.assign({}, state.taskContents[index], data)})
             } else {
-                state.taskContents.push(data);
+                commit("task/content/push", data)
             }
         }
     },
@@ -2706,8 +2663,6 @@ export default {
      * @param data
      */
     saveDialog({commit, state, dispatch}, data) {
-        $A.execMainDispatch("saveDialog", data)
-        //
         if ($A.isArray(data)) {
             data.forEach((dialog) => {
                 dispatch("saveDialog", dialog)
@@ -2761,8 +2716,6 @@ export default {
      * @param data
      */
     updateDialogLastMsg({state, dispatch}, data) {
-        $A.execMainDispatch("updateDialogLastMsg", data)
-        //
         if ($A.isArray(data)) {
             data.forEach((msg) => {
                 dispatch("updateDialogLastMsg", msg)
@@ -2943,11 +2896,12 @@ export default {
 
     /**
      * 获取会话待办
+     * @param commit
      * @param state
      * @param dispatch
      * @param dialog_id
      */
-    getDialogTodo({state, dispatch}, dialog_id) {
+    getDialogTodo({commit, state, dispatch}, dialog_id) {
         dispatch("call", {
             url: 'dialog/todo',
             data: {
@@ -2960,7 +2914,7 @@ export default {
                         id: dialog_id,
                         todo_num: $A.arrayLength(data)
                     });
-                    state.dialogTodos = state.dialogTodos.filter(item => item.dialog_id != dialog_id)
+                    commit("dialog/todo/save", state.dialogTodos.filter(item => item.dialog_id != dialog_id))
                 }
                 dispatch("saveDialogTodo", data)
             } else {
@@ -3075,8 +3029,6 @@ export default {
      * @param dialog_id
      */
     forgetDialog({commit, state, dispatch}, dialog_id) {
-        $A.execMainDispatch("forgetDialog", dialog_id)
-        //
         const ids = $A.isArray(dialog_id) ? dialog_id : [dialog_id];
         ids.some(id => {
             const index = state.cacheDialogs.findIndex(dialog => dialog.id == id);
@@ -3098,19 +3050,17 @@ export default {
      * @param data {uid, dialog_id}
      */
     saveInDialog({commit, state, dispatch}, data) {
-        $A.execMainDispatch("saveInDialog", data)
-        //
         const index = state.dialogIns.findIndex(item => item.uid == data.uid);
         if (index > -1) {
-            state.dialogIns.splice(index, 1, Object.assign({}, state.dialogIns[index], data));
+            commit("dialog/in/splice", {index, data: Object.assign({}, state.dialogIns[index], data)});
         } else {
-            state.dialogIns.push(data);
+            commit("dialog/in/push", data);
         }
         // 会话消息总数量大于5000时只保留最近打开的50个会话
         const msg_max = 5000
         const retain_num = 500
-        state.dialogHistory = state.dialogHistory.filter(id => id != data.dialog_id)
-        state.dialogHistory.push(data.dialog_id)
+        commit('dialog/history/save', state.dialogHistory.filter(id => id != data.dialog_id))
+        commit('dialog/history/push', data.dialog_id)
         if (state.dialogMsgs.length > msg_max && state.dialogHistory.length > retain_num) {
             const historys = state.dialogHistory.slice().reverse()
             const newIds = []
@@ -3125,22 +3075,20 @@ export default {
             if (delIds.length > 0) {
                 commit("message/save", state.dialogMsgs.filter(item => !delIds.includes(item.dialog_id)))
             }
-            state.dialogHistory = newIds
+            commit('dialog/history/save', newIds)
         }
     },
 
     /**
      * 忘记正在会话
      * @param state
-     * @param dispatch
+     * @param commit
      * @param uid
      */
-    forgetInDialog({state, dispatch}, uid) {
-        $A.execMainDispatch("forgetInDialog", uid)
-        //
+    forgetInDialog({state, commit}, uid) {
         const index = state.dialogIns.findIndex(item => item.uid == uid);
         if (index > -1) {
-            state.dialogIns.splice(index, 1);
+            commit("dialog/in/splice", {index})
         }
     },
 
@@ -3155,7 +3103,6 @@ export default {
         if (!/^\d+$/.test(dialog_id)) {
             return
         }
-        $A.execMainDispatch("closeDialog", dialog_id)
 
         // 更新草稿标签
         commit('draft/tag', dialog_id)
@@ -3170,13 +3117,12 @@ export default {
 
     /**
      * 保存待办数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveDialogTodo({state, dispatch}, data) {
-        $A.execMainDispatch("saveDialogTodo", data)
-        //
+    saveDialogTodo({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach(item => {
                 dispatch("saveDialogTodo", item)
@@ -3184,9 +3130,9 @@ export default {
         } else if ($A.isJson(data)) {
             const index = state.dialogTodos.findIndex(item => item.id == data.id);
             if (index > -1) {
-                state.dialogTodos.splice(index, 1, Object.assign({}, state.dialogTodos[index], data));
+                commit('dialog/todo/splice', {index, data: Object.assign({}, state.dialogTodos[index], data)});
             } else {
-                state.dialogTodos.push(data);
+                commit('dialog/todo/push', data)
             }
         }
     },
@@ -3194,38 +3140,35 @@ export default {
     /**
      * 忘记待办数据
      * @param state
-     * @param dispatch
+     * @param commit
      * @param msg_id
      */
-    forgetDialogTodoForMsgId({state, dispatch}, msg_id) {
-        $A.execMainDispatch("forgetDialogTodoForMsgId", msg_id)
-        //
+    forgetDialogTodoForMsgId({state, commit}, msg_id) {
         const index = state.dialogTodos.findIndex(item => item.msg_id == msg_id);
         if (index > -1) {
-            state.dialogTodos.splice(index, 1);
+            commit('dialog/todo/splice', {index})
         }
     },
 
     /**
      * 保存置顶数据
+     * @param commit
      * @param state
      * @param dispatch
      * @param data
      */
-    saveDialogMsgTop({state, dispatch}, data) {
-        $A.execMainDispatch("saveDialogMsgTop", data)
-        //
+    saveDialogMsgTop({commit, state, dispatch}, data) {
         if ($A.isArray(data)) {
             data.forEach(item => {
                 dispatch("saveDialogMsgTop", item)
             });
         } else if ($A.isJson(data)) {
-            state.dialogMsgTops = state.dialogMsgTops.filter(item => item.dialog_id != data.dialog_id)
+            commit('dialog/msg/top/save', state.dialogMsgTops.filter(item => item.dialog_id != data.dialog_id))
             const index = state.dialogMsgTops.findIndex(item => item.id == data.id);
             if (index > -1) {
-                state.dialogMsgTops.splice(index, 1, Object.assign({}, state.dialogMsgTops[index], data));
+                commit('dialog/msg/top/splice', {index, data: Object.assign({}, state.dialogMsgTops[index], data)});
             } else {
-                state.dialogMsgTops.push(data);
+                commit('dialog/msg/top/push', data)
             }
         }
     },
@@ -3233,15 +3176,13 @@ export default {
     /**
      * 忘记消息置顶数据
      * @param state
-     * @param dispatch
+     * @param commit
      * @param msg_id
      */
-    forgetDialogMsgTopForMsgId({state, dispatch}, msg_id) {
-        $A.execMainDispatch("forgetDialogMsgTopForMsgId", msg_id)
-        //
+    forgetDialogMsgTopForMsgId({state, commit}, msg_id) {
         const index = state.dialogMsgTops.findIndex(item => item.msg_id == msg_id);
         if (index > -1) {
-            state.dialogMsgTops.splice(index, 1);
+            commit('dialog/msg/top/splice', {index})
         }
     },
 
@@ -3301,48 +3242,47 @@ export default {
      * @param data
      */
     saveDialogMsg({commit, state, dispatch}, data) {
-        $A.execMainDispatch("saveDialogMsg", data)
-        //
         if ($A.isArray(data)) {
             data.forEach((msg) => {
                 dispatch("saveDialogMsg", msg)
             });
-        } else if ($A.isJson(data)) {
-            if (data.type == "notice") {
-                data.estimateSize = 42;
+            return
+        }
+        //
+        if (data.type == "notice") {
+            data.estimateSize = 42;
+        }
+        const index = state.dialogMsgs.findIndex(({id}) => id == data.id);
+        if (index > -1) {
+            const original = state.dialogMsgs[index]
+            if (original.read_at) {
+                delete data.read_at
             }
-            const index = state.dialogMsgs.findIndex(({id}) => id == data.id);
-            if (index > -1) {
-                const original = state.dialogMsgs[index]
-                if (original.read_at) {
-                    delete data.read_at
+            data = Object.assign({}, original, data)
+            commit("message/splice", {index, data})
+        } else {
+            commit("message/push", data)
+        }
+        //
+        const dialog = state.cacheDialogs.find(({id}) => id == data.dialog_id);
+        if (dialog) {
+            let isUpdate = false
+            if (!data.read_at
+                && data.userid != state.userId
+                && !state.dialogIns.find(({dialog_id}) => dialog_id == dialog.id)) {
+                if (dialog.unread_one) {
+                    dialog.unread_one = Math.min(dialog.unread_one, data.id)
+                } else {
+                    dialog.unread_one = data.id
                 }
-                data = Object.assign({}, original, data)
-                commit("message/splice", {index, data})
-            } else {
-                commit("message/push", data)
+                isUpdate = true
             }
-            //
-            const dialog = state.cacheDialogs.find(({id}) => id == data.dialog_id);
-            if (dialog) {
-                let isUpdate = false
-                if (!data.read_at
-                    && data.userid != state.userId
-                    && !state.dialogIns.find(({dialog_id}) => dialog_id == dialog.id)) {
-                    if (dialog.unread_one) {
-                        dialog.unread_one = Math.min(dialog.unread_one, data.id)
-                    } else {
-                        dialog.unread_one = data.id
-                    }
-                    isUpdate = true
-                }
-                if (dialog.last_msg && dialog.last_msg.id == data.id) {
-                    dialog.last_msg = Object.assign({}, dialog.last_msg, data)
-                    isUpdate = true
-                }
-                if (isUpdate) {
-                    dispatch("saveDialog", dialog)
-                }
+            if (dialog.last_msg && dialog.last_msg.id == data.id) {
+                dialog.last_msg = Object.assign({}, dialog.last_msg, data)
+                isUpdate = true
+            }
+            if (isUpdate) {
+                dispatch("saveDialog", dialog)
             }
         }
     },
@@ -3355,14 +3295,12 @@ export default {
      * @param msg_id
      */
     forgetDialogMsg({commit, state, dispatch}, msg_id) {
-        $A.execMainDispatch("forgetDialogMsg", msg_id)
-        //
         const ids = $A.isArray(msg_id) ? msg_id : [msg_id];
         ids.some(id => {
             const index = state.dialogMsgs.findIndex(item => item.id == id);
             if (index > -1) {
                 const msgData = state.dialogMsgs[index]
-                dispatch("decrementMsgReplyNum", msgData);
+                dispatch("decrementMsgReplyNum", msgData.reply_id);
                 dispatch("audioStop", $A.getObject(msgData, 'msg.path'));
                 commit("message/splice", {index})
             }
@@ -3432,7 +3370,7 @@ export default {
                     dispatch("saveDialog", resData.dialog)
                 }
                 if ($A.isArray(resData.todo)) {
-                    state.dialogTodos = state.dialogTodos.filter(item => item.dialog_id != data.dialog_id)
+                    commit("dialog/todo/save", state.dialogTodos.filter(item => item.dialog_id != data.dialog_id))
                     dispatch("saveDialogTodo", resData.todo)
                 }
                 if ($A.isJson(resData.top)) {
@@ -4034,9 +3972,9 @@ export default {
                                         const isChat = mode === "chat" || $A.isSubElectron;
                                         if (!state.dialogMsgs.find(({id}) => id == data.id)) {
                                             // 新增任务消息数量
-                                            dispatch("increaseTaskMsgNum", data);
+                                            dispatch("increaseTaskMsgNum", data.dialog_id);
                                             // 新增回复数量
-                                            dispatch("increaseMsgReplyNum", data);
+                                            dispatch("increaseMsgReplyNum", data.reply_id);
                                             //
                                             if (!isChat) {
                                                 if (data.userid !== state.userId) {

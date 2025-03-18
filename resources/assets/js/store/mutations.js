@@ -54,6 +54,19 @@ export default {
         $A.IDBSave("cacheTasks", state.cacheTasks, 600)
     },
 
+    // taskContents
+    'task/content/push': function(state, data) {
+        state.taskContents.push(data)
+    },
+
+    'task/content/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.taskContents.splice(index, count)
+        } else {
+            state.taskContents.splice(index, count, data)
+        }
+    },
+
     // 对话管理
     'dialog/push': function(state, data) {
         state.cacheDialogs.push(data)
@@ -67,6 +80,132 @@ export default {
             state.cacheDialogs.splice(index, count, data)
         }
         $A.IDBSave("cacheDialogs", state.cacheDialogs, 600)
+    },
+
+    // dialogIns
+    'dialog/in/push': function(state, data) {
+        state.dialogIns.push(data)
+    },
+
+    'dialog/in/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.dialogIns.splice(index, count)
+        } else {
+            state.dialogIns.splice(index, count, data)
+        }
+    },
+
+    // dialogHistory
+    'dialog/history/push': function(state, data) {
+        state.dialogHistory.push(data)
+    },
+
+    'dialog/history/save': function(state, data) {
+        state.dialogHistory = data
+    },
+
+    // dialogMsgTops
+    'dialog/msg/top/push': function(state, data) {
+        state.dialogMsgTops.push(data)
+    },
+
+    'dialog/msg/top/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.dialogMsgTops.splice(index, count)
+        } else {
+            state.dialogMsgTops.splice(index, count, data)
+        }
+    },
+
+    'dialog/msg/top/save': function(state, data) {
+        state.dialogMsgTops = data
+    },
+
+    // dialogTodos
+    'dialog/todo/push': function(state, data) {
+        state.dialogTodos.push(data)
+    },
+
+    'dialog/todo/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.dialogTodos.splice(index, count)
+        } else {
+            state.dialogTodos.splice(index, count, data)
+        }
+    },
+
+    'dialog/todo/save': function(state, data) {
+        state.dialogTodos = data
+    },
+
+    // 项目管理
+    'project/push': function(state, data) {
+        state.cacheProjects.push(data)
+        $A.IDBSave("cacheProjects", state.cacheProjects);
+    },
+
+    'project/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheProjects.splice(index, count)
+        } else {
+            state.cacheProjects.splice(index, count, data)
+        }
+        $A.IDBSave("cacheProjects", state.cacheProjects);
+    },
+
+    // cacheColumns
+    'project/column/push': function(state, data) {
+        state.cacheColumns.push(data)
+        $A.IDBSave("cacheColumns", state.cacheColumns);
+    },
+
+    'project/column/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheColumns.splice(index, count)
+        } else {
+            state.cacheColumns.splice(index, count, data)
+        }
+        $A.IDBSave("cacheColumns", state.cacheColumns);
+    },
+
+    'project/column/save': function(state, data) {
+        state.cacheColumns = data
+        $A.IDBSave("cacheColumns", state.cacheColumns);
+    },
+
+    // cacheProjectParameter
+    'project/parameter/push': function(state, data) {
+        state.cacheProjectParameter.push(data)
+        $A.IDBSave("cacheProjectParameter", state.cacheProjectParameter);
+    },
+
+    'project/parameter/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.cacheProjectParameter.splice(index, count)
+        } else {
+            state.cacheProjectParameter.splice(index, count, data)
+        }
+        $A.IDBSave("cacheProjectParameter", state.cacheProjectParameter);
+    },
+
+    // 文件管理
+    'file/push': function(state, data) {
+        state.fileLists.push(data)
+        $A.IDBSave("fileLists", state.fileLists, 600)
+    },
+
+    'file/splice': function(state, {index, data, count = 1}) {
+        if (typeof data === "undefined") {
+            state.fileLists.splice(index, count)
+        } else {
+            state.fileLists.splice(index, count, data)
+        }
+        $A.IDBSave("fileLists", state.fileLists, 600)
+    },
+
+    'file/save': function(state, data) {
+        state.fileLists = data
+        $A.IDBSave("fileLists", state.fileLists, 600)
     },
 
     // 草稿管理

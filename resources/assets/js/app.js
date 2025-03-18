@@ -206,12 +206,14 @@ if (isElectron) {
 
 // 子窗口给主窗口发送指令相关
 $A.execMainDispatch = (action, data) => {
-    if ($A.isSubElectron) {
-        $A.Electron.sendMessage('sendForwardMain', {
-            channel: 'dispatch',
-            data: {action, data},
-        });
+    if (!$A.isSubElectron) {
+        return false
     }
+    $A.Electron.sendMessage('sendForwardMain', {
+        channel: 'dispatch',
+        data: {action, data},
+    });
+    return true
 };
 
 window.execMainCacheData = {}
