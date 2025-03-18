@@ -1977,6 +1977,7 @@ export default {
                     msg.text = text
                 }
 
+                const curText = msg.text
                 this.$nextTick(_ => {
                     if (tail <= 10 && tail != this.scrollInfo().tail) {
                         this.operatePreventScroll++
@@ -1990,7 +1991,7 @@ export default {
                     }
                     setTimeout(_ => {
                         this.msgChangeCache[load] = false
-                        this.onMsgOutput(id, msg)
+                        curText === msg.text && this.onMsgOutput(id, msg)
                     }, 5)
                 })
             } catch (e) {
