@@ -40,7 +40,7 @@
         </div>
 
         <!-- 标签添加/编辑 -->
-        <TaskTagAdd ref="addTag" :project-id="projectId" @on-save="loadTags" @on-save-error="loadTags"/>
+        <TaskTagAdd ref="addTag" :project-id="projectId" @on-save="getTagData" @on-save-error="getTagData"/>
     </div>
 </template>
 
@@ -71,11 +71,11 @@ export default {
         ...mapState(['formOptions'])
     },
     created() {
-        this.loadTags()
+        this.getTagData()
     },
     methods: {
         // 加载标签列表
-        async loadTags() {
+        async getTagData() {
             this.loadIng++
             try {
                 const {data} = await this.$store.dispatch("call", {
@@ -114,7 +114,7 @@ export default {
                             spinner: 300
                         })
                         $A.messageSuccess(msg || '删除成功')
-                        this.loadTags()
+                        await this.getTagData()
                     } catch ({msg}) {
                         $A.messageError(msg || '删除失败')
                     } finally {
