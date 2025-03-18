@@ -660,6 +660,10 @@ body {
                 > button + button {
                     margin-left: 8px;
                 }
+
+                .ivu-btn-text {
+                    box-shadow: none;
+                }
             }
         }
     }

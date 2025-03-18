@@ -17,17 +17,13 @@
                     </div>
                 </li>
                 <li class="search-button">
-                    <Tooltip
-                        theme="light"
+                    <SearchButton
+                        :loading="loadIng > 0"
+                        :filtering="keyIs"
                         placement="right"
-                        transfer-class-name="search-button-clear"
-                        transfer>
-                        <Button :loading="loadIng > 0" type="primary" icon="ios-search" @click="onSearch">{{$L('搜索')}}</Button>
-                        <div slot="content">
-                            <Button v-if="keyIs" type="text" @click="keyIs=false">{{$L('取消筛选')}}</Button>
-                            <Button v-else :loading="loadIng > 0" type="text" @click="getLists">{{$L('刷新')}}</Button>
-                        </div>
-                    </Tooltip>
+                        @search="onSearch"
+                        @refresh="getLists"
+                        @cancelFilter="keyIs=false"/>
                 </li>
             </ul>
         </div>
@@ -55,8 +51,11 @@
 </template>
 
 <script>
+import SearchButton from "../../../components/SearchButton.vue";
+
 export default {
     name: "ProjectArchived",
+    components: {SearchButton},
     data() {
         return {
             loadIng: 0,
