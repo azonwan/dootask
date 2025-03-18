@@ -144,7 +144,7 @@ export default {
             return $A.leftExists(icon, '&#')
         },
         handleIn() {
-            if (this.$refs.action.offsetWidth != this.width) {
+            if (this.$refs.action?.offsetWidth != this.width) {
                 this.onUpdate();
             }
         },

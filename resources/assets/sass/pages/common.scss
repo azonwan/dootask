@@ -941,6 +941,26 @@ body.window-portrait {
         background-color: var(--bg-color);
         transform: translateY(-50%);
     }
+    &.start:after {
+        background-color: $flow-status-start-color;
+    }
+
+    &.progress:after {
+        background-color: $flow-status-progress-color;
+    }
+
+    &.test:after {
+        background-color: $flow-status-test-color;
+    }
+
+    &.completed:after,
+    &.end:after {
+        background-color: $flow-status-end-color;
+    }
+
+    &.uncompleted:after {
+        background-color: $flow-status-archived-color;
+    }
 }
 
 /*部门层级*/

@@ -539,7 +539,7 @@
         <DrawerOverlay
             v-model="archivedTaskShow"
             placement="right"
-            :size="1100">
+            :size="1180">
             <TaskArchived v-if="archivedTaskShow" :project-id="projectId"/>
         </DrawerOverlay>
 
@@ -547,7 +547,7 @@
         <DrawerOverlay
             v-model="deletedTaskShow"
             placement="right"
-            :size="1100">
+            :size="1180">
             <TaskDeleted v-if="deletedTaskShow" :project-id="projectId"/>
         </DrawerOverlay>
     </div>
