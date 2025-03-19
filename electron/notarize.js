@@ -12,6 +12,7 @@ exports.default = async function notarizing(context) {
     }
 
     return await notarize({
+        tool: "notarytool",
         appBundleId: config.build.appId,
         appPath: `${appOutDir}/${appName}.app`,
         appleId: APPLEID,
