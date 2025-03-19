@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.67]
+
+### Bug Fixes
+
+- 修复查看待办图片不符的情况
+
+### Performance
+
+- 优化数据
+- 优化未读消息数
+- 优化搜索组件
+- 已归档/已删除任务列表支持按状态检索
+- 优化消息流效果
+- 优化AI上下文
+- 优化工作流获取
+- 优化转发功能
+
 ## [0.44.53]
 
 ### Bug Fixes
