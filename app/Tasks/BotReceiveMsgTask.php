@@ -490,7 +490,7 @@ class BotReceiveMsgTask extends AbstractTask
                             break;
                         case 'file':
                             $msgData = Base::json2array($replyMsg->getRawOriginal('msg'));
-                            $fileResult = TextExtractor::getFileContent(public_path($msgData['path']));
+                            $fileResult = TextExtractor::extractFile(public_path($msgData['path']));
                             if (Base::isError($fileResult)) {
                                 $errorContent = $fileResult['msg'];
                             } else {
@@ -651,7 +651,7 @@ class BotReceiveMsgTask extends AbstractTask
                     if (!file_exists($urlPath)) {
                         throw new Exception("文件不存在或已被删除");
                     }
-                    $fileResult = TextExtractor::getFileContent($urlPath);
+                    $fileResult = TextExtractor::extractFile($urlPath);
                     if (Base::isError($fileResult)) {
                         throw new Exception("文件读取失败：" . $fileResult['msg']);
                     }

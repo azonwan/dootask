@@ -3,8 +3,10 @@
 namespace App\Module;
 
 use Exception;
-use PhpOffice\PhpWord\IOFactory;
-use Smalot\PdfParser\Parser;
+use PhpOffice\PhpWord\IOFactory as WordIOFactory;
+use PhpOffice\PhpSpreadsheet\IOFactory as SpreadsheetIOFactory;
+use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
+
 
 class TextExtractor
 {
@@ -15,7 +17,7 @@ class TextExtractor
      * @return string
      * @throws Exception
      */
-    public function extractText(string $filePath): string
+    public function extractContent(string $filePath): string
     {
         if (!file_exists($filePath)) {
             throw new Exception("File does not exist: {$filePath}");
@@ -23,49 +25,46 @@ class TextExtractor
 
         $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-        return match($fileExtension) {
-            'pdf'   => $this->extractFromPDF($filePath),
-            'docx'  => $this->extractFromDOCX($filePath),
-            'ipynb' => $this->extractFromIPYNB($filePath),
-            default => $this->extractFromOtherFile($filePath),
+        return match ($fileExtension) {
+            // Word documents
+            'docx' => $this->parseWordDocument($filePath),
+
+            // Spreadsheet files
+            'xlsx', 'xls', 'csv' => $this->parseSpreadsheet($filePath),
+
+            // Presentation files
+            'ppt', 'pptx' => $this->parsePresentation($filePath),
+
+            // PDF files (requires additional library)
+            'pdf' => $this->parsePdf($filePath),
+
+            // RTF files
+            'rtf' => $this->parseRtf($filePath),
+
+            // Default case
+            default => $this->parseOther($filePath),
         };
     }
 
     /**
-     * 从PDF文件中提取文本
-     *
-     * @param string $filePath
-     * @return string
-     * @throws Exception
+     * Parse Word documents (.doc, .docx)
      */
-    protected function extractFromPDF(string $filePath): string
+    private function parseWordDocument(string $filePath): string
     {
-        try {
-            $parser = new Parser();
-            $pdf = $parser->parseFile($filePath);
-
-            return $pdf->getText();
-        } catch (Exception $e) {
-            throw new Exception("PDF text extraction failed: " . $e->getMessage());
-        }
-    }
-
-    /**
-     * 从DOCX文件中提取文本
-     *
-     * @param string $filePath
-     * @return string
-     * @throws Exception
-     */
-    protected function extractFromDOCX(string $filePath): string
-    {
-        $phpWord = IOFactory::load($filePath);
+        $phpWord = WordIOFactory::load($filePath);
         $text = '';
 
+        // Extract text from each section
         foreach ($phpWord->getSections() as $section) {
             foreach ($section->getElements() as $element) {
                 if (method_exists($element, 'getText')) {
                     $text .= $element->getText() . "\n";
+                } elseif (method_exists($element, 'getElements')) {
+                    foreach ($element->getElements() as $childElement) {
+                        if (method_exists($childElement, 'getText')) {
+                            $text .= $childElement->getText() . "\n";
+                        }
+                    }
                 }
             }
         }
@@ -74,67 +73,125 @@ class TextExtractor
     }
 
     /**
-     * 从Jupyter Notebook文件中提取文本
-     *
-     * @param string $filePath
-     * @return string
-     * @throws Exception
+     * Parse spreadsheet files (.xlsx, .xls, .csv)
      */
-    protected function extractFromIPYNB(string $filePath): string
+    private function parseSpreadsheet(string $filePath): string
     {
-        $content = file_get_contents($filePath);
-        $notebook = json_decode($content, true);
+        $spreadsheet = SpreadsheetIOFactory::load($filePath);
+        $text = '';
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("IPYNB file parsing failed: " . json_last_error_msg());
-        }
+        // Extract text from all worksheets
+        foreach ($spreadsheet->getWorksheetIterator() as $worksheet) {
+            $text .= 'Worksheet: ' . $worksheet->getTitle() . "\n";
 
-        $extractedText = '';
+            foreach ($worksheet->getRowIterator() as $row) {
+                $cellIterator = $row->getCellIterator();
+                $cellIterator->setIterateOnlyExistingCells(false);
+                $rowText = '';
 
-        foreach ($notebook['cells'] ?? [] as $cell) {
-            if (in_array($cell['cell_type'] ?? '', ['markdown', 'code']) && isset($cell['source'])) {
-                $source = $cell['source'];
-                $extractedText .= is_array($source)
-                    ? implode("\n", $source)
-                    : $source;
-                $extractedText .= "\n";
+                foreach ($cellIterator as $cell) {
+                    $value = $cell->getValue();
+                    if (!empty($value)) {
+                        $rowText .= $value . "\t";
+                    }
+                }
+
+                if (!empty(trim($rowText))) {
+                    $text .= trim($rowText) . "\n";
+                }
             }
+
+            $text .= "\n";
         }
 
-        return $extractedText;
+        return $text;
     }
 
     /**
-     * 从其他类型文件中提取文本
-     *
-     * @param string $filePath
-     * @return string
+     * Parse presentation files (.ppt, .pptx)
      * @throws Exception
      */
-    protected function extractFromOtherFile(string $filePath): string
+    private function parsePresentation(string $filePath): string
     {
-        if ($this->isBinaryFile($filePath)) {
-            throw new Exception("Unable to read the text content of this type of file");
+        $presentation = PresentationIOFactory::load($filePath);
+        $text = '';
+
+        // Extract text from all slides
+        foreach ($presentation->getAllSlides() as $slide) {
+            foreach ($slide->getShapeCollection() as $shape) {
+                if ($shape instanceof \PhpOffice\PhpPresentation\Shape\RichText) {
+                    foreach ($shape->getParagraphs() as $paragraph) {
+                        foreach ($paragraph->getRichTextElements() as $element) {
+                            $text .= $element->getText();
+                        }
+                        $text .= "\n";
+                    }
+                }
+            }
+            $text .= "\n";
         }
 
-        return file_get_contents($filePath);
+        return $text;
     }
 
     /**
-     * 检查文件是否为二进制文件
-     *
-     * @param string $filePath
-     * @return bool
+     * Parse PDF files (requires additional library like Smalot\PdfParser)
+     * @throws Exception
      */
-    protected function isBinaryFile(string $filePath): bool
+    private function parsePdf(string $filePath): string
+    {
+        // You'll need to install the Smalot PDF Parser: composer require smalot/pdfparser
+        if (!class_exists('\Smalot\PdfParser\Parser')) {
+            throw new \Exception("PDF Parser not available. Install with: composer require smalot/pdfparser");
+        }
+
+        $parser = new \Smalot\PdfParser\Parser();
+        $pdf = $parser->parseFile($filePath);
+        return $pdf->getText();
+    }
+
+    /**
+     * Parse RTF files
+     */
+    private function parseRtf(string $filePath): string
+    {
+        // Simple RTF to text conversion
+        $content = file_get_contents($filePath);
+
+        // Remove RTF control words and groups
+        $content = preg_replace('/\\\\([a-z]{1,32})(-?[0-9]{1,10})?[ ]?/i', '', $content);
+        $content = preg_replace('/\\\\([^a-z]|[a-z]{33,})/i', '', $content);
+        $content = preg_replace('/\{\*?\\\\[^{}]*\}/', '', $content);
+        $content = preg_replace('/\{[\r\n]*\}/', '', $content);
+
+        // Convert special characters
+        $content = preg_replace('/\\\\\'([0-9a-f]{2})/i', '', $content);
+
+        // Remove remaining curly braces
+        $content = str_replace(['{', '}'], '', $content);
+
+        return $content ?: '';
+    }
+
+    /**
+     * Parse Other(text) files
+     * @throws Exception
+     */
+    private function parseOther(string $filePath): string
     {
         $finfo = finfo_open(FILEINFO_MIME);
         $mimeType = finfo_file($finfo, $filePath);
         finfo_close($finfo);
 
-        return !str_contains($mimeType, 'text/')
+        $isBinary = !str_contains($mimeType, 'text/')
             && !str_contains($mimeType, 'application/json')
             && !str_contains($mimeType, 'application/xml');
+
+        if ($isBinary) {
+            throw new Exception("Unable to read the text content of this type of file");
+        }
+
+        return file_get_contents($filePath);
     }
 
     /** ********************************************************************* */
@@ -147,7 +204,7 @@ class TextExtractor
      * @param float|int $maxSize 最大文件大小，单位字节，默认300KB
      * @return array
      */
-    public static function getFileContent($filePath, float|int $maxSize = 300 * 1024)
+    public static function extractFile($filePath, float|int $maxSize = 300 * 1024): array
     {
         if (!file_exists($filePath) || !is_file($filePath)) {
             return Base::retError("Failed to read contents of {$filePath}");
@@ -157,7 +214,7 @@ class TextExtractor
         }
         try {
             $extractor = new self();
-            return Base::retSuccess("success", $extractor->extractText($filePath));
+            return Base::retSuccess("success", $extractor->extractContent($filePath));
         } catch (Exception $e) {
             return Base::retError($e->getMessage());
         }
