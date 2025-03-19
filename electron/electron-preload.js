@@ -33,26 +33,24 @@ contextBridge.exposeInMainWorld(
         request: (msg, callback, error) => {
             msg.reqId = reqId++;
             reqInfo[msg.reqId] = {callback: callback, error: error};
-
-            //TODO Maybe a special function for this better than this hack?
-            //File watch special case where the callback is called multiple times
             if (msg.action == 'watchFile') {
                 fileChangedListeners[msg.path] = msg.listener;
                 delete msg.listener;
             }
-
             ipcRenderer.send('rendererReq', msg);
         },
-        registerMsgListener: function (action, callback) {
-            ipcRenderer.on(action, function (event, args) {
-                callback(args);
-            });
-        },
+
         sendMessage: function (action, args) {
             ipcRenderer.send(action, args);
         },
         sendAsync: function (action, args) {
             return ipcRenderer.invoke(action, args)
+        },
+
+        listener: function (action, callback) {
+            ipcRenderer.on(action, function (event, args) {
+                callback(args);
+            });
         },
         listenOnce: function (action, callback) {
             ipcRenderer.once(action, function (event, args) {

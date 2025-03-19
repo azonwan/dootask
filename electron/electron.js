@@ -1261,24 +1261,15 @@ ipcMain.on('windowMax', (event) => {
 })
 
 /**
- * 给主窗口发送信息
- * @param args {channel, data}
- */
-ipcMain.on('sendForwardMain', (event, args) => {
-    if (mainWindow) {
-        mainWindow.webContents.send(args.channel, args.data)
-    }
-    event.returnValue = "ok"
-})
-
-/**
- * 窗口同步执行派遣
+ * 给所有窗口广播指令（除了本身）
  * @param args {type, payload}
  */
-ipcMain.on('syncDispatch', (event, args) => {
+ipcMain.on('broadcastCommand', (event, args) => {
+    const channel = args.channel || args.command
+    const payload = args.payload || args.data
     BrowserWindow.getAllWindows().forEach(window => {
         if (window.webContents.id !== event.sender.id) {
-            window.webContents.send('syncDispatch', args)
+            window.webContents.send(channel, payload)
         }
     })
     event.returnValue = "ok"

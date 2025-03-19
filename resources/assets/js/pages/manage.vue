@@ -1208,12 +1208,12 @@ export default {
             }
             //
             if (this.$Electron) {
-                this.$Electron.registerMsgListener('clickNotification', target => {
+                this.$Electron.listener('clickNotification', target => {
                     console.log("[Notification] B Click", target);
                     this.$Electron.sendMessage('mainWindowActive')
                     this.notificationClick(target)
                 })
-                this.$Electron.registerMsgListener('replyNotification', target => {
+                this.$Electron.listener('replyNotification', target => {
                     console.log("[Notification] B Reply", target);
                     this.notificationReply(target)
                 })

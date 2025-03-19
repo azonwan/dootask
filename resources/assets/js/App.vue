@@ -440,13 +440,13 @@ export default {
                 this.$store.dispatch("openWebTabWindow", url)
                 return true
             }
-            this.$Electron.registerMsgListener('browserWindowBlur', _ => {
+            this.$Electron.listener('browserWindowBlur', _ => {
                 this.$store.state.windowActive = false;
             })
-            this.$Electron.registerMsgListener('browserWindowFocus', _ => {
+            this.$Electron.listener('browserWindowFocus', _ => {
                 this.$store.state.windowActive = true;
             })
-            this.$Electron.registerMsgListener('systemThemeChanged', _ => {
+            this.$Electron.listener('systemThemeChanged', _ => {
                 this.autoTheme()
             })
             $A.bindScreenshotKey(this.$store.state.cacheKeyboard);

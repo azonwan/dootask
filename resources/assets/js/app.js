@@ -217,14 +217,17 @@ $A.syncDispatch = (action, data) => {
         delete data.__sync__;
         return false
     }
-    $A.Electron?.sendMessage('syncDispatch', {
-        dispatchId,
-        action,
-        data,
+    $A.Electron?.sendMessage('broadcastCommand', {
+        channel: 'syncDispatch',
+        payload: {
+            dispatchId,
+            action,
+            data,
+        }
     });
     return true
 };
-$A.Electron?.registerMsgListener('syncDispatch', async ({dispatchId: targetId, action, data}) => {
+$A.Electron?.listener('syncDispatch', async ({dispatchId: targetId, action, data}) => {
     if (dispatchId === targetId) {
         return
     }

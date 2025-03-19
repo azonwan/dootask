@@ -70,7 +70,7 @@ export default {
         //
         if (this.$Electron) {
             emitter.on('updateNotification', this.onUpdateShow);
-            this.$Electron.registerMsgListener('updateDownloaded', info => {
+            this.$Electron.listener('updateDownloaded', info => {
                 this.$store.state.clientNewVersion = info.version
                 this.updateVersion = info.version;
                 this.updateNote = info.releaseNotes || this.$L('没有更新描述。');

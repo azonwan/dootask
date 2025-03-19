@@ -35,12 +35,12 @@ export default {
         }
     },
     methods: {
-        saveSuccess(data) {
-            this.detail = data;
+        saveSuccess(payload) {
+            this.detail = payload;
             if (this.$isSubElectron) {
-                $A.Electron.sendMessage('sendForwardMain', {
+                $A.Electron.sendMessage('broadcastCommand', {
                     channel: 'reportSaveSuccess',
-                    data,
+                    payload,
                 });
                 window.close();
             }
