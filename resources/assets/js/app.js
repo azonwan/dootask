@@ -204,24 +204,36 @@ if (isElectron) {
     $A.Platform = /(iPhone|iPad|iPod|iOS)/i.test(navigator.userAgent) ? "ios" : "android";
 }
 
-// 子窗口给主窗口发送指令相关
-$A.execMainDispatch = (action, data) => {
-    if (!$A.isSubElectron) {
+// 同步执行派遣
+const dispatchId = $A.randomString(6) + "_" + Date.now().toString()
+$A.syncDispatch = (action, data) => {
+    if (!isElectron) {
         return false
     }
-    $A.Electron.sendMessage('sendForwardMain', {
-        channel: 'dispatch',
-        data: {action, data},
+    if (!$A.isJson(data)) {
+        return false
+    }
+    if (data.__sync__ === true) {
+        delete data.__sync__;
+        return false
+    }
+    $A.Electron?.sendMessage('syncDispatch', {
+        dispatchId,
+        action,
+        data,
     });
     return true
 };
-
-window.execMainCacheData = {}
-$A.execMainCacheJudge = (key) => {
-    const val = window.execMainCacheData[key] || false
-    window.execMainCacheData[key] = true
-    return val
-};
+$A.Electron?.registerMsgListener('syncDispatch', async ({dispatchId: targetId, action, data}) => {
+    if (dispatchId === targetId) {
+        return
+    }
+    if (!$A.isJson(data)) {
+        return
+    }
+    data.__sync__ = true
+    await store.dispatch(action, data)
+})
 
 // 绑定截图快捷键
 $A.bindScreenshotKey = (data) => {

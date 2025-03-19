@@ -831,8 +831,8 @@ export default {
         this.generateUnreadData(this.dialogId)
         //
         if (!this.isChildComponent) {
-            this.$store.dispatch('forgetInDialog', this._uid)
-            this.$store.dispatch('closeDialog', this.dialogId)
+            this.$store.dispatch('forgetInDialog', {uid: this._uid})
+            this.$store.dispatch('closeDialog', {id: this.dialogId})
         }
         //
         this.observers.forEach(({observer}) => observer.disconnect())
@@ -1219,7 +1219,7 @@ export default {
                 this.getDialogBase(dialog_id)
                 this.generateUnreadData(old_id)
                 //
-                this.$store.dispatch('closeDialog', old_id)
+                this.$store.dispatch('closeDialog', {id: old_id})
                 //
                 window.localStorage.removeItem('__cache:vote__')
                 window.localStorage.removeItem('__cache:unfoldWordChain__')
@@ -2321,8 +2321,8 @@ export default {
             })
             this.$store.dispatch("saveDialogMsg", data);
             if (!isUpdate) {
-                this.$store.dispatch("increaseTaskMsgNum", data.dialog_id);
-                this.$store.dispatch("increaseMsgReplyNum", data.reply_id);
+                this.$store.dispatch("increaseTaskMsgNum", {id: data.dialog_id});
+                this.$store.dispatch("increaseMsgReplyNum", {id: data.reply_id});
                 this.$store.dispatch("updateDialogLastMsg", data);
             }
             this.cancelQuote();
@@ -2766,7 +2766,7 @@ export default {
                             }
                         }).then(({msg}) => {
                             resolve(msg);
-                            this.$store.dispatch("forgetDialog", this.dialogId);
+                            this.$store.dispatch("forgetDialog", {id: this.dialogId});
                             this.goForward({name: 'manage-messenger'});
                         }).catch(({msg}) => {
                             reject(msg);
@@ -2789,7 +2789,7 @@ export default {
                             }
                         }).then(({msg}) => {
                             resolve(msg);
-                            this.$store.dispatch("forgetDialog", this.dialogId);
+                            this.$store.dispatch("forgetDialog", {id: this.dialogId});
                             this.goForward({name: 'manage-messenger'});
                         }).catch(({msg}) => {
                             reject(msg);
@@ -3540,7 +3540,7 @@ export default {
                             },
                         }).then(() => {
                             resolve("消息已撤回");
-                            this.$store.dispatch("forgetDialogMsg", this.operateItem.id);
+                            this.$store.dispatch("forgetDialogMsg", this.operateItem);
                         }).catch(({msg}) => {
                             reject(msg);
                         });

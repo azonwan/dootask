@@ -440,13 +440,6 @@ export default {
                 this.$store.dispatch("openWebTabWindow", url)
                 return true
             }
-            this.$Electron.registerMsgListener('dispatch', args => {
-                if (!$A.isJson(args)) {
-                    return;
-                }
-                let {action, data} = args;
-                this.$store.dispatch(action, data);
-            })
             this.$Electron.registerMsgListener('browserWindowBlur', _ => {
                 this.$store.state.windowActive = false;
             })

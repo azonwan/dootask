@@ -283,7 +283,7 @@ export default {
                             if (userids.length > 0) {
                                 this.getDialogUser();
                             } else {
-                                this.$store.dispatch("forgetDialog", this.dialogId);
+                                this.$store.dispatch("forgetDialog", {id: this.dialogId});
                                 this.goForward({name: 'manage-messenger'});
                             }
                         }).catch(({msg}) => {

@@ -1280,7 +1280,7 @@ export default {
                                     },
                                 }).then(({msg}) => {
                                     resolve(msg);
-                                    this.$store.dispatch("forgetFile", item.id);
+                                    this.$store.dispatch("forgetFile", item);
                                 }).catch(({msg}) => {
                                     reject(msg);
                                 });
@@ -1433,7 +1433,7 @@ export default {
                             },
                         }).then(({msg}) => {
                             resolve(msg);
-                            this.$store.dispatch("forgetFile", ids);
+                            this.$store.dispatch("forgetFile", {id: ids});
                             this.selectIds = this.selectIds.filter(id => !ids.includes(id))
                         }).catch(({msg}) => {
                             reject(msg);
@@ -1542,7 +1542,7 @@ export default {
                 const isCreate = !/^\d+$/.test(item.id);
                 if (isCreate) {
                     item.newname = ''
-                    this.$store.dispatch("forgetFile", item.id);
+                    this.$store.dispatch("forgetFile", item);
                 } else {
                     this.setLoad(item.id, false)
                     this.setEdit(item.id, false)
@@ -1554,7 +1554,7 @@ export default {
             const isCreate = !/^\d+$/.test(item.id);
             if (!item.newname) {
                 if (isCreate) {
-                    this.$store.dispatch("forgetFile", item.id);
+                    this.$store.dispatch("forgetFile", item);
                 } else {
                     this.setEdit(item.id, false)
                 }
@@ -1583,14 +1583,14 @@ export default {
                 this.setEdit(item.id, false)
                 this.$store.dispatch("saveFile", data);
                 if (isCreate) {
-                    this.$store.dispatch("forgetFile", item.id);
+                    this.$store.dispatch("forgetFile", item);
                     this.shakeFile(data.id);
                 }
             }).catch(({msg}) => {
                 $A.modalError(msg)
                 this.setLoad(item.id, false)
                 if (isCreate) {
-                    this.$store.dispatch("forgetFile", item.id);
+                    this.$store.dispatch("forgetFile", item);
                 }
             })
         },

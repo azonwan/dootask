@@ -1272,13 +1272,13 @@ ipcMain.on('sendForwardMain', (event, args) => {
 })
 
 /**
- * 窗口数据同步
+ * 窗口同步执行派遣
  * @param args {type, payload}
  */
-ipcMain.on('syncStore', (event, args) => {
+ipcMain.on('syncDispatch', (event, args) => {
     BrowserWindow.getAllWindows().forEach(window => {
         if (window.webContents.id !== event.sender.id) {
-            window.webContents.send('syncStore', args)
+            window.webContents.send('syncDispatch', args)
         }
     })
     event.returnValue = "ok"
