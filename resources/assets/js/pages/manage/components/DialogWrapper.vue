@@ -3599,9 +3599,7 @@ export default {
             switch (target.nodeName) {
                 // 打开图片
                 case "IMG":
-                    if (target.classList.contains('browse')) {
-                        this.onViewPicture(target.currentSrc);
-                    } else {
+                    if (!(target.classList.contains('browse') && this.onViewPicture(target.currentSrc))) {
                         const list = $A.getTextImagesInfo(el.outerHTML)
                         this.$store.dispatch("previewImage", {index: target.currentSrc, list})
                     }
@@ -3756,7 +3754,13 @@ export default {
                 }
             })
             //
+            const current = $A.thumbRestore(currentUrl)
+            if (!list.find(item => $A.thumbRestore(item.src) == current)) {
+                return false
+            }
+            //
             this.$store.dispatch("previewImage", {index: currentUrl, list})
+            return true
         },
 
         onDownFile(data) {
