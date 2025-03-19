@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.74]
+
+### Performance
+
+- 优化AI解析文件
+- 优化 WebSocket 消息
+- 优化数据
+
 ## [0.44.67]
 
 ### Bug Fixes

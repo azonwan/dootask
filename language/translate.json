@@ -29134,5 +29134,53 @@
         "fr": "P.S.",
         "id": "PS",
         "ru": "P.S."
+    },
+    {
+        "key": "指令解析失败。",
+        "zh": "",
+        "zh-CHT": "指令解析失敗。",
+        "en": "Instruction parsing failed.",
+        "ko": "명령 해석 실패.",
+        "ja": "指示の解析に失敗しました。",
+        "de": "Befehl konnte nicht analysiert werden.",
+        "fr": "Échec de l'analyse de l'instruction.",
+        "id": "Gagal memparsing instruksi.",
+        "ru": "Ошибка разбора инструкции."
+    },
+    {
+        "key": "引用消息解析失败。",
+        "zh": "",
+        "zh-CHT": "引用消息解析失敗。",
+        "en": "Reference message parsing failed.",
+        "ko": "참조 메시지 해석 실패.",
+        "ja": "参照メッセージの解析に失敗しました。",
+        "de": "Referenznachricht konnte nicht analysiert werden.",
+        "fr": "Échec de l'analyse du message de référence.",
+        "id": "Gagal memparsing pesan referensi.",
+        "ru": "Ошибка разбора ссылочного сообщения."
+    },
+    {
+        "key": "任务不存在或已被删除",
+        "zh": "",
+        "zh-CHT": "任務不存在或已被刪除",
+        "en": "Task does not exist or has been deleted.",
+        "ko": "작업이 존재하지 않거나 삭제되었습니다.",
+        "ja": "タスクが存在しないか削除されました。",
+        "de": "Aufgabe existiert nicht oder wurde gelöscht.",
+        "fr": "La tâche n'existe pas ou a été supprimée.",
+        "id": "Tugas tidak ada atau telah dihapus.",
+        "ru": "Задача не существует или была удалена."
+    },
+    {
+        "key": "文件读取失败：(%T1)",
+        "zh": "",
+        "zh-CHT": "文件讀取失敗：(%T1)",
+        "en": "File read failed: (%T1)",
+        "ko": "파일 읽기 실패: (%T1)",
+        "ja": "ファイルの読み込みに失敗しました: (%T1)",
+        "de": "Dateilesen fehlgeschlagen: (%T1)",
+        "fr": "Échec de la lecture du fichier : (%T1)",
+        "id": "Gagal membaca file: (%T1)",
+        "ru": "Ошибка чтения файла: (%T1)"
     }
 ]
