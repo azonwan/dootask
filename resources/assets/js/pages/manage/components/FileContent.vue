@@ -125,9 +125,9 @@
 </template>
 
 <script>
-import {mapState} from "vuex";
 import FileHistory from "./FileHistory";
 import IFrame from "./IFrame";
+import emitter from "../../../store/events";
 
 const VMEditor = () => import('../../../components/VMEditor/index');
 const VMPreview = () => import('../../../components/VMEditor/preview');
@@ -185,6 +185,7 @@ export default {
         this.edit = !this.windowPortrait
         document.addEventListener('keydown', this.keySave)
         window.addEventListener('message', this.handleOfficeMessage)
+        emitter.on('websocketMsg', this.onWebsocketMsg)
         //
         if (this.$isSubElectron) {
             window.__onBeforeUnload = () => {
@@ -207,6 +208,7 @@ export default {
     beforeDestroy() {
         document.removeEventListener('keydown', this.keySave)
         window.removeEventListener('message', this.handleOfficeMessage)
+        emitter.off('websocketMsg', this.onWebsocketMsg)
     },
 
     watch: {
@@ -231,46 +233,9 @@ export default {
                 this.$refs.historyTip.updatePopper()
             }
         },
-
-        wsMsg: {
-            handler(info) {
-                const {type, action, data} = info;
-                switch (type) {
-                    case 'path':
-                        if (data.path == '/single/file/' + this.fileId) {
-                            this.editUser = data.userids;
-                        }
-                        break;
-
-                    case 'file':
-                        if (action == 'content') {
-                            if (this.value && data.id == this.fileId) {
-                                const contents = [
-                                    '团队成员「' + info.nickname + '」更新了内容，',
-                                    '更新时间：' + $A.dayjs(info.time).format("YYYY-MM-DD HH:mm:ss") + '。',
-                                    '',
-                                    '点击【确定】加载最新内容。'
-                                ]
-                                $A.modalConfirm({
-                                    language: false,
-                                    title: this.$L("更新提示"),
-                                    content: contents.map(item => `<p>${item ? this.$L(item) : '&nbsp;'}</p>`).join(''),
-                                    onOk: () => {
-                                        this.getContent();
-                                    }
-                                });
-                            }
-                        }
-                        break;
-                }
-            },
-            deep: true,
-        },
     },
 
     computed: {
-        ...mapState(['wsMsg']),
-
         fileId() {
             return this.file.id || 0
         },
@@ -332,6 +297,38 @@ export default {
                         }
                         break;
                 }
+            }
+        },
+
+        onWebsocketMsg(info) {
+            const {type, action, data} = info;
+            switch (type) {
+                case 'path':
+                    if (data.path == '/single/file/' + this.fileId) {
+                        this.editUser = data.userids;
+                    }
+                    break;
+
+                case 'file':
+                    if (action == 'content') {
+                        if (this.value && data.id == this.fileId) {
+                            const contents = [
+                                '团队成员「' + info.nickname + '」更新了内容，',
+                                '更新时间：' + $A.dayjs(info.time).format("YYYY-MM-DD HH:mm:ss") + '。',
+                                '',
+                                '点击【确定】加载最新内容。'
+                            ]
+                            $A.modalConfirm({
+                                language: false,
+                                title: this.$L("更新提示"),
+                                content: contents.map(item => `<p>${item ? this.$L(item) : '&nbsp;'}</p>`).join(''),
+                                onOk: () => {
+                                    this.getContent();
+                                }
+                            });
+                        }
+                    }
+                    break;
             }
         },
 

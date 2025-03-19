@@ -1882,7 +1882,7 @@ export default {
         const index = state.dialogMsgs.findIndex(m => m.id == data.id)
         if (index !== -1) {
             const newData = $A.cloneJSON(state.dialogMsgs[index])
-            newData.reply_num--
+            newData.reply_num++
             commit("message/splice", {index, data: newData})
         }
     },
@@ -3979,16 +3979,10 @@ export default {
 
                 default:
                     msgId && dispatch("websocketSend", {type: 'receipt', msgId}).catch(_ => {});
-                    state.wsMsg = msgDetail;
-                    Object.values(state.wsListener).forEach((call) => {
-                        if (typeof call === "function") {
-                            try {
-                                call(msgDetail);
-                            } catch (err) {
-                                wgLog && console.log("[WS] Callerr", err);
-                            }
-                        }
-                    });
+                    emitter.emit('websocketMsg', msgDetail);
+                    if ($A.isSubElectron) {
+                        return
+                    }
                     switch (type) {
                         /**
                          * 聊天会话消息
@@ -4291,24 +4285,6 @@ export default {
                 dispatch("websocketSend", {type: 'path', data: {path}}).catch(_ => {});
             }
         }, 1000);
-    },
-
-    /**
-     * 监听消息
-     * @param state
-     * @param params {name, callback}
-     */
-    websocketMsgListener({state}, params) {
-        if (typeof params === "string") {
-            state.wsListener[params] && delete state.wsListener[params];
-            return;
-        }
-        const {name, callback} = params;
-        if (typeof callback === "function") {
-            state.wsListener[name] = callback;
-        } else {
-            state.wsListener[name] && delete state.wsListener[name];
-        }
     },
 
     /**

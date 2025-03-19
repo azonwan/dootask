@@ -821,13 +821,13 @@ export default {
     },
 
     mounted() {
-        this.subMsgListener()
+        emitter.on('websocketMsg', this.onWebsocketMsg);
         emitter.on('dialogMsgChange', this.onMsgChange);
     },
 
     beforeDestroy() {
         emitter.off('dialogMsgChange', this.onMsgChange);
-        this.subMsgListener(true)
+        emitter.off('websocketMsg', this.onWebsocketMsg);
         this.generateUnreadData(this.dialogId)
         //
         if (!this.isChildComponent) {
@@ -1523,29 +1523,6 @@ export default {
         },
 
         /**
-         * 订阅消息（用于独立窗口）
-         * @param unsubscribe
-         */
-        subMsgListener(unsubscribe = false) {
-            if (!$A.isSubElectron) {
-                return
-            }
-            if (unsubscribe) {
-                this.$store.dispatch('websocketMsgListener', 'DialogWrapper')
-            } else {
-                this.$store.dispatch('websocketMsgListener', {
-                    name: 'DialogWrapper',
-                    callback: (msgDetail) => {
-                        const {type, mode, data} = msgDetail;
-                        if (type === 'dialog' && mode === 'add') {
-                            this.tempMsgs.push(data)
-                        }
-                    }
-                })
-            }
-        },
-
-        /**
          * 发送数据处理
          * @param data
          * @returns {*}
@@ -1917,6 +1894,20 @@ export default {
                     }
                     this.sendMsg(`<p><span data-quick-key="${item.key}">${item.label}</span></p>`)
                     break;
+            }
+        },
+
+        /**
+         * 收到websocket消息
+         * @param msgDetail
+         */
+        onWebsocketMsg(msgDetail) {
+            if (!$A.isSubElectron) {
+                return
+            }
+            const {type, mode, data} = msgDetail;
+            if (type === 'dialog' && mode === 'add') {
+                this.tempMsgs.push(data)
             }
         },
 

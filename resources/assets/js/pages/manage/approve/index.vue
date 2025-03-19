@@ -341,7 +341,7 @@ export default {
         }
     },
     computed: {
-        ...mapState(['wsMsg', 'userInfo', 'userIsAdmin', 'windowWidth', 'formOptions']),
+        ...mapState(['userInfo', 'userIsAdmin', 'windowWidth', 'formOptions']),
         departmentList() {
             let departmentNames = (this.userInfo.department_name || '').split(',');
             return (this.userInfo.department || []).map((h, index) => {
@@ -357,24 +357,6 @@ export default {
             if (to.name == 'manage-approve') {
                 this.init()
             }
-        },
-        wsMsg: {
-            handler(info) {
-                const {type, action, mode, data} = info;
-                switch (type) {
-                    case 'approve':
-                        if (action == 'unread') {
-                            this.tabsClick();
-                        }
-                        break;
-                    case 'dialog':
-                        if (mode == 'add' && data?.msg?.text?.indexOf('open-approve-details') != -1) {
-                            this.tabsClick();
-                        }
-                        break;
-                }
-            },
-            deep: true,
         },
         addShow(val) {
             if (!val) {
@@ -396,6 +378,10 @@ export default {
     mounted() {
         this.tabsValue = "unread"
         this.init()
+        emitter.on('websocketMsg', this.onWebsocketMsg)
+    },
+    beforeDestroy() {
+        emitter.off('websocketMsg', this.onWebsocketMsg)
     },
     methods: {
         init() {
@@ -407,6 +393,23 @@ export default {
             this.addData.department_id = this.userInfo.department[0] || 0;
             this.addData.startTime = this.addData.endTime = $A.daytz().format('YYYY-MM-DD');
             this.isShowIcon = this.windowWidth < 515
+        },
+
+        // 收到websocket消息
+        onWebsocketMsg(info) {
+            const {type, action, mode, data} = info;
+            switch (type) {
+                case 'approve':
+                    if (action == 'unread') {
+                        this.tabsClick();
+                    }
+                    break;
+                case 'dialog':
+                    if (mode == 'add' && data?.msg?.text?.indexOf('open-approve-details') != -1) {
+                        this.tabsClick();
+                    }
+                    break;
+            }
         },
 
         // 获取流程列表

@@ -99,12 +99,10 @@ export default {
 
     // Websocket
     ws: null,
-    wsMsg: {},
     wsCall: {},
     wsTimeout: null,
     wsRandom: 0,
     wsOpenNum: 0,
-    wsListener: {},
 
     // 会员信息
     userInfo: {},
