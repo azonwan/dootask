@@ -17,6 +17,7 @@ use App\Module\Doo;
 use App\Module\Ihttp;
 use App\Module\TextExtractor;
 use Carbon\Carbon;
+use Exception;
 use League\HTMLToMarkdown\HtmlConverter;
 use DB;
 
@@ -90,8 +91,16 @@ class BotReceiveMsgTask extends AbstractTask
         }
 
         // 提取指令
-        $command = $this->extractCommand($msg, $botUser->isAiBot(), $this->mention);
-        if (empty($command)) {
+        try {
+            $command = $this->extractCommand($msg, $botUser->isAiBot(), $this->mention);
+            if (empty($command)) {
+                return;
+            }
+        } catch (Exception $e) {
+            WebSocketDialogMsg::sendMsg(null, $msg->dialog_id, 'template', [
+                'type' => 'content',
+                'content' => $e->getMessage() ?: "指令解析失败。",
+            ], $botUser->userid, false, false, true);    // todo 未能在任务end事件来发送任务
             return;
         }
 
@@ -473,14 +482,20 @@ class BotReceiveMsgTask extends AbstractTask
                 if ($replyMsg) {
                     switch ($replyMsg->type) {
                         case 'text':
-                            $replyCommand = $this->extractCommand($replyMsg, true);
-                            if ($replyCommand) {
-                                $replyCommand = Base::cutStr($replyCommand, 20000);
+                            try {
+                                $replyCommand = $this->extractCommand($replyMsg, true);
+                            } catch (Exception) {
+                                $errorContent = "引用消息解析失败。";
                             }
                             break;
                         case 'file':
                             $msgData = Base::json2array($replyMsg->getRawOriginal('msg'));
-                            $replyCommand = TextExtractor::getFileContent(public_path($msgData['path']));
+                            $fileResult = TextExtractor::getFileContent(public_path($msgData['path']));
+                            if (Base::isError($fileResult)) {
+                                $errorContent = $fileResult['msg'];
+                            } else {
+                                $replyCommand = $fileResult['data'];
+                            }
                             break;
                     }
                 }
@@ -581,6 +596,7 @@ class BotReceiveMsgTask extends AbstractTask
      * @param bool $isAiBot
      * @param bool $mention
      * @return string
+     * @throws Exception
      */
     private function extractCommand(WebSocketDialogMsg $msg, bool $isAiBot = false, bool $mention = false)
     {
@@ -608,13 +624,12 @@ class BotReceiveMsgTask extends AbstractTask
         if (preg_match_all("/<span class=\"mention task\" data-id=\"(\d+)\">(.*?)<\/span>/", $original, $match)) {
             $taskIds = Base::newIntval($match[1]);
             foreach ($taskIds as $index => $taskId) {
-                $taskName = addslashes($match[2][$index]) . " (ID:{$taskId})";
-                $taskContext = "任务状态：不存在或已删除";
                 $taskInfo = ProjectTask::with(['content'])->whereId($taskId)->first();
-                if ($taskInfo) {
-                    $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
-                    $taskContext = implode("\n", $taskInfo->AIContext());
+                if (!$taskInfo) {
+                    throw new Exception("任务不存在或已被删除");
                 }
+                $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
+                $taskContext = implode("\n", $taskInfo->AIContext());
                 $contents[] = "<task_content path=\"{$taskName}\">\n{$taskContext}\n</task_content>";
                 $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
             }
@@ -628,28 +643,31 @@ class BotReceiveMsgTask extends AbstractTask
                 $pathContent = null;
                 // 文件
                 if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
-                    $pathTag = "file_content";
-                    $pathName = addslashes($match[3][$index]);
-                    $pathContent = "文件状态：不存在或已删除";
                     $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
-                    if ($fileInfo && isset($fileInfo->content['url'])) {
-                        $urlPath = public_path($fileInfo->content['url']);
-                        if (file_exists($urlPath)) {
-                            $pathName .= " (ID:{$fileInfo->id})";
-                            $pathContent = TextExtractor::getFileContent($urlPath);
-                        }
+                    if (!$fileInfo || !isset($fileInfo->content['url'])) {
+                        throw new Exception("文件不存在或已被删除");
                     }
+                    $urlPath = public_path($fileInfo->content['url']);
+                    if (!file_exists($urlPath)) {
+                        throw new Exception("文件不存在或已被删除");
+                    }
+                    $fileResult = TextExtractor::getFileContent($urlPath);
+                    if (Base::isError($fileResult)) {
+                        throw new Exception("文件读取失败：" . $fileResult['msg']);
+                    }
+                    $pathTag = "file_content";
+                    $pathName = addslashes($match[3][$index]) . " (ID:{$fileInfo->id})";
+                    $pathContent = $fileResult['data'];
                 }
                 // 报告
                 elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
-                    $pathTag = "report_content";
-                    $pathName = addslashes($match[3][$index]);
-                    $pathContent = "报告状态：不存在或已删除";
                     $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
-                    if ($reportInfo) {
-                        $pathName .= " (ID:{$reportInfo->id})";
-                        $pathContent = $reportInfo->content;
+                    if (!$reportInfo) {
+                        throw new Exception("报告不存在或已被删除");
                     }
+                    $pathTag = "report_content";
+                    $pathName = addslashes($match[3][$index]) . " (ID:{$reportInfo->id})";
+                    $pathContent = $reportInfo->content;
                 }
                 if ($pathTag) {
                     $contents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
@@ -662,7 +680,9 @@ class BotReceiveMsgTask extends AbstractTask
             try {
                 $converter = new HtmlConverter();
                 $original = $converter->convert($original);
-            } catch (\Exception) { }
+            } catch (\Exception) {
+                throw new Exception("Failed to convert HTML to Markdown");
+            }
         }
         if ($contents) {
             // 添加tag内容

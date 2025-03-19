@@ -3,7 +3,6 @@
 namespace App\Module;
 
 use Exception;
-use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpWord\IOFactory;
 use Smalot\PdfParser\Parser;
 
@@ -19,25 +18,17 @@ class TextExtractor
     public function extractText(string $filePath): string
     {
         if (!file_exists($filePath)) {
-            throw new Exception("文件不存在: {$filePath}");
+            throw new Exception("File does not exist: {$filePath}");
         }
 
         $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
-        try {
-            return match($fileExtension) {
-                'pdf'   => $this->extractFromPDF($filePath),
-                'docx'  => $this->extractFromDOCX($filePath),
-                'ipynb' => $this->extractFromIPYNB($filePath),
-                default => $this->extractFromOtherFile($filePath),
-            };
-        } catch (Exception $e) {
-            Log::error('文本提取失败', [
-                'file' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            throw $e;
-        }
+        return match($fileExtension) {
+            'pdf'   => $this->extractFromPDF($filePath),
+            'docx'  => $this->extractFromDOCX($filePath),
+            'ipynb' => $this->extractFromIPYNB($filePath),
+            default => $this->extractFromOtherFile($filePath),
+        };
     }
 
     /**
@@ -55,11 +46,7 @@ class TextExtractor
 
             return $pdf->getText();
         } catch (Exception $e) {
-            Log::error('PDF解析失败', [
-                'file' => $filePath,
-                'error' => $e->getMessage()
-            ]);
-            throw new Exception("PDF文本提取失败: " . $e->getMessage());
+            throw new Exception("PDF text extraction failed: " . $e->getMessage());
         }
     }
 
@@ -99,7 +86,7 @@ class TextExtractor
         $notebook = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception("IPYNB文件解析失败: " . json_last_error_msg());
+            throw new Exception("IPYNB file parsing failed: " . json_last_error_msg());
         }
 
         $extractedText = '';
@@ -127,7 +114,7 @@ class TextExtractor
     protected function extractFromOtherFile(string $filePath): string
     {
         if ($this->isBinaryFile($filePath)) {
-            throw new Exception("无法读取该类型文件的文本内容");
+            throw new Exception("Unable to read the text content of this type of file");
         }
 
         return file_get_contents($filePath);
@@ -158,25 +145,21 @@ class TextExtractor
      * 获取文件内容
      * @param $filePath
      * @param float|int $maxSize 最大文件大小，单位字节，默认300KB
-     * @return string
+     * @return array
      */
     public static function getFileContent($filePath, float|int $maxSize = 300 * 1024)
     {
         if (!file_exists($filePath) || !is_file($filePath)) {
-            return "(Failed to read contents of {$filePath})";
+            return Base::retError("Failed to read contents of {$filePath}");
         }
         if (filesize($filePath) > $maxSize) {
-            return "(File size exceeds " . Base::readableBytes($maxSize) . ", unable to display content)";
+            return Base::retError("File size exceeds " . Base::readableBytes($maxSize) . ", unable to display content");
         }
-        $te = new self();
         try {
-            $isBinary = $te->isBinaryFile($filePath);
-            if ($isBinary) {
-                return "(Binary file, unable to display content)";
-            }
-            return $te->extractText($filePath);
+            $extractor = new self();
+            return Base::retSuccess("success", $extractor->extractText($filePath));
         } catch (Exception $e) {
-            return "(Failed to read contents of {$filePath}: {$e->getMessage()})";
+            return Base::retError($e->getMessage());
         }
     }
 }
