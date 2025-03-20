@@ -6,52 +6,83 @@ use Exception;
 use PhpOffice\PhpWord\IOFactory as WordIOFactory;
 use PhpOffice\PhpSpreadsheet\IOFactory as SpreadsheetIOFactory;
 use PhpOffice\PhpPresentation\IOFactory as PresentationIOFactory;
+use Illuminate\Support\Facades\File as FileFacade;
 
 
 class TextExtractor
 {
+    private string $filePath;
+    private string $fileMimeType;
+    private string $fileExtension;
+
     /**
-     * 从文件中提取文本
-     *
-     * @param string $filePath 文件路径
-     * @return string
+     * @param string $filePath
      * @throws Exception
      */
-    public function extractContent(string $filePath): string
+    public function __construct(string $filePath)
     {
         if (!file_exists($filePath)) {
             throw new Exception("File does not exist: {$filePath}");
         }
+        $this->filePath = $filePath;
+        $this->fileMimeType = FileFacade::mimeType($filePath);
+        $this->fileExtension = $this->detectFileType();
+    }
 
-        $fileExtension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+    /**
+     * 从文件中提取文本
+     * @return string
+     * @throws Exception
+     */
+    public function extractContent(): string
+    {
+        return match ($this->fileExtension) {
+            // Word文档
+            'docx' => $this->parseWordDocument(),
 
-        return match ($fileExtension) {
-            // Word documents
-            'docx' => $this->parseWordDocument($filePath),
+            // Excel文档
+            'xlsx', 'xls', 'csv' => $this->parseSpreadsheet(),
 
-            // Spreadsheet files
-            'xlsx', 'xls', 'csv' => $this->parseSpreadsheet($filePath),
+            // PowerPoint文档
+            'ppt', 'pptx' => $this->parsePresentation(),
 
-            // Presentation files
-            'ppt', 'pptx' => $this->parsePresentation($filePath),
+            // PDF文档
+            'pdf' => $this->parsePdf(),
 
-            // PDF files (requires additional library)
-            'pdf' => $this->parsePdf($filePath),
+            // RTF文档
+            'rtf' => $this->parseRtf(),
 
-            // RTF files
-            'rtf' => $this->parseRtf($filePath),
+            // 其他文本文件
+            default => $this->parseOther(),
+        };
+    }
 
-            // Default case
-            default => $this->parseOther($filePath),
+    /**
+     * 获取文件类型
+     * @return string
+     */
+    private function detectFileType(): string
+    {
+        return match ($this->fileMimeType) {
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx',
+            'application/vnd.ms-excel' => 'xls',
+            'text/csv', 'application/csv' => 'csv',
+            'application/vnd.ms-powerpoint' => 'ppt',
+            'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'pptx',
+            'application/pdf' => 'pdf',
+            'application/rtf', 'text/rtf' => 'rtf',
+            default => strtolower(pathinfo($this->filePath, PATHINFO_EXTENSION)),
         };
     }
 
     /**
      * Parse Word documents (.doc, .docx)
+     * @return string
      */
-    private function parseWordDocument(string $filePath): string
+    private function parseWordDocument(): string
     {
-        $phpWord = WordIOFactory::load($filePath);
+        $phpWord = WordIOFactory::load($this->filePath);
         $text = '';
 
         // Extract text from each section
@@ -74,10 +105,11 @@ class TextExtractor
 
     /**
      * Parse spreadsheet files (.xlsx, .xls, .csv)
+     * @return string
      */
-    private function parseSpreadsheet(string $filePath): string
+    private function parseSpreadsheet(): string
     {
-        $spreadsheet = SpreadsheetIOFactory::load($filePath);
+        $spreadsheet = SpreadsheetIOFactory::load($this->filePath);
         $text = '';
 
         // Extract text from all worksheets
@@ -109,11 +141,12 @@ class TextExtractor
 
     /**
      * Parse presentation files (.ppt, .pptx)
+     * @return string
      * @throws Exception
      */
-    private function parsePresentation(string $filePath): string
+    private function parsePresentation(): string
     {
-        $presentation = PresentationIOFactory::load($filePath);
+        $presentation = PresentationIOFactory::load($this->filePath);
         $text = '';
 
         // Extract text from all slides
@@ -136,9 +169,10 @@ class TextExtractor
 
     /**
      * Parse PDF files (requires additional library like Smalot\PdfParser)
+     * @return string
      * @throws Exception
      */
-    private function parsePdf(string $filePath): string
+    private function parsePdf(): string
     {
         // You'll need to install the Smalot PDF Parser: composer require smalot/pdfparser
         if (!class_exists('\Smalot\PdfParser\Parser')) {
@@ -146,17 +180,18 @@ class TextExtractor
         }
 
         $parser = new \Smalot\PdfParser\Parser();
-        $pdf = $parser->parseFile($filePath);
+        $pdf = $parser->parseFile($this->filePath);
         return $pdf->getText();
     }
 
     /**
      * Parse RTF files
+     * @return string
      */
-    private function parseRtf(string $filePath): string
+    private function parseRtf(): string
     {
         // Simple RTF to text conversion
-        $content = file_get_contents($filePath);
+        $content = file_get_contents($this->filePath);
 
         // Remove RTF control words and groups
         $content = preg_replace('/\\\\([a-z]{1,32})(-?[0-9]{1,10})?[ ]?/i', '', $content);
@@ -175,23 +210,20 @@ class TextExtractor
 
     /**
      * Parse Other(text) files
+     * @return string
      * @throws Exception
      */
-    private function parseOther(string $filePath): string
+    private function parseOther(): string
     {
-        $finfo = finfo_open(FILEINFO_MIME);
-        $mimeType = finfo_file($finfo, $filePath);
-        finfo_close($finfo);
-
-        $isBinary = !str_contains($mimeType, 'text/')
-            && !str_contains($mimeType, 'application/json')
-            && !str_contains($mimeType, 'application/xml');
+        $isBinary = !str_contains($this->fileMimeType, 'text/')
+            && !str_contains($this->fileMimeType, 'application/json')
+            && !str_contains($this->fileMimeType, 'application/xml');
 
         if ($isBinary) {
             throw new Exception("Unable to read the text content of this type of file");
         }
 
-        return file_get_contents($filePath);
+        return file_get_contents($this->filePath);
     }
 
     /** ********************************************************************* */
@@ -201,20 +233,25 @@ class TextExtractor
     /**
      * 获取文件内容
      * @param $filePath
-     * @param float|int $maxSize 最大文件大小，单位字节，默认300KB
+     * @param int $fileMaxSize      最大文件大小，单位字节，默认1024KB
+     * @param int $contentMaxSize   最大内容大小，单位字节，默认300KB
      * @return array
      */
-    public static function extractFile($filePath, float|int $maxSize = 300 * 1024): array
+    public static function extractFile($filePath, int $fileMaxSize = 1024, int $contentMaxSize = 300): array
     {
         if (!file_exists($filePath) || !is_file($filePath)) {
             return Base::retError("Failed to read contents of {$filePath}");
         }
-        if (filesize($filePath) > $maxSize) {
-            return Base::retError("File size exceeds " . Base::readableBytes($maxSize) . ", unable to display content");
+        if (filesize($filePath) > $fileMaxSize * 1024) {
+            return Base::retError("File size exceeds " . Base::readableBytes($fileMaxSize * 1024) . ", unable to display content");
         }
         try {
-            $extractor = new self();
-            return Base::retSuccess("success", $extractor->extractContent($filePath));
+            $extractor = new self($filePath);
+            $content = $extractor->extractContent();
+            if (strlen($content) > $contentMaxSize * 1024) {
+                return Base::retError("Content size exceeds " . Base::readableBytes($contentMaxSize * 1024) . ", unable to display content");
+            }
+            return Base::retSuccess("success", $content);
         } catch (Exception $e) {
             return Base::retError($e->getMessage());
         }
