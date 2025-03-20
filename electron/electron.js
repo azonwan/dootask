@@ -589,7 +589,7 @@ function createWebTabWindow(args) {
             autoHideMenuBar: true,
             titleBarStyle: 'hidden',
             titleBarOverlay,
-            backgroundColor: nativeTheme.shouldUseDarkColors ? '#3B3B3D' : '#EFF0F4',
+            backgroundColor: nativeTheme.shouldUseDarkColors ? '#575757' : '#FFFFFF',
             webPreferences: {
                 preload: path.join(__dirname, 'electron-preload.js'),
                 webSecurity: true,
@@ -888,7 +888,7 @@ function monitorThemeChanges() {
         preloadWindow?.setBackgroundColor(backgroundColor);
         mediaWindow?.setBackgroundColor(backgroundColor);
         childWindow.some(({browser}) => browser.setBackgroundColor(backgroundColor))
-        webTabWindow?.setBackgroundColor(nativeTheme.shouldUseDarkColors ? '#3B3B3D' : '#EFF0F4')
+        webTabWindow?.setBackgroundColor(nativeTheme.shouldUseDarkColors ? '#575757' : '#FFFFFF')
         // 通知所有窗口
         BrowserWindow.getAllWindows().forEach(window => {
             window.webContents.send('systemThemeChanged', {

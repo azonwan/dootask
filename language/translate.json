@@ -28680,18 +28680,6 @@
         "ru": "Скоро истечет"
     },
     {
-        "key": "在消息中打开",
-        "zh": "",
-        "zh-CHT": "在消息中打開",
-        "en": "Open in messages",
-        "ko": "메시지에서 열기",
-        "ja": "メッセージで開く",
-        "de": "In Nachrichten öffnen",
-        "fr": "Ouvrir dans les messages",
-        "id": "Buka di pesan",
-        "ru": "Открыть в сообщениях"
-    },
-    {
         "key": "项目已归档，无法查看",
         "zh": "",
         "zh-CHT": "项目已歸檔，無法查看",
@@ -29182,5 +29170,29 @@
         "fr": "Échec de la lecture du fichier : (%T1)",
         "id": "Gagal membaca file: (%T1)",
         "ru": "Ошибка чтения файла: (%T1)"
+    },
+    {
+        "key": "检查",
+        "zh": "",
+        "zh-CHT": "檢查",
+        "en": "Check",
+        "ko": "확인",
+        "ja": "確認",
+        "de": "Prüfen",
+        "fr": "Vérifier",
+        "id": "Periksa",
+        "ru": "Проверка"
+    },
+    {
+        "key": "独立窗口显示",
+        "zh": "",
+        "zh-CHT": "獨立窗口顯示",
+        "en": "Display in a separate window",
+        "ko": "독립 창에 표시",
+        "ja": "独立ウィンドウに表示",
+        "de": "In einem separaten Fenster anzeigen",
+        "fr": "Afficher dans une fenêtre séparée",
+        "id": "Tampilkan di jendela terpisah",
+        "ru": "Отображение в отдельном окне"
     }
 ]

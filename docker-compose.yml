@@ -103,7 +103,7 @@ services:
 
   fileview:
     container_name: "dootask-fileview-${APP_ID}"
-    image: "kuaifan/fileview:4.2.0-SNAPSHOT-RC25"
+    image: "kuaifan/fileview:4.4.0-1"
     environment:
       KK_CONTEXT_PATH: "/fileview"
       KK_OFFICE_PREVIEW_SWITCH_DISABLED: true
