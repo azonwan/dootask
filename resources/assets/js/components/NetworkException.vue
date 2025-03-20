@@ -19,7 +19,7 @@
                     </div>
                     <div class="ivu-modal-confirm-footer">
                         <Button type="text" @click="onClose">{{$L('关闭提示')}}</Button>
-                        <Button type="primary" :loading="loadIng" @click="onCheck">{{$L('重试')}}</Button>
+                        <Button type="primary" :loading="loadIng" @click="onCheck">{{$L('检查')}}</Button>
                     </div>
                 </div>
             </Modal>

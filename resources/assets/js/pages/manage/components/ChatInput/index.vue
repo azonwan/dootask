@@ -119,6 +119,12 @@
                                 {{$L('发起投票')}}
                             </div>
                         </template>
+                        <template v-else>
+                            <div class="chat-input-popover-item" @click="onToolbar('file')">
+                                <i class="taskfont">&#xe7c0;</i>
+                                {{$L('上传文件')}}
+                            </div>
+                        </template>
                         <div class="chat-input-popover-item" @click="onToolbar('full')">
                             <i class="taskfont">&#xe6a7;</i>
                             {{$L('全屏输入')}}
