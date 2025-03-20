@@ -351,7 +351,7 @@ export default {
                             name: this.$L('超期'),
                             style: 'background-color:#f00',
                         })
-                    } else if ($A.dayjs(item.end_at).unix() - nowTime < 86400) {
+                    } else if (item.end_at && $A.dayjs(item.end_at).unix() - nowTime < 86400) {
                         tags.push({
                             name: this.$L('即将到期'),
                             style: 'background-color:#f80',
