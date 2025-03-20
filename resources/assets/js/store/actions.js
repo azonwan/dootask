@@ -1214,6 +1214,28 @@ export default {
         $A.Electron.sendMessage('openWebTabWindow', params)
     },
 
+    /**
+     * 打开会话独立窗口（客户端）
+     * @param state
+     * @param dispatch
+     * @param dialogId
+     * @returns {Promise<void>}
+     */
+    async openDialogWindow({state, dispatch}, dialogId) {
+        const dialogData = state.cacheDialogs.find(({id}) => id === dialogId) || {}
+        dispatch('openChildWindow', {
+            name: `dialog-${dialogId}`,
+            path: `/single/dialog/${dialogId}`,
+            force: false,
+            config: {
+                title: dialogData.name,
+                parent: null,
+                width: Math.min(window.screen.availWidth, 1024),
+                height: Math.min(window.screen.availHeight, 768),
+            },
+        });
+    },
+
     /** *****************************************************************************************/
     /** ************************************** 文件 **********************************************/
     /** *****************************************************************************************/
@@ -2992,6 +3014,14 @@ export default {
      */
     openDialog({state, dispatch}, dialog_id) {
         return new Promise(async (resolve, reject) => {
+            if ($A.isSubElectron) {
+                const data = $A.isJson(dialog_id) ? dialog_id : {dialog_id}
+                $A.syncDispatch("openDialog", data)
+                $A.Electron.sendMessage('mainWindowActive');
+                resolve()
+                return
+            }
+            //
             let search_msg_id;
             let dialog_msg_id;
             if ($A.isJson(dialog_id)) {

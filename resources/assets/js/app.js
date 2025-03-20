@@ -109,7 +109,15 @@ if (!isSoftware) {
 }
 
 // 加载路由
-Vue.prototype.goForward = function(route, isReplace) {
+Vue.prototype.goForward = function(route, isReplace, noBroadcast = false) {
+    if ($A.isSubElectron && !noBroadcast) {
+        $A.Electron.sendMessage('broadcastCommand', {
+            channel: 'goForward',
+            payload: {route, isReplace},
+        });
+        $A.Electron.sendMessage('mainWindowActive');
+        return
+    }
     // 处理路由格式
     if (typeof route === 'string') {
         if ($A.strExists(route, '/')) {
@@ -236,6 +244,9 @@ $A.Electron?.listener('syncDispatch', async ({dispatchId: targetId, action, data
     }
     data.__sync__ = true
     await store.dispatch(action, data)
+})
+$A.Electron?.listener('goForward', ({route, isReplace}) => {
+    $A.goForward(route, isReplace, true)
 })
 
 // 绑定截图快捷键

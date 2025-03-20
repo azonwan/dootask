@@ -4,8 +4,8 @@
             <div class="dialog-user">
                 <div class="member-head">
                     <div class="member-title">{{$L('项目成员')}}<span @click="memberShowAll=!memberShowAll">({{projectData.project_user.length}})</span></div>
-                    <div class="member-open" @click="onMsgOpen" :title="$L('在消息中打开')">
-                        <Icon type="ios-chatbubbles-outline"/>
+                    <div class="member-open" @click="onOpenDialog" :title="$L('独立窗口显示')">
+                        <i class="taskfont open-dialog">&#xe776;</i>
                     </div>
                     <div class="member-close" @click="onClose">
                         <Icon type="ios-close"/>
@@ -37,15 +37,6 @@ export default {
         return {
             loadIng: false,
             memberShowAll: false,
-            beforeDestroyClose: false,
-        }
-    },
-
-    beforeDestroy() {
-        if (this.beforeDestroyClose) {
-            requestAnimationFrame(_ => {
-                this.$store.dispatch('toggleProjectParameter', 'chat');
-            })
         }
     },
 
@@ -58,16 +49,19 @@ export default {
     },
 
     methods: {
-        onMsgOpen() {
-            this.$store.dispatch("openDialog", this.projectData.dialog_id);
-            this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
-            this.beforeDestroyClose = true;
+        onOpenDialog() {
+            this.$store.dispatch('openDialogWindow', this.projectData.dialog_id);
+            this.toggleParameter();
         },
 
         onClose() {
             this.$emit('on-close');
+            this.toggleParameter();
+        },
+
+        toggleParameter() {
             this.$store.dispatch('toggleProjectParameter', 'chat');
-        }
+        },
     }
 }
 </script>

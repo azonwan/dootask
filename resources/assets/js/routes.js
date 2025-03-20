@@ -154,6 +154,11 @@ export default [
         component: () => import('./pages/single/task.vue'),
     },
     {
+        name: 'single-dialog',
+        path: '/single/dialog/:dialogId',
+        component: () => import('./pages/single/dialog.vue'),
+    },
+    {
         name: 'single-apps',
         path: '/single/apps/*',
         component: () => import('./pages/single/apps.vue')

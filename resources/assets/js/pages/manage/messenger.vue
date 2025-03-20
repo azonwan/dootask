@@ -194,6 +194,12 @@
                                             <i class="taskfont" v-html="operateItem.silence ? '&#xe7eb;' : '&#xe7d7;'"></i>
                                         </div>
                                     </DropdownItem>
+                                    <DropdownItem v-if="$Electron" divided @click.native="handleDialogClick('single')">
+                                        <div class="item">
+                                            {{ $L('独立窗口显示') }}
+                                            <i class="taskfont">&#xe776;</i>
+                                        </div>
+                                    </DropdownItem>
                                     <DropdownItem @click.native="handleDialogClick('hide')" :disabled="!!operateItem.top_at">
                                         <div class="item">
                                             {{ $L('不显示该会话') }}
@@ -1121,6 +1127,10 @@ export default {
                     }).catch(({msg}) => {
                         $A.modalError(msg);
                     });
+                    break;
+
+                case 'single':
+                    this.$store.dispatch('openDialogWindow', this.operateItem.id);
                     break;
 
                 case 'hide':
