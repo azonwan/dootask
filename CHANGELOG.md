@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.82]
+
+### Bug Fixes
+
+- 修复搜索结果显示即将到期
+
+### Features
+
+- 新增独立窗口打开会话
+
+### Performance
+
+- 优化AI支持文件类型
+
 ## [0.44.74]
 
 ### Performance

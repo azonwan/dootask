@@ -29194,5 +29194,17 @@
         "fr": "Afficher dans une fenêtre séparée",
         "id": "Tampilkan di jendela terpisah",
         "ru": "Отображение в отдельном окне"
+    },
+    {
+        "key": "在消息中显示",
+        "zh": "",
+        "zh-CHT": "在消息中顯示",
+        "en": "Show in message",
+        "ko": "메시지에 표시",
+        "ja": "メッセージに表示",
+        "de": "In Nachricht anzeigen",
+        "fr": "Afficher dans le message",
+        "id": "Tampilkan di pesan",
+        "ru": "Показать в сообщении"
     }
 ]
