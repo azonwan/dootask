@@ -33,6 +33,7 @@ export default {
             default: false
         },
         userResult: {
+            type: [Function, Object],
             default: null
         }
     }

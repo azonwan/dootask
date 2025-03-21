@@ -1,7 +1,7 @@
 <template>
     <div class="electron-dialog">
         <PageTitle :title="dialogData.name"/>
-        <DialogWrapper v-if="dialogId > 0" :dialogId="dialogId" :beforeBack="onBeforeClose" location="modal"/>
+        <DialogWrapper v-if="dialogId > 0" :dialogId="dialogId" location="modal"/>
     </div>
 </template>
 
@@ -30,10 +30,5 @@ export default {
             return this.cacheDialogs.find(({id}) => id === this.dialogId) || {}
         }
     },
-    methods: {
-        onBeforeClose() {
-
-        }
-    }
 }
 </script>
