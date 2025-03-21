@@ -109,8 +109,8 @@ if (!isSoftware) {
 }
 
 // 加载路由
-Vue.prototype.goForward = function(route, isReplace, noBroadcast = false) {
-    if ($A.isSubElectron && !noBroadcast) {
+Vue.prototype.goForward = function(route, isReplace, autoBroadcast = true) {
+    if ($A.Ready && $A.isSubElectron && autoBroadcast) {
         $A.Electron.sendMessage('broadcastCommand', {
             channel: 'goForward',
             payload: {route, isReplace},
@@ -195,6 +195,7 @@ Vue.prototype.copyText = function (obj) {
 
 // 全局对象/变量
 $A.L = $L;
+$A.Ready = false;
 $A.Electron = null;
 $A.Platform = "web";
 $A.isMainElectron = false;
@@ -215,6 +216,9 @@ if (isElectron) {
 // 同步执行派遣
 const dispatchId = $A.randomString(6) + "_" + Date.now().toString()
 $A.syncDispatch = (action, data) => {
+    if (!$A.Ready) {
+        return false
+    }
     if (!isElectron) {
         return false
     }
@@ -236,6 +240,9 @@ $A.syncDispatch = (action, data) => {
     return true
 };
 $A.Electron?.listener('syncDispatch', async ({dispatchId: targetId, action, data}) => {
+    if (!$A.Ready) {
+        return
+    }
     if (dispatchId === targetId) {
         return
     }
@@ -246,7 +253,10 @@ $A.Electron?.listener('syncDispatch', async ({dispatchId: targetId, action, data
     await store.dispatch(action, data)
 })
 $A.Electron?.listener('goForward', ({route, isReplace}) => {
-    typeof $A.goForward === "function" && $A.goForward(route, isReplace, true)
+    if (!$A.Ready) {
+        return
+    }
+    $A.goForward(route, isReplace, false)
 })
 
 // 绑定截图快捷键
@@ -290,6 +300,7 @@ const $init = async () => {
     $A.Message = app.$Message;
     $A.Notice = app.$Notice;
     $A.Modal = app.$Modal;
+    $A.Ready = true;
 
     if (action === "handleClearCache") {
         $A.messageSuccess("清除成功");
@@ -324,11 +335,11 @@ const $preload = async () => {
     await store.dispatch("preload");
     const hash = (window.location[routeMode === 'history' ? 'pathname' : 'hash']).replace(/^[#\/\s]/, '');
     if (hash !== 'preload') {
-        $init().catch(_ => {})
+        await $init()
         return
     }
 
-    window.__initializeApp = (route) => {
+    window.__initializeApp = async (route) => {
         if (/^https?:\/\//.test(route)) {
             if ($A.getDomain(route) !== $A.getDomain($A.mainUrl())) {
                 window.location.href = url;
@@ -337,7 +348,7 @@ const $preload = async () => {
             route = route.replace(/^https?:\/\/[^\/]+/, '');
         }
         window.history.replaceState(null, '', route)
-        $init().catch(_ => {})
+        await $init()
     }
 }
 
