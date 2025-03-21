@@ -80,7 +80,7 @@
                     <p v-if="taskDetail.id"><span>{{taskDetail.id}}</span></p>
                 </div>
                 <div class="function">
-                    <ETooltip v-if="$Electron" :disabled="$isEEUiApp || windowTouch" :content="$L('新窗口打开')">
+                    <ETooltip v-if="$Electron" :disabled="$isEEUiApp || windowTouch" :content="$L('独立窗口显示')">
                         <i class="taskfont open" @click="openNewWin">&#xe776;</i>
                     </ETooltip>
                     <div class="menu">

@@ -246,7 +246,7 @@ $A.Electron?.listener('syncDispatch', async ({dispatchId: targetId, action, data
     await store.dispatch(action, data)
 })
 $A.Electron?.listener('goForward', ({route, isReplace}) => {
-    $A.goForward(route, isReplace, true)
+    typeof $A.goForward === "function" && $A.goForward(route, isReplace, true)
 })
 
 // 绑定截图快捷键

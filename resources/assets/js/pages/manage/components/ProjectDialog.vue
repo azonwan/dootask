@@ -4,9 +4,16 @@
             <div class="dialog-user">
                 <div class="member-head">
                     <div class="member-title">{{$L('项目成员')}}<span @click="memberShowAll=!memberShowAll">({{projectData.project_user.length}})</span></div>
-                    <div class="member-open" @click="onOpenDialog" :title="$L('独立窗口显示')">
-                        <i class="taskfont open-dialog">&#xe776;</i>
-                    </div>
+                    <ETooltip v-if="$Electron" :disabled="$isEEUiApp || windowTouch" :content="$L('独立窗口显示')">
+                        <div class="member-open" @click="onOpenDialog">
+                            <i class="taskfont open-dialog">&#xe776;</i>
+                        </div>
+                    </ETooltip>
+                    <ETooltip v-else :disabled="$isEEUiApp || windowTouch" :content="$L('在消息中显示')">
+                        <div class="member-open" @click="onMsgOpen">
+                            <Icon type="ios-chatbubbles-outline"/>
+                        </div>
+                    </ETooltip>
                     <div class="member-close" @click="onClose">
                         <Icon type="ios-close"/>
                     </div>
@@ -37,6 +44,13 @@ export default {
         return {
             loadIng: false,
             memberShowAll: false,
+            beforeDestroyClose: false,
+        }
+    },
+
+    beforeDestroy() {
+        if (this.beforeDestroyClose) {
+            requestAnimationFrame(this.toggleParameter)
         }
     },
 
@@ -49,6 +63,12 @@ export default {
     },
 
     methods: {
+        onMsgOpen() {
+            this.$store.dispatch("openDialog", this.projectData.dialog_id);
+            this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
+            this.beforeDestroyClose = true;
+        },
+
         onOpenDialog() {
             this.$store.dispatch('openDialogWindow', this.projectData.dialog_id);
             this.toggleParameter();
