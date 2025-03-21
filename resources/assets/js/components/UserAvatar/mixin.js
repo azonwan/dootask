@@ -18,7 +18,7 @@ export default {
         },
         nameText: {
             type: String,
-            default: null   // showName = true 时有效，留空就显示会员昵称
+            default: ''   // showName = true 时有效，留空就显示会员昵称
         },
         borderWitdh: {
             type: Number,
@@ -33,7 +33,6 @@ export default {
             default: false
         },
         userResult: {
-            type: [Function, Object],
             default: null
         }
     }
