@@ -463,7 +463,7 @@ if [ $# -gt 0 ]; then
         # 启动容器
         [[ "$(arg_get port)" -gt 0 ]] && env_set APP_PORT "$(arg_get port)"
         $COMPOSE up php -d
-        # 安装composer依赖
+        # 安装PHP依赖
         run_exec php "composer install"
         if [ ! -f "${cur_path}/vendor/autoload.php" ]; then
             run_exec php "composer config repo.packagist composer https://packagist.phpcomposer.com"
@@ -475,32 +475,15 @@ if [ $# -gt 0 ]; then
             exit 1
         fi
         [[ -z "$(env_get APP_KEY)" ]] && run_exec php "php artisan key:generate"
+        # 设置生产模式
         switch_debug "false"
-        # 检查数据库
-        remaining=10
-        while [ ! -f "${cur_path}/docker/mysql/data/$(env_get DB_DATABASE)/db.opt" ]; do
-            ((remaining=$remaining-1))
-            if [ $remaining -lt 0 ]; then
-                error "数据库初始化失败!"
-                exit 1
-            fi
-            sleep 3
-        done
         # 数据库迁移
-        remaining=10
-        while [ ! -f "${cur_path}/docker/mysql/data/$(env_get DB_DATABASE)/$(env_get DB_PREFIX)migrations.ibd" ]; do
-            ((remaining=$remaining-1))
-            if [ $remaining -lt 0 ]; then
-                error "数据库安装失败!"
-                exit 1
-            fi
-            sleep 3
-            run_exec php "php artisan migrate --seed"
-        done
-        # 设置初始化密码
+        run_exec php "php artisan migrate --seed"
+        # 启动其他容器
         $COMPOSE up -d
         success "安装完成"
         info "地址: http://${GreenBG}127.0.0.1:$(env_get APP_PORT)${Font}"
+        # 设置初始化密码
         run_exec mariadb "sh /etc/mysql/repassword.sh"
     elif [[ "$1" == "update" ]]; then
         shift 1
@@ -594,9 +577,9 @@ if [ $# -gt 0 ]; then
     elif [[ "$1" == "npm" ]]; then
         shift 1
         npm $@
-        cd electron
+        pushd electron || exit
         npm $@
-        cd ..
+        popd || exit
         docker run --rm -it -v ${cur_path}/resources/mobile:/work -w /work --entrypoint=/bin/bash node:16 -c "npm $@"
     elif [[ "$1" == "doc" ]]; then
         shift 1

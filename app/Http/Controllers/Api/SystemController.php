@@ -1510,7 +1510,7 @@ class SystemController extends AbstractController
             }
             // 添加office资源
             $officePath = '';
-            $officeApi = 'http://' . env('APP_IPPR') . '.6/web-apps/apps/api/documents/api.js';
+            $officeApi = 'http://office/web-apps/apps/api/documents/api.js';
             $content = @file_get_contents($officeApi);
             if ($content) {
                 if (preg_match("/const\s+ver\s*=\s*'\/*([^']+)'/", $content, $matches)) {

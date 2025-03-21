@@ -424,7 +424,7 @@ class BotReceiveMsgTask extends AbstractTask
      */
     private function botWebhookBusiness(string $command, WebSocketDialogMsg $msg, User $botUser, WebSocketDialog $dialog)
     {
-        $serverUrl = 'http://' . env('APP_IPPR') . '.3';
+        $serverUrl = 'http://nginx';
         $userBot = null;
         $extras = [];
         $errorContent = null;

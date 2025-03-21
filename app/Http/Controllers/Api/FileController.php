@@ -666,7 +666,7 @@ class FileController extends AbstractController
         //
         if ($status === 2) {
             $parse = parse_url($url);
-            $from = 'http://' . env('APP_IPPR') . '.3' . $parse['path'] . '?' . $parse['query'];
+            $from = 'http://nginx' . $parse['path'] . '?' . $parse['query'];
             $path = 'uploads/file/' . $file->type . '/' . date("Ym") . '/' . $file->id . '/' . $key;
             $save = public_path($path);
             Base::makeDir(dirname($save));

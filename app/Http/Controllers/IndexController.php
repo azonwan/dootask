@@ -493,7 +493,7 @@ class IndexController extends InvokeController
         if (in_array($ext, File::localExt)) {
             $url = Base::fillUrl($path);
         } else {
-            $url = 'http://' . env('APP_IPPR') . '.3/' . $path;
+            $url = 'http://nginx/' . $path;
         }
         $url = Base::urlAddparameter($url, [
             'fullfilename' => Base::rightDelete($name, '.' . $ext) . '_' . filemtime($file) . '.' . $ext

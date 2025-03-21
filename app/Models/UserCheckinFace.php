@@ -47,7 +47,7 @@ class UserCheckinFace extends AbstractModel
             $record = base64_encode(file_get_contents($faceFile));
         }
 
-        $url = 'http://' . env('APP_IPPR') . '.14' . ":7788/user";
+        $url = "http://face:7788/user";
         $data = [
             'name' => $nickname,
             'enrollid' => $userid,
@@ -92,7 +92,7 @@ class UserCheckinFace extends AbstractModel
     }
 
     public static function deleteDeviceUser($userid) {
-        $url = 'http://' . env('APP_IPPR') . '.14' . ":7788/user/delete";
+        $url = "http://face:7788/user/delete";
         $data = [
             'enrollid' => $userid,
             'backupnum' => 50, // 13 删除整个用户  50 删除图片

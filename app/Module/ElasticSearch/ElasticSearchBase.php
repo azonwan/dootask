@@ -36,7 +36,7 @@ class ElasticSearchBase
      */
     public function __construct($index = null)
     {
-        $host = env('ELASTICSEARCH_HOST', env('APP_IPPR') . '.15');
+        $host = env('ELASTICSEARCH_HOST', 'es');
         $port = env('ELASTICSEARCH_PORT', '9200');
         $scheme = env('ELASTICSEARCH_SCHEME', 'http');
         $user = env('ELASTICSEARCH_USER', '');
