@@ -3541,6 +3541,17 @@ export default {
             }
             const {target, clientX} = event
 
+            // 快速输入
+            if (target.classList.contains('mark-set')) {
+                !this.windowTouch && this.$refs.input.focus()
+                this.$refs.input.setText(target.innerText)
+                return
+            }
+            if (target.classList.contains('mark-insert')) {
+                this.$refs.input.insertText(target.innerText)
+                return
+            }
+
             // 创建任务
             if (target.classList.contains('apply-create-task-button')) {
                 this.operateItem = this.findMsgByElement(el)

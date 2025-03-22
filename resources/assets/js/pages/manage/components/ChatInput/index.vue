@@ -1203,6 +1203,13 @@ export default {
             return "";
         },
 
+        insertText(text) {
+            if (this.quill) {
+                const {index} = this.quill.getSelection(true);
+                this.quill.insertText(index, text)
+            }
+        },
+
         setText(value) {
             if (this.quill) {
                 this.quill.setText(value)

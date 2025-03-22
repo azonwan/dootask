@@ -1212,6 +1212,13 @@
                             .mark-color {
                                 color: $primary-color;
                             }
+
+                            .mark-set {
+                                cursor: pointer;
+                                &:hover {
+                                    text-decoration: underline;
+                                }
+                            }
                         }
 
                         .content-loading {
