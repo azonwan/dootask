@@ -1928,6 +1928,50 @@ class UsersController extends AbstractController
     }
 
     /**
+     * @api {get} api/users/bot/list          32. 机器人列表
+     *
+     * @apiDescription 需要token身份，获取我的机器人列表
+     * @apiVersion 1.0.0
+     * @apiGroup users
+     * @apiName bot__list
+     *
+     * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
+     * @apiSuccess {String} msg     返回信息（错误描述）
+     * @apiSuccess {Object} data    返回数据
+     */
+    public function bot__list()
+    {
+        // 获取当前认证用户
+        $user = User::auth();
+
+        // 使用连表查询一次性获取所有机器人数据
+        $bots = User::join('user_bots', 'user_bots.bot_id', '=', 'users.userid')
+            ->where('user_bots.userid', $user->userid)
+            ->select([
+                'users.userid',
+                'users.nickname',
+                'users.userimg',
+                'user_bots.clear_day',
+                'user_bots.webhook_url'
+            ])
+            ->orderByDesc('id')
+            ->get()
+            ->toArray();
+        foreach ($bots as &$bot) {
+            $bot['id'] = $bot['userid'];
+            $bot['name'] = $bot['nickname'];
+            $bot['avatar'] = $bot['userimg'];
+            $bot['system_name'] = UserBot::systemBotName($bot['name']);
+            unset($bot['userid'], $bot['nickname'], $bot['userimg']);
+        }
+
+        // 返回成功响应，将机器人列表包装在list字段中
+        return Base::retSuccess('success', [
+            'list' => $bots
+        ]);
+    }
+
+    /**
      * @api {get} api/users/bot/info          32. 机器人信息
      *
      * @apiDescription 需要token身份，获取我的机器人信息
@@ -1979,14 +2023,14 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {post} api/users/bot/edit          33. 编辑机器人
+     * @api {post} api/users/bot/edit          33. 添加、编辑机器人
      *
      * @apiDescription 需要token身份，编辑 我的机器人 或 管理员修改系统机器人 信息
      * @apiVersion 1.0.0
      * @apiGroup users
      * @apiName bot__edit
      *
-     * @apiParam {Number} id            机器人ID
+     * @apiParam {Number} [id]          机器人ID（编辑时必填，留空为添加）
      * @apiParam {String} [name]        机器人名称
      * @apiParam {String} [avatar]      机器人头像
      * @apiParam {Number} [clear_day]   清理天数（仅 我的机器人）
@@ -2001,10 +2045,19 @@ class UsersController extends AbstractController
         $user = User::auth();
         //
         $botId = intval(Request::input('id'));
-        $botUser = User::whereUserid($botId)->whereBot(1)->first();
-        if (empty($botUser)) {
-            return Base::retError('机器人不存在');
+        if (empty($botId)) {
+            $res = UserBot::newbot($user->userid, trim(Request::input('name')));
+            if (Base::isError($res)) {
+                return $res;
+            }
+            $botUser = $res['data'];
+        } else {
+            $botUser = User::whereUserid($botId)->whereBot(1)->first();
+            if (empty($botUser)) {
+                return Base::retError('机器人不存在');
+            }
         }
+        //
         $userBot = UserBot::whereBotId($botUser->userid)->whereUserid($user->userid)->first();
         if (empty($userBot)) {
             if (UserBot::systemBotName($botUser->email)) {
@@ -2061,7 +2114,57 @@ class UsersController extends AbstractController
             $data['clear_day'] = $userBot->clear_day;
             $data['webhook_url'] = $userBot->webhook_url;
         }
-        return Base::retSuccess('修改成功', $data);
+        return Base::retSuccess($botId ? '修改成功' : '添加成功', $data);
+    }
+
+    /**
+     * @api {get} api/users/bot/delete          33. 删除机器人
+     *
+     * @apiDescription 需要token身份
+     * @apiVersion 1.0.0
+     * @apiGroup users
+     * @apiName bot__delete
+     *
+     * @apiParam {Number} id            机器人ID
+     * @apiParam {String} remark        删除备注
+     *
+     * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
+     * @apiSuccess {String} msg     返回信息（错误描述）
+     * @apiSuccess {Object} data    返回数据
+     */
+    public function bot__delete()
+    {
+        $user = User::auth();
+        //
+        $botId = intval(Request::input('id'));
+        $remark = trim(Request::input('remark'));
+        //
+        if (empty($remark)) {
+            return Base::retError('请输入删除备注');
+        }
+        if (mb_strlen($remark) > 255) {
+            return Base::retError('删除备注长度限制255个字');
+        }
+        //
+        $botUser = User::whereUserid($botId)->whereBot(1)->first();
+        if (empty($botUser)) {
+            return Base::retError('机器人不存在');
+        }
+        $userBot = UserBot::whereBotId($botUser->userid)->whereUserid($user->userid)->first();
+        if (empty($userBot)) {
+            if (UserBot::systemBotName($botUser->email)) {
+                // 系统机器人（仅限管理员）
+                return Base::retError('系统机器人不能删除');
+            } else {
+                // 其他用户的机器人（仅限主人）
+                return Base::retError('不是你的机器人');
+            }
+        }
+        //
+        if (!$botUser->deleteUser($remark)) {
+            return Base::retError('删除失败');
+        }
+        return Base::retSuccess('删除成功');
     }
 
     /**

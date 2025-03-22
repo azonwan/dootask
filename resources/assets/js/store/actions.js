@@ -843,6 +843,40 @@ export default {
     },
 
     /**
+     * 修改机器人信息
+     * @param dispatch
+     * @param data
+     * @returns {Promise<unknown>}
+     */
+    editUserBot({dispatch}, data) {
+        return new Promise((resolve, reject) => {
+            let dialogId = 0
+            if (data.dialog_id) {
+                dialogId = data.dialog_id;
+                delete data.dialog_id;
+            }
+            dispatch("call", {
+                url: 'users/bot/edit',
+                data,
+                method: 'post'
+            }).then(({data, msg}) => {
+                dispatch("saveUserBasic", {
+                    userid: data.id,
+                    nickname: data.name,
+                    userimg: data.avatar,
+                });
+                if (dialogId) {
+                    dispatch("saveDialog", {
+                        id: dialogId,
+                        name: data.name
+                    });
+                }
+                resolve({data, msg})
+            }).catch(reject);
+        })
+    },
+
+    /**
      * 设置用户信息
      * @param dispatch
      * @param type

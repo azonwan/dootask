@@ -452,4 +452,39 @@ class UserBot extends AbstractModel
             default => [],
         };
     }
+
+    /**
+     * 创建我的机器人
+     * @param $userid
+     * @param $botName
+     * @return array
+     */
+    public static function newbot($userid, $botName)
+    {
+        if (User::select(['users.*'])
+                ->join('user_bots', 'users.userid', '=', 'user_bots.bot_id')
+                ->where('users.bot', 1)
+                ->where('user_bots.userid', $userid)
+                ->count() >= 50) {
+            return Base::retError("超过最大创建数量。");
+        }
+        if (strlen($botName) < 2 || strlen($botName) > 20) {
+            return Base::retError("机器人名称由2-20个字符组成。");
+        }
+        $data = User::botGetOrCreate("user-" . Base::generatePassword(), [
+            'nickname' => $botName
+        ], $userid);
+        if (empty($data)) {
+            return Base::retError("创建失败。");
+        }
+        $dialog = WebSocketDialog::checkUserDialog($data, $userid);
+        if ($dialog) {
+            WebSocketDialogMsg::sendMsg(null, $dialog->id, 'template', [
+                'type' => '/hello',
+                'title' => '创建成功。',
+                'data' => $data,
+            ], $data->userid);
+        }
+        return Base::retSuccess("创建成功。", $data);
+    }
 }

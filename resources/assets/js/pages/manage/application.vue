@@ -40,7 +40,71 @@
             </div>
         </div>
 
-        <!--AI-->
+        <!--MY BOT-->
+        <DrawerOverlay v-model="mybotShow" placement="right" :size="720">
+            <div v-if="mybotShow" class="ivu-modal-wrap-apply">
+                <div class="ivu-modal-wrap-apply-title">
+                    {{ $L('我的机器人') }}
+                    <p @click="applyClick({value: 'mybot-add'}, {id: 0})">{{$L('添加机器人')}}</p>
+                </div>
+                <div class="ivu-modal-wrap-apply-body full-body">
+                    <div v-if="mybotList.length === 0" class="empty-data">
+                        <Loading v-if="mybotLoad"/>
+                        <span>{{$L('您没有创建机器人')}}</span>
+                    </div>
+                    <ul v-else class="ivu-modal-wrap-ul">
+                        <li v-for="(item, key) in mybotList" :key="key">
+                            <div class="modal-item-img">
+                                <img :src="item.avatar">
+                            </div>
+                            <div class="modal-item-info">
+                                <h4>{{ item.name }}</h4>
+                                <div class="modal-item-mybot">
+                                    <p><span>ID:</span>{{item.id}}</p>
+                                    <p><span>{{$L('清理时间')}}:</span>{{item.clear_day}}</p>
+                                    <p><span>Webhook:</span>{{item.webhook_url || '-'}}</p>
+                                </div>
+                                <div class="modal-item-btns">
+                                    <Button icon="md-chatbubbles" @click="applyClick({value: 'mybot-chat'}, item)">{{ $L('开始聊天') }}</Button>
+                                    <Button icon="md-create" @click="applyClick({value: 'mybot-add'}, item)">{{ $L('修改') }}</Button>
+                                    <Button icon="md-trash" @click="applyClick({value: 'mybot-del'}, item)">{{ $L('删除') }}</Button>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </DrawerOverlay>
+
+        <!--MY BOT 设置-->
+        <Modal
+            v-model="mybotModifyShow"
+            :title="$L(mybotModifyData.id > 0 ? '修改机器人' : '添加机器人')"
+            :mask-closable="false">
+            <Form :model="mybotModifyData" v-bind="formOptions" @submit.native.prevent>
+                <Alert v-if="mybotModifyData.system_name" type="error" style="margin-bottom:18px">{{$L(`正在修改系统机器人：${mybotModifyData.system_name}`)}}</Alert>
+                <FormItem prop="avatar" :label="$L('头像')">
+                    <ImgUpload v-model="mybotModifyData.avatar" :num="1" :width="512" :height="512" whcut="cover"/>
+                </FormItem>
+                <FormItem prop="name" :label="$L('名称')">
+                    <Input v-model="mybotModifyData.name" :maxlength="20" />
+                </FormItem>
+                <FormItem prop="clear_day" :label="$L('消息保留')">
+                    <Input v-model="mybotModifyData.clear_day" :maxlength="3" type="number">
+                        <div slot="append">{{$L('天')}}</div>
+                    </Input>
+                </FormItem>
+                <FormItem prop="webhook_url" label="Webhook">
+                    <Input v-model="mybotModifyData.webhook_url" :maxlength="255" :show-word-limit="0.9" type="textarea" />
+                </FormItem>
+            </Form>
+            <div slot="footer" class="adaption">
+                <Button type="default" @click="mybotModifyShow=false">{{$L('取消')}}</Button>
+                <Button type="primary" :loading="mybotModifyLoad > 0" @click="onMybotModify">{{$L('保存')}}</Button>
+            </div>
+        </Modal>
+
+        <!--AI BOT-->
         <DrawerOverlay v-model="aibotShow" placement="right" :size="720">
             <div v-if="aibotShow" class="ivu-modal-wrap-apply">
                 <div class="ivu-modal-wrap-apply-title">
@@ -70,7 +134,7 @@
             </div>
         </DrawerOverlay>
 
-        <!--AI 设置-->
+        <!--AI BOT 设置-->
         <DrawerOverlay v-model="aibotSettingShow" placement="right" :size="950">
             <div v-if="aibotSettingShow" class="ivu-modal-wrap-apply">
                 <div class="ivu-modal-wrap-apply-title">
@@ -248,9 +312,11 @@ import SystemEmailSetting from "./setting/components/SystemEmailSetting";
 import SystemAppPush from "./setting/components/SystemAppPush";
 import emitter from "../../store/events";
 import {AIBotList, AIModelNames} from "../../store/ai";
+import ImgUpload from "../../components/ImgUpload.vue";
 
 export default {
     components: {
+        ImgUpload,
         UserSelect,
         DrawerOverlay,
         SystemAibot,
@@ -266,8 +332,15 @@ export default {
             applyList: [],
             applyListTypes: ['base', 'admin'],
             //
-            aibotList: AIBotList,
+            mybotShow: false,
+            mybotList: [],
+            mybotLoad: 0,
+            mybotModifyShow: false,
+            mybotModifyData: {},
+            mybotModifyLoad: 0,
+            //
             aibotShow: false,
+            aibotList: AIBotList,
             aibotSettingShow: false,
             aibotTabAction: "openai",
             aibotDialogSearchLoad: "",
@@ -308,6 +381,7 @@ export default {
             'approveUnreadNumber',
             'cacheDialogs',
             'windowOrientation',
+            'formOptions',
         ]),
         isExistAdminList() {
             return this.applyList.map(h => h.type).indexOf('admin') !== -1;
@@ -321,14 +395,15 @@ export default {
     methods: {
         initList() {
             let applyList = [
-                { value: "approve", label: "审批中心", sort: 3 },
-                { value: "report", label: "工作报告", sort: 5 },
-                { value: "okr", label: "OKR 管理", sort: 4 },
-                { value: "robot", label: "AI 机器人", sort: 6 },
-                { value: "signin", label: "签到打卡", sort: 7 },
-                { value: "meeting", label: "在线会议", sort: 8 },
-                { value: "word-chain", label: "群接龙", sort: 9 },
-                { value: "vote", label: "群投票", sort: 10 },
+                { value: "approve", label: "审批中心", sort: 30 },
+                { value: "report", label: "工作报告", sort: 50 },
+                { value: "okr", label: "OKR 管理", sort: 40 },
+                { value: "mybot", label: "我的机器人", sort: 55 },
+                { value: "robot", label: "AI 机器人", sort: 60 },
+                { value: "signin", label: "签到打卡", sort: 70 },
+                { value: "meeting", label: "在线会议", sort: 80 },
+                { value: "word-chain", label: "群接龙", sort: 90 },
+                { value: "vote", label: "群投票", sort: 100 },
             ];
             if (this.systemConfig.server_closeai === 'close') {
                 applyList = applyList.filter(h => h.value !== 'robot');
@@ -336,32 +411,32 @@ export default {
             // wap模式
             if (this.windowOrientation == 'landscape') {
                 // 横屏模式
-                applyList.push({ value: "scan", label: "扫一扫", show: $A.isEEUiApp, sort: 13 })
+                applyList.push({ value: "scan", label: "扫一扫", show: $A.isEEUiApp, sort: 130 })
             } else {
                 // 竖屏模式
                 applyList.push(...[
-                    { value: "calendar", label: "日历", sort: 1 },
-                    { value: "file", label: "文件", sort: 2 },
-                    { value: "addProject", label: "创建项目", sort: 11 },
-                    { value: "addTask", label: "添加任务", sort: 12 },
-                    { value: "scan", label: "扫一扫", show: $A.isEEUiApp, sort: 13 },
-                    { value: "setting", label: "设置", sort: 14 }
+                    { value: "calendar", label: "日历", sort: 10 },
+                    { value: "file", label: "文件", sort: 20 },
+                    { value: "addProject", label: "创建项目", sort: 110 },
+                    { value: "addTask", label: "添加任务", sort: 120 },
+                    { value: "scan", label: "扫一扫", show: $A.isEEUiApp, sort: 130 },
+                    { value: "setting", label: "设置", sort: 140 }
                 ])
             }
             // 管理员
             let adminApplyList = [];
             if (!this.userIsAdmin) {
                 if (this.userInfo.department_owner) {
-                    adminApplyList.push({ value: "okrAnalyze", label: "OKR 结果", sort: 15 })
+                    adminApplyList.push({ value: "okrAnalyze", label: "OKR 结果", sort: 150 })
                 }
             } else {
                 adminApplyList.push(...[
-                    { value: "okrAnalyze", label: "OKR 结果", sort: 15 },
-                    { value: "ldap", label: "LDAP", sort: 16 },
-                    { value: "mail", label: "邮件通知", sort: 17 },
-                    { value: "appPush", label: "APP 推送", sort: 18 },
-                    { value: "complaint", label: "举报管理", sort: 19 },
-                    { value: "allUser", label: "团队管理", sort: 20 },
+                    { value: "okrAnalyze", label: "OKR 结果", sort: 150 },
+                    { value: "ldap", label: "LDAP", sort: 160 },
+                    { value: "mail", label: "邮件通知", sort: 170 },
+                    { value: "appPush", label: "APP 推送", sort: 180 },
+                    { value: "complaint", label: "举报管理", sort: 190 },
+                    { value: "allUser", label: "团队管理", sort: 200 },
                 ])
             }
             adminApplyList = adminApplyList.map((h) => {
@@ -369,15 +444,7 @@ export default {
                 return h;
             });
             //
-            this.applyList = [...applyList, ...adminApplyList].sort((a, b) => {
-                if (a.sort < b.sort) {
-                    return -1;
-                } else if (a.sort > b.sort) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            });
+            this.applyList = [...applyList, ...adminApplyList].sort((a, b) => a.sort - b.sort);
         },
         getLogoClass(name) {
             name = name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
@@ -413,6 +480,19 @@ export default {
                 case 'report':
                     emitter.emit('openReport', area == 'badge' ? 'receive' : 'my');
                     break;
+                case 'mybot':
+                    this.getMybot();
+                    this.mybotShow = true;
+                    break;
+                case 'mybot-chat':
+                    this.chatMybot(area.id);
+                    break;
+                case 'mybot-add':
+                    this.addMybot(area);
+                    break;
+                case 'mybot-del':
+                    this.delMybot(area);
+                    break;
                 case 'robot':
                     this.getAITags();
                     this.aibotShow = true;
@@ -447,6 +527,82 @@ export default {
                     return;
             }
             this.$emit("on-click", item.value)
+        },
+        // 获取我的机器人
+        getMybot() {
+            this.mybotLoad++
+            this.$store.dispatch("call", {
+                url: 'users/bot/list',
+            }).then(({data}) => {
+                this.mybotList = data.list;
+            }).finally(_ => {
+                this.mybotLoad--
+            });
+        },
+        // 与我的机器人聊天
+        chatMybot(userid) {
+            this.$store.dispatch("openDialogUserid", userid).then(_ => {
+                this.mybotShow = false;
+                this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
+            }).catch(({msg}) => {
+                $A.modalError(msg || this.$L('打开会话失败'))
+            });
+        },
+        // 添加修改我的机器人
+        addMybot(info) {
+            this.mybotModifyData = $A.cloneJSON(info)
+            this.mybotModifyShow = true;
+        },
+        // 删除我的机器人
+        delMybot(info) {
+            $A.modalInput({
+                title: `删除机器人：${info.name}`,
+                placeholder: `请输入备注原因`,
+                okText: "删除",
+                okType: "error",
+                onOk: remark => {
+                    if (!remark) {
+                        return `请输入备注原因`
+                    }
+                    return new Promise((resolve, reject) => {
+                        this.$store.dispatch("call", {
+                            url: 'users/bot/delete',
+                            data: {
+                                id: info.id,
+                                remark
+                            }
+                        }).then(({msg}) => {
+                            const index = this.mybotList.findIndex(item => item.id === info.id);
+                            if (index > -1) {
+                                this.mybotList.splice(index, 1);
+                            }
+                            $A.messageSuccess(msg);
+                            resolve();
+                        }).catch(({msg}) => {
+                            reject(msg);
+                        });
+                    })
+                }
+            });
+        },
+        // 添加/修改我的机器人
+        onMybotModify() {
+            this.mybotModifyLoad++
+            this.$store.dispatch("editUserBot", this.mybotModifyData).then(({data, msg}) => {
+                const index = this.mybotList.findIndex(item => item.id === data.id);
+                if (index > -1) {
+                    this.mybotList.splice(index, 1, data);
+                } else {
+                    this.mybotList.unshift(data);
+                }
+                this.mybotModifyShow = false;
+                this.mybotModifyData = {};
+                $A.messageSuccess(msg);
+            }).catch(({msg}) => {
+                $A.modalError(msg);
+            }).finally(_ => {
+                this.mybotModifyLoad--;
+            });
         },
         // 获取AI标签
         getAITags() {

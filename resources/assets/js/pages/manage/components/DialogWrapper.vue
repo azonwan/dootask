@@ -2794,27 +2794,15 @@ export default {
             if (this.modifyData.userid) {
                 // 个人头像（机器人）
                 this.modifyLoad++;
-                this.$store.dispatch("call", {
-                    url: 'users/bot/edit',
-                    data: {
-                        id: this.modifyData.userid,
-                        avatar: this.modifyData.avatar,
-                        name: this.modifyData.name,
-                        clear_day: this.modifyData.clear_day,
-                        webhook_url: this.modifyData.webhook_url,
-                    },
-                    method: 'post'
-                }).then(({data, msg}) => {
+                this.$store.dispatch("editUserBot", {
+                    id: this.modifyData.userid,
+                    avatar: this.modifyData.avatar,
+                    name: this.modifyData.name,
+                    clear_day: this.modifyData.clear_day,
+                    webhook_url: this.modifyData.webhook_url,
+                    dialog_id: this.modifyData.dialog_id
+                }).then(({msg}) => {
                     $A.messageSuccess(msg);
-                    this.$store.dispatch("saveUserBasic", {
-                        userid: this.modifyData.userid,
-                        nickname: data.name,
-                        userimg: data.avatar,
-                    });
-                    this.$store.dispatch("saveDialog", {
-                        id: this.modifyData.dialog_id,
-                        name: data.name
-                    });
                     this.modifyShow = false;
                     this.modifyData = {};
                 }).catch(({msg}) => {

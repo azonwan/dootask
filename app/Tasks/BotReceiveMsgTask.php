@@ -208,32 +208,11 @@ class BotReceiveMsgTask extends AbstractTask
                  * 创建
                  */
                 case '/newbot':
-                    if (User::select(['users.*'])
-                            ->join('user_bots', 'users.userid', '=', 'user_bots.bot_id')
-                            ->where('users.bot', 1)
-                            ->where('user_bots.userid', $msg->userid)
-                            ->count() >= 50) {
-                        $content = "超过最大创建数量。";
-                        break;
-                    }
-                    if (strlen($array[1]) < 2 || strlen($array[1]) > 20) {
-                        $content = "机器人名称由2-20个字符组成。";
-                        break;
-                    }
-                    $data = User::botGetOrCreate("user-" . Base::generatePassword(), [
-                        'nickname' => $array[1]
-                    ], $msg->userid);
-                    if (empty($data)) {
-                        $content = "创建失败。";
-                        break;
-                    }
-                    $dialog = WebSocketDialog::checkUserDialog($data, $msg->userid);
-                    if ($dialog) {
-                        WebSocketDialogMsg::sendMsg(null, $dialog->id, 'template', [
-                            'type' => '/hello',
-                            'title' => '创建成功。',
-                            'data' => $data,
-                        ], $data->userid);    // todo 未能在任务end事件来发送任务
+                    $res = UserBot::newbot($msg->userid, $array[1]);
+                    if (Base::isError($res)) {
+                        $content = $res['msg'];
+                    } else {
+                        $data = $res['data'];
                     }
                     break;
 
