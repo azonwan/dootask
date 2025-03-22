@@ -386,6 +386,8 @@
                         margin-bottom: 12px;
                         > p {
                             display: flex;
+                            flex-wrap: wrap;
+                            word-break: break-all;
                             > span {
                                 opacity: 0.8;
                                 padding-right: 6px;

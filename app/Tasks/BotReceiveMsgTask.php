@@ -494,6 +494,9 @@ class BotReceiveMsgTask extends AbstractTask
             $webhookUrl = "{$serverUrl}/ai/chat";
         } else {
             // 用户机器人
+            if (str_starts_with($command, '/')) {
+                return;
+            }
             $userBot = UserBot::whereBotId($botUser->userid)->first();
             $webhookUrl = $userBot?->webhook_url;
         }
