@@ -29206,5 +29206,113 @@
         "fr": "Afficher dans le message",
         "id": "Tampilkan di pesan",
         "ru": "Показать в сообщении"
+    },
+    {
+        "key": "添加机器人",
+        "zh": "",
+        "zh-CHT": "添加機器人",
+        "en": "Add Bot",
+        "ko": "로봇 추가",
+        "ja": "ボットを追加",
+        "de": "Bot hinzufügen",
+        "fr": "Ajouter un bot",
+        "id": "Tambahkan Bot",
+        "ru": "Добавить бота"
+    },
+    {
+        "key": "消息保留",
+        "zh": "",
+        "zh-CHT": "消息保留",
+        "en": "Message Retention",
+        "ko": "메시지 보존",
+        "ja": "メッセージ保持",
+        "de": "Nachrichtenaufbewahrung",
+        "fr": "Conservation des messages",
+        "id": "Penyimpanan Pesan",
+        "ru": "Сохранение сообщений"
+    },
+    {
+        "key": "您没有创建机器人",
+        "zh": "",
+        "zh-CHT": "您沒有創建機器人",
+        "en": "You have not created any bots",
+        "ko": "봇을 생성하지 않았습니다",
+        "ja": "ボットを作成していません",
+        "de": "Sie haben keine Bots erstellt",
+        "fr": "Vous n'avez créé aucun bot",
+        "id": "Anda belum membuat bot",
+        "ru": "Вы не создали ботов"
+    },
+    {
+        "key": "清理时间",
+        "zh": "",
+        "zh-CHT": "清理時間",
+        "en": "Cleanup Time",
+        "ko": "정리 시간",
+        "ja": "クリーンアップ時間",
+        "de": "Aufräumzeit",
+        "fr": "Heure de nettoyage",
+        "id": "Waktu Pembersihan",
+        "ru": "Время очистки"
+    },
+    {
+        "key": "请输入备注原因",
+        "zh": "",
+        "zh-CHT": "請輸入備註原因",
+        "en": "Please enter the reason for the note",
+        "ko": "메모 이유를 입력하세요",
+        "ja": "注釈の理由を入力してください",
+        "de": "Bitte geben Sie den Grund für die Anmerkung ein",
+        "fr": "Veuillez entrer la raison de la note",
+        "id": "Silakan masukkan alasan catatan",
+        "ru": "Пожалуйста, введите причину для заметки"
+    },
+    {
+        "key": "删除机器人：(%T1)",
+        "zh": "",
+        "zh-CHT": "刪除機器人：(%T1)",
+        "en": "Delete Bot: (%T1)",
+        "ko": "로봇 삭제: (%T1)",
+        "ja": "ボットを削除: (%T1)",
+        "de": "Bot löschen: (%T1)",
+        "fr": "Supprimer le bot : (%T1)",
+        "id": "Hapus Bot: (%T1)",
+        "ru": "Удалить бота: (%T1)"
+    },
+    {
+        "key": "请输入删除备注",
+        "zh": "",
+        "zh-CHT": "請輸入刪除備註",
+        "en": "Please enter delete remark",
+        "ko": "삭제 설명을 입력하세요",
+        "ja": "削除の注釈を入力してください",
+        "de": "Bitte geben Sie den Löschkommentar ein",
+        "fr": "Veuillez entrer une remarque de suppression",
+        "id": "Silakan masukkan catatan penghapusan",
+        "ru": "Пожалуйста, введите примечание для удаления"
+    },
+    {
+        "key": "删除备注长度限制(%T1)个字",
+        "zh": "",
+        "zh-CHT": "刪除備註長度限制(%T1)個字",
+        "en": "Delete remark length limit: (%T1) characters",
+        "ko": "삭제 설명 길이 제한: (%T1)자",
+        "ja": "削除の注釈は(%T1)文字以内で入力してください",
+        "de": "Löschkommentar Länge begrenzt auf (%T1) Zeichen",
+        "fr": "Limite de longueur de la remarque de suppression : (%T1) caractères",
+        "id": "Batas panjang catatan penghapusan: (%T1) karakter",
+        "ru": "Длина примечания для удаления ограничена (%T1) символами"
+    },
+    {
+        "key": "系统机器人不能删除",
+        "zh": "",
+        "zh-CHT": "系統機器人不能刪除",
+        "en": "System bots cannot be deleted",
+        "ko": "시스템 로봇은 삭제할 수 없습니다",
+        "ja": "システムボットは削除できません",
+        "de": "Systembots können nicht gelöscht werden",
+        "fr": "Les bots système ne peuvent pas être supprimés",
+        "id": "Bot sistem tidak dapat dihapus",
+        "ru": "Системные боты не могут быть удалены"
     }
 ]
