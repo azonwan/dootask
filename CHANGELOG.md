@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.44.91]
+
+### Features
+
+- 添加我的机器人管理
+
+### Performance
+
+- 优化初始化逻辑
+- 优化docker配置
+
 ## [0.44.82]
 
 ### Bug Fixes

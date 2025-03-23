@@ -1972,7 +1972,7 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {get} api/users/bot/info          32. 机器人信息
+     * @api {get} api/users/bot/info          33. 机器人信息
      *
      * @apiDescription 需要token身份，获取我的机器人信息
      * @apiVersion 1.0.0
@@ -2023,7 +2023,7 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {post} api/users/bot/edit          33. 添加、编辑机器人
+     * @api {post} api/users/bot/edit          34. 添加、编辑机器人
      *
      * @apiDescription 需要token身份，编辑 我的机器人 或 管理员修改系统机器人 信息
      * @apiVersion 1.0.0
@@ -2118,7 +2118,7 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {get} api/users/bot/delete          33. 删除机器人
+     * @api {get} api/users/bot/delete          35. 删除机器人
      *
      * @apiDescription 需要token身份
      * @apiVersion 1.0.0
@@ -2168,7 +2168,7 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {get} api/users/share/list          34. 获取分享列表
+     * @api {get} api/users/share/list          36. 获取分享列表
      *
      * @apiVersion 1.0.0
      * @apiGroup users
@@ -2253,7 +2253,7 @@ class UsersController extends AbstractController
     }
 
     /**
-     * @api {get} api/users/annual/report          35. 年度报告
+     * @api {get} api/users/annual/report          37. 年度报告
      *
      * @apiVersion 1.0.0
      * @apiGroup users
