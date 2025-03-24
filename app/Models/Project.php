@@ -221,6 +221,7 @@ class Project extends AbstractModel
                     'important' => 1
                 ], function () use ($userid) {
                     return [
+                        'important' => 1,
                         'bot' => User::isBot($userid) ? 1 : 0,
                     ];
                 });
