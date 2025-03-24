@@ -12,7 +12,7 @@
                             <span>{{formData.info.sn}}</span>
                             <ETooltip max-width="auto" placement="right">
                                 <div slot="content">{{$L('当前环境')}}: {{formData.doo_sn}}</div>
-                                <Icon class="information" type="ios-information-circle-outline" />
+                                <Icon class="information" :class="{error: !existIntersection(formData.doo_sn, formData.info.sn)}" type="ios-information-circle-outline" />
                             </ETooltip>
                         </li>
                         <li>
@@ -28,7 +28,7 @@
                             <span>{{infoJoin(formData.info.mac)}}</span>
                             <ETooltip max-width="auto" placement="right">
                                 <div slot="content">{{$L('当前环境')}}: {{infoJoin(formData.macs, '-')}}</div>
-                                <Icon class="information" type="ios-information-circle-outline" />
+                                <Icon class="information" :class="{error: !existIntersection(formData.macs, formData.info.mac)}" type="ios-information-circle-outline" />
                             </ETooltip>
                         </li>
                         <li>
@@ -109,6 +109,9 @@
                 align-items: center;
                 justify-content: center;
                 margin-left: 6px;
+                &.error {
+                    color: #ed4014;
+                }
             }
         }
     }
@@ -182,6 +185,16 @@ export default {
                 return val
             }
             return def === null ? this.$L("无限制") : def
+        },
+
+        existIntersection(val1, val2) {
+            if (!$A.isArray(val1)) {
+                val1 = [val1]
+            }
+            if (!$A.isArray(val2)) {
+                val2 = [val2]
+            }
+            return val1.some(v => val2.includes(v))
         }
     }
 }
