@@ -1117,7 +1117,7 @@ export default {
                         array.some(item => {
                             let list = item.list;
                             if (searchTerm) {
-                                list = list.filter(({value}) => $A.strExists(value, searchTerm));
+                                list = list.filter(({value, key}) => $A.strExists(key || value, searchTerm));
                             }
                             if (list.length > 0) {
                                 item.label && values.push(...item.label)
@@ -1954,6 +1954,7 @@ export default {
                                         avatar: item.userimg,
                                         online: item.online,
                                         bot: item.bot,
+                                        key: `${item.nickname} ${item.email} ${item.pinyin}`
                                     }
                                 }))
                             }
@@ -1974,6 +1975,7 @@ export default {
                                         avatar: item.userimg,
                                         online: item.online,
                                         bot: item.bot,
+                                        key: `${item.nickname} ${item.email} ${item.pinyin}`
                                     })
                                 }
                             })
@@ -2181,6 +2183,8 @@ export default {
                                     value: item.nickname,
                                     avatar: item.userimg,
                                     online: !!item.online,
+                                    bot: !!item.bot,
+                                    key: `${item.nickname} ${item.email} ${item.pinyin}`
                                 }
                             }))
                         }).catch(_ => {
