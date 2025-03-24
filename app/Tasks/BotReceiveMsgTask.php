@@ -92,7 +92,7 @@ class BotReceiveMsgTask extends AbstractTask
 
         // 提取指令
         try {
-            $command = $this->extractCommand($msg, $botUser->isAiBot(), $this->mention);
+            $command = $this->extractCommand($msg, $botUser, $this->mention);
             if (empty($command)) {
                 return;
             }
@@ -406,6 +406,7 @@ class BotReceiveMsgTask extends AbstractTask
         $serverUrl = 'http://nginx';
         $userBot = null;
         $extras = [];
+        $replyText = null;
         $errorContent = null;
         if ($botUser->isAiBot($type)) {
             // AI机器人
@@ -456,32 +457,13 @@ class BotReceiveMsgTask extends AbstractTask
             }
 
             if ($msg->reply_id > 0) {
-                $replyMsg = WebSocketDialogMsg::find($msg->reply_id);
-                $replyCommand = null;
-                if ($replyMsg) {
-                    switch ($replyMsg->type) {
-                        case 'text':
-                            try {
-                                $replyCommand = $this->extractCommand($replyMsg, true);
-                            } catch (Exception) {
-                                $errorContent = "引用消息解析失败。";
-                            }
-                            break;
-                        case 'file':
-                            $msgData = Base::json2array($replyMsg->getRawOriginal('msg'));
-                            $fileResult = TextExtractor::extractFile(public_path($msgData['path']));
-                            if (Base::isError($fileResult)) {
-                                $errorContent = $fileResult['msg'];
-                            } else {
-                                $replyCommand = $fileResult['data'];
-                            }
-                            break;
-                    }
-                }
-                if ($replyCommand) {
+                $replyCommand = $this->extractReplyCommand($msg->reply_id, $botUser);
+                if (Base::isError($replyCommand)) {
+                    $errorContent = $replyCommand['msg'];
+                } else {
                     $command = <<<EOF
                         <quoted_content>
-                        {$replyCommand}
+                        {$replyCommand['data']}
                         </quoted_content>
 
                         The content within the above quoted_content tags is a citation.
@@ -494,8 +476,16 @@ class BotReceiveMsgTask extends AbstractTask
             $webhookUrl = "{$serverUrl}/ai/chat";
         } else {
             // 用户机器人
-            if (str_starts_with($command, '/')) {
+            if ($botUser->isUserBot() && str_starts_with($command, '/')) {
+                // 用户机器人不处理指令类型命令
                 return;
+            }
+
+            if ($msg->reply_id > 0) {
+                $replyCommand = $this->extractReplyCommand($msg->reply_id, $botUser);
+                if (Base::isSuccess($replyCommand)) {
+                    $replyText = $replyCommand['data'] ?: '';
+                }
             }
             $userBot = UserBot::whereBotId($botUser->userid)->first();
             $webhookUrl = $userBot?->webhook_url;
@@ -514,6 +504,7 @@ class BotReceiveMsgTask extends AbstractTask
         try {
             $data = [
                 'text' => $command,
+                'reply_text' => $replyText,
                 'token' => User::generateToken($botUser),
                 'dialog_id' => $dialog->id,
                 'dialog_type' => $dialog->type,
@@ -575,12 +566,12 @@ class BotReceiveMsgTask extends AbstractTask
     /**
      * 提取消息指令（提取消息内容）
      * @param WebSocketDialogMsg $msg
-     * @param bool $isAiBot
+     * @param User $botUser
      * @param bool $mention
      * @return string
      * @throws Exception
      */
-    private function extractCommand(WebSocketDialogMsg $msg, bool $isAiBot = false, bool $mention = false)
+    private function extractCommand(WebSocketDialogMsg $msg, User $botUser, bool $mention = false)
     {
         if ($msg->type !== 'text') {
             return '';
@@ -597,80 +588,113 @@ class BotReceiveMsgTask extends AbstractTask
             }
             return $command;
         }
-        if (!$isAiBot) {
+
+        if ($botUser->isAiBot()) {
+            // AI 机器人
+            $contents = [];
+            if (preg_match_all("/<span class=\"mention task\" data-id=\"(\d+)\">(.*?)<\/span>/", $original, $match)) {
+                // 任务
+                $taskIds = Base::newIntval($match[1]);
+                foreach ($taskIds as $index => $taskId) {
+                    $taskInfo = ProjectTask::with(['content'])->whereId($taskId)->first();
+                    if (!$taskInfo) {
+                        throw new Exception("任务不存在或已被删除");
+                    }
+                    $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
+                    $taskContext = implode("\n", $taskInfo->AIContext());
+                    $contents[] = "<task_content path=\"{$taskName}\">\n{$taskContext}\n</task_content>";
+                    $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
+                }
+            }
+            if (preg_match_all("/<a class=\"mention ([^'\"]*)\" href=\"([^\"']+?)\"[^>]*?>[~%]([^>]*)<\/a>/", $original, $match)) {
+                // 文件、报告
+                $urlPaths = $match[2];
+                foreach ($urlPaths as $index => $urlPath) {
+                    $pathTag = null;
+                    $pathName = null;
+                    $pathContent = null;
+                    // 文件
+                    if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
+                        $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
+                        if (!$fileInfo || !isset($fileInfo->content['url'])) {
+                            throw new Exception("文件不存在或已被删除");
+                        }
+                        $urlPath = public_path($fileInfo->content['url']);
+                        if (!file_exists($urlPath)) {
+                            throw new Exception("文件不存在或已被删除");
+                        }
+                        $fileResult = TextExtractor::extractFile($urlPath);
+                        if (Base::isError($fileResult)) {
+                            throw new Exception("文件读取失败：" . $fileResult['msg']);
+                        }
+                        $pathTag = "file_content";
+                        $pathName = addslashes($match[3][$index]) . " (ID:{$fileInfo->id})";
+                        $pathContent = $fileResult['data'];
+                    }
+                    // 报告
+                    elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
+                        $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
+                        if (!$reportInfo) {
+                            throw new Exception("报告不存在或已被删除");
+                        }
+                        $pathTag = "report_content";
+                        $pathName = addslashes($match[3][$index]) . " (ID:{$reportInfo->id})";
+                        $pathContent = $reportInfo->content;
+                    }
+                    if ($pathTag) {
+                        $contents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
+                        $original = str_replace($match[0][$index], "'{$pathName}' (see below for {$pathTag} tag)", $original);
+                    }
+                }
+            }
+            $original = Base::html2markdown($original);
+            if ($contents) {
+                // 添加tag内容
+                $original .= "\n\n" . implode("\n\n", $contents);
+            }
+            return $original;
+        } elseif ($botUser->isUserBot()) {
+            // 用户机器人
+            return Base::html2markdown($original);
+        } else {
+            // 其他机器人（系统）
             return trim(strip_tags($original));
         }
+    }
 
-        $contents = [];
-        // 任务
-        if (preg_match_all("/<span class=\"mention task\" data-id=\"(\d+)\">(.*?)<\/span>/", $original, $match)) {
-            $taskIds = Base::newIntval($match[1]);
-            foreach ($taskIds as $index => $taskId) {
-                $taskInfo = ProjectTask::with(['content'])->whereId($taskId)->first();
-                if (!$taskInfo) {
-                    throw new Exception("任务不存在或已被删除");
-                }
-                $taskName = addslashes($taskInfo->name) . " (ID:{$taskId})";
-                $taskContext = implode("\n", $taskInfo->AIContext());
-                $contents[] = "<task_content path=\"{$taskName}\">\n{$taskContext}\n</task_content>";
-                $original = str_replace($match[0][$index], "'{$taskName}' (see below for task_content tag)", $original);
+    /**
+     * 提取回复消息指令
+     * @param $id
+     * @param User $botUser
+     * @return array
+     */
+    private function extractReplyCommand($id, User $botUser)
+    {
+        $replyMsg = WebSocketDialogMsg::find($id);
+        $replyCommand = null;
+        if ($replyMsg) {
+            switch ($replyMsg->type) {
+                case 'text':
+                    try {
+                        $replyCommand = $this->extractCommand($replyMsg, $botUser);
+                    } catch (Exception) {
+                        return Base::retError('error', "引用消息解析失败。");
+                    }
+                    break;
+                case 'file':
+                    if ($botUser->isAiBot()) {
+                        $msgData = Base::json2array($replyMsg->getRawOriginal('msg'));
+                        $fileResult = TextExtractor::extractFile(public_path($msgData['path']));
+                        if (Base::isError($fileResult)) {
+                            return Base::retError('error', $fileResult['msg']);
+                        } else {
+                            $replyCommand = $fileResult['data'];
+                        }
+                    }
+                    break;
             }
         }
-        // 文件、报告
-        if (preg_match_all("/<a class=\"mention ([^'\"]*)\" href=\"([^\"']+?)\"[^>]*?>[~%]([^>]*)<\/a>/", $original, $match)) {
-            $urlPaths = $match[2];
-            foreach ($urlPaths as $index => $urlPath) {
-                $pathTag = null;
-                $pathName = null;
-                $pathContent = null;
-                // 文件
-                if (preg_match("/single\/file\/(.*?)$/", $urlPath, $fileMatch)) {
-                    $fileInfo = FileContent::idOrCodeToContent($fileMatch[1]);
-                    if (!$fileInfo || !isset($fileInfo->content['url'])) {
-                        throw new Exception("文件不存在或已被删除");
-                    }
-                    $urlPath = public_path($fileInfo->content['url']);
-                    if (!file_exists($urlPath)) {
-                        throw new Exception("文件不存在或已被删除");
-                    }
-                    $fileResult = TextExtractor::extractFile($urlPath);
-                    if (Base::isError($fileResult)) {
-                        throw new Exception("文件读取失败：" . $fileResult['msg']);
-                    }
-                    $pathTag = "file_content";
-                    $pathName = addslashes($match[3][$index]) . " (ID:{$fileInfo->id})";
-                    $pathContent = $fileResult['data'];
-                }
-                // 报告
-                elseif (preg_match("/single\/report\/detail\/(.*?)$/", $urlPath, $reportMatch)) {
-                    $reportInfo = Report::idOrCodeToContent($reportMatch[1]);
-                    if (!$reportInfo) {
-                        throw new Exception("报告不存在或已被删除");
-                    }
-                    $pathTag = "report_content";
-                    $pathName = addslashes($match[3][$index]) . " (ID:{$reportInfo->id})";
-                    $pathContent = $reportInfo->content;
-                }
-                if ($pathTag) {
-                    $contents[] = "<{$pathTag} path=\"{$pathName}\">\n{$pathContent}\n</{$pathTag}>";
-                    $original = str_replace($match[0][$index], "'{$pathName}' (see below for {$pathTag} tag)", $original);
-                }
-            }
-        }
-        if ($msg->msg['type'] !== 'md') {
-            // 转换为Markdown
-            try {
-                $converter = new HtmlConverter();
-                $original = $converter->convert($original);
-            } catch (\Exception) {
-                throw new Exception("Failed to convert HTML to Markdown");
-            }
-        }
-        if ($contents) {
-            // 添加tag内容
-            $original .= "\n\n" . implode("\n\n", $contents);
-        }
-        return $original ?: '';
+        return Base::retSuccess('success', $replyCommand);
     }
 
     /**

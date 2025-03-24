@@ -256,6 +256,18 @@ class User extends AbstractModel
     }
 
     /**
+     * 返回是否用户机器人
+     * @return bool
+     */
+    public function isUserBot()
+    {
+        if (preg_match('/^user-(.*?)@bot\.system$/', $this->email)) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * 判断是否管理员
      */
     public function checkAdmin()

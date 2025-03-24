@@ -9,7 +9,7 @@ use App\Services\RequestContext;
 use Cache;
 use Carbon\Carbon;
 use League\CommonMark\CommonMarkConverter;
-use League\CommonMark\Exception\CommonMarkException;
+use League\HTMLToMarkdown\HtmlConverter;
 use Overtrue\Pinyin\Pinyin;
 use Redirect;
 use Request;
@@ -2977,11 +2977,26 @@ class Base
      */
     public static function markdown2html($markdown)
     {
-        $converter = new CommonMarkConverter();
         try {
+            $converter = new CommonMarkConverter();
             return $converter->convert($markdown);
-        } catch (CommonMarkException $e) {
+        } catch (\League\CommonMark\Exception\CommonMarkException $e) {
             return $markdown;
+        }
+    }
+
+    /**
+     * html 转 MD(markdown)
+     * @param $html
+     * @return mixed|string
+     */
+    public static function html2markdown($html)
+    {
+        try {
+            $converter = new HtmlConverter();
+            return $converter->convert($html);
+        } catch (\Exception) {
+            return $html;
         }
     }
 }

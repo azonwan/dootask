@@ -629,12 +629,11 @@ class UsersController extends AbstractController
         User::auth();
         //
         $type = trim(Request::input('type'));
-        $botName = "ai-{$type}";
-        if (!UserBot::isAiBot("{$botName}@bot.system")) {
+        if (!UserBot::systemBotName($type)) {
             return Base::retError('AI机器人不存在');
         }
         //
-        $botUser = User::botGetOrCreate($botName);
+        $botUser = User::botGetOrCreate("ai-{$type}");
         if (empty($botUser)) {
             return Base::retError('AI机器人不存在');
         }

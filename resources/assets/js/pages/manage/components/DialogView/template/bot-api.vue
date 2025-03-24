@@ -18,6 +18,7 @@
         <p><b>{{$L("Webhook说明")}}：</b></p>
         <p>{{$L("机器人收到消息后会将消息POST推送到Webhook地址，请求超时为10秒，请求参数如下")}}：</p>
         <p><span class="mark-color">text</span>: {{$L("消息文本")}}</p>
+        <p><span class="mark-color">reply_text</span>: {{$L("回复/引用消息文本")}}</p>
         <p><span class="mark-color">token</span>: {{$L("机器人Token")}}</p>
         <p><span class="mark-color">dialog_id</span>: {{$L("对话ID")}}</p>
         <p><span class="mark-color">dialog_type</span>: {{$L("对话类型")}}</p>
