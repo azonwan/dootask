@@ -87,15 +87,15 @@
                     <ImgUpload v-model="mybotModifyData.avatar" :num="1" :width="512" :height="512" whcut="cover"/>
                 </FormItem>
                 <FormItem prop="name" :label="$L('名称')">
-                    <Input v-model="mybotModifyData.name" :maxlength="20" />
+                    <Input v-model="mybotModifyData.name" :maxlength="20" :placeholder="$L('机器人名称')"/>
                 </FormItem>
                 <FormItem prop="clear_day" :label="$L('消息保留')">
-                    <Input v-model="mybotModifyData.clear_day" :maxlength="3" type="number">
+                    <Input v-model="mybotModifyData.clear_day" :maxlength="3" type="number" :placeholder="$L('默认：90天')">
                         <div slot="append">{{$L('天')}}</div>
                     </Input>
                 </FormItem>
                 <FormItem prop="webhook_url" label="Webhook">
-                    <Input v-model="mybotModifyData.webhook_url" :maxlength="255" :show-word-limit="0.9" type="textarea" />
+                    <Input v-model="mybotModifyData.webhook_url" :maxlength="255" :show-word-limit="0.9" type="textarea" placeholder="Webhook"/>
                 </FormItem>
             </Form>
             <div slot="footer" class="adaption">
