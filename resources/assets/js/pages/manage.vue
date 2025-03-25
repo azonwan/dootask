@@ -1074,7 +1074,7 @@ export default {
             this.__notificationId = id;
             //
             const notificationFuncA = async (title) => {
-                const tempUser = (await this.$store.dispatch("getUserData", userid).catch(_ => {}))?.data;
+                const tempUser = await this.$store.dispatch("getUserData", userid).catch(_ => {});
                 if (dialog_type === 'group' && tempUser) {
                     title = `${title} (${tempUser.nickname})`
                 }
