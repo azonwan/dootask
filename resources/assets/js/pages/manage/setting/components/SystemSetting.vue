@@ -214,7 +214,7 @@
                                 </template>
                             </Input>
                         </div>
-                        <div class="form-tip">{{$L('消息发出后的可撤回时长。')}} ({{$L('系统管理员除外')}})</div>
+                        <div class="form-tip">{{$L('消息发出后的可撤回时长。')}}</div>
                     </FormItem>
                     <FormItem :label="$L('修改消息限制')" prop="msgEditLimit">
                         <div style="width: 220px;">
@@ -224,7 +224,7 @@
                                 </template>
                             </Input>
                         </div>
-                        <div class="form-tip">{{$L('消息发出后的可修改时长。')}} ({{$L('系统管理员除外')}})</div>
+                        <div class="form-tip">{{$L('消息发出后的可修改时长。')}}</div>
                     </FormItem>
                 </div>
             </div>

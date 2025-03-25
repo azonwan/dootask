@@ -1093,7 +1093,7 @@ class DialogController extends AbstractController
             //
             if ($update_id > 0) {
                 $action = $update_mark ? "update-$update_id" : "change-$update_id";
-                if (!($user->bot || $user->isAdmin())) {
+                if (!$user->bot) {
                     Setting::validateMsgLimit('edit', $update_id);
                 }
             } elseif ($reply_id > 0) {
@@ -1818,7 +1818,7 @@ class DialogController extends AbstractController
         if (empty($msg)) {
             return Base::retError("消息不存在或已被删除");
         }
-        if (!($user->bot || $user->isAdmin())) {
+        if (!$user->bot) {
             Setting::validateMsgLimit('rev', $msg);
         }
         $msg->withdrawMsg();
