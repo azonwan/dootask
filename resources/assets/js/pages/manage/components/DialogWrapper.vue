@@ -2915,7 +2915,7 @@ export default {
 
         onThrottleScroll: throttle(function (target) {
             if (this.operatePreventScroll === 0 && this.operateVisible) {
-                this.operateVisible = !!this.getSelectedTextInElement(target)
+                this.operateVisible = !!this.getSelectedTextInElement(target) && target?.querySelector(`[unique="${this.operateItem.id}"]`)?.classList.contains('item-enter')
             }
         }, 100),
 
