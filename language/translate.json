@@ -28848,18 +28848,6 @@
         "ru": "Время, в течение которого сообщение может быть отозвано после отправки."
     },
     {
-        "key": "系统管理员除外",
-        "zh": "",
-        "zh-CHT": "系統管理員除外",
-        "en": "Except for system administrators",
-        "ko": "시스템 관리자 제외",
-        "ja": "システム管理者は除く",
-        "de": "Ausgenommen sind Systemadministratoren",
-        "fr": "À l'exception des administrateurs système",
-        "id": "Kecuali administrator sistem",
-        "ru": "За исключением системных администраторов"
-    },
-    {
         "key": "修改消息限制",
         "zh": "",
         "zh-CHT": "修改訊息限制",
