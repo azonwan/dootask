@@ -328,9 +328,13 @@
                                     <i class="taskfont">&#xe795;</i>
                                     <span>{{ $L('翻译') }}</span>
                                 </li>
-                                <li v-for="item in operateCopys" @click="onOperate('copy', item)">
+                                <li
+                                    v-for="(item, index) in operateCopys"
+                                    v-if="item.visible !== false"
+                                    :key="index"
+                                    @click="onOperate('copy', item)">
                                     <i class="taskfont" v-html="item.icon"></i>
-                                    <span>{{ $L(item.label) }}</span>
+                                    <span>{{ $L(item.label || item.title) }}</span>
                                 </li>
                                 <li v-if="actionPermission(operateItem, 'forward')" @click="onOperate('forward')">
                                     <i class="taskfont">&#xe638;</i>
@@ -650,6 +654,7 @@ import {languageList} from "../../../language";
 import {isLocalResourcePath} from "../../../components/Replace/utils";
 import emitter from "../../../store/events";
 import Forwarder from "./Forwarder/index.vue";
+import {throttle} from "lodash";
 
 export default {
     name: "DialogWrapper",
@@ -823,9 +828,11 @@ export default {
     mounted() {
         emitter.on('websocketMsg', this.onWebsocketMsg);
         emitter.on('dialogMsgChange', this.onMsgChange);
+        this.windowTouch && document.addEventListener('selectionchange', this.onSelectionchange);
     },
 
     beforeDestroy() {
+        this.windowTouch && document.removeEventListener('selectionchange', this.onSelectionchange);
         emitter.off('dialogMsgChange', this.onMsgChange);
         emitter.off('websocketMsg', this.onWebsocketMsg);
         this.generateUnreadData(this.dialogId)
@@ -2884,9 +2891,10 @@ export default {
             }
         },
 
-        onScroll(event) {
-            if (this.operatePreventScroll === 0) {
-                this.operateVisible = false;
+        onScroll({target}) {
+            this.onThrottleScroll(target)
+            if (this.operateVisible) {
+                this.onUpdateOperate(target.querySelector(`[data-id="${this.operateItem.id}"]`)?.querySelector(".dialog-head"))
             }
             //
             const {offset, tail} = this.scrollInfo();
@@ -2897,13 +2905,19 @@ export default {
                 this.scrollToBottomRefresh && this.onReGetMsg()
             }
             //
-            this.scrollAction = event.target.scrollTop;
+            this.scrollAction = target.scrollTop;
             this.scrollDirection = this.scrollTmp <= this.scrollAction ? 'down' : 'up';
             setTimeout(_ => this.scrollTmp = this.scrollAction, 0);
             //
             this.scrollIng++;
             setTimeout(_=> this.scrollIng--, 100);
         },
+
+        onThrottleScroll: throttle(function (target) {
+            if (this.operatePreventScroll === 0 && this.operateVisible) {
+                this.operateVisible = !!this.getSelectedTextInElement(target)
+            }
+        }, 100),
 
         onRange(range) {
             if (this.preventRangeLoad > 0) {
@@ -2999,13 +3013,23 @@ export default {
             this.operateVisible = this.operateItem.id === msgData.id;
             this.operateItem = $A.isJson(msgData) ? msgData : {};
             this.operateCopys = []
-            if (event.target.nodeName === 'IMG' && this.$Electron) {
-                this.operateCopys.push({
-                    type: 'image',
-                    icon: '&#xe7cd;',
-                    label: '复制图片',
-                    value: $A.thumbRestore(event.target.currentSrc),
-                })
+            if (event.target.nodeName === 'IMG') {
+                if (this.$Electron) {
+                    this.operateCopys.push({
+                        type: 'image',
+                        icon: '&#xe7cd;',
+                        label: '复制图片',
+                        value: $A.thumbRestore(event.target.currentSrc),
+                    })
+                }
+                if (!isLocalResourcePath(event.target.currentSrc)) {
+                    this.operateCopys.push({
+                        type: 'imagedown',
+                        icon: '&#xe7a8;',
+                        label: '下载图片',
+                        value: $A.thumbRestore(event.target.currentSrc),
+                    })
+                }
             } else if (event.target.nodeName === 'A') {
                 if (event.target.classList.contains("mention") && event.target.classList.contains("file")) {
                     this.findOperateFile(this.operateItem.id, event.target.href)
@@ -3017,33 +3041,20 @@ export default {
                     value: event.target.href,
                 })
             }
+            this.operateCopys.push({
+                type: 'selected',
+                icon: '&#xe7df;',
+                label: '复制选择',
+                value: '',
+                visible: false,
+            })
             if (msgData.type === 'text') {
-                if (event.target.nodeName === 'IMG' && !isLocalResourcePath(event.target.currentSrc)) {
-                    this.operateCopys.push({
-                        type: 'imagedown',
-                        icon: '&#xe7a8;',
-                        label: '下载图片',
-                        value: $A.thumbRestore(event.target.currentSrc),
-                    })
-                }
-                const selectText = this.getSelectedTextInElement(el)
-                if (selectText.length > 0) {
-                    this.operateCopys.push({
-                        type: 'selected',
-                        icon: '&#xe7df;',
-                        label: '复制选择',
-                        value: selectText,
-                    })
-                }
                 if (msgData.msg.text.replace(/<[^>]+>/g,"").length > 0) {
-                    let label = this.operateCopys.length > 0 ? '复制文本' : '复制'
-                    if (selectText.length > 0) {
-                        label = '复制全部'
-                    }
                     this.operateCopys.push({
                         type: 'text',
                         icon: '&#xe77f;',
-                        label,
+                        label: null,
+                        title: this.operateCopys.length > 1 ? '复制文本' : '复制',
                         value: '',
                     })
                 }
@@ -3057,32 +3068,62 @@ export default {
                 }
             }
             this.$nextTick(() => {
-                const rect = el.getBoundingClientRect();
-                const scrollerRect = this.$refs.scroller.$el.getBoundingClientRect();
-                let top = rect.top + this.windowScrollY,
-                    height = rect.height;
-                if (rect.top < scrollerRect.top) {
-                    top = scrollerRect.top
-                    height -= scrollerRect.top - rect.top
-                }
-                if (rect.bottom > scrollerRect.bottom) {
-                    height -= rect.bottom - scrollerRect.bottom
-                }
-                const left = this.windowWidth < 500 ? (this.windowWidth / 2) : event.clientX
-                this.operateStyles = {
-                    left: `${left}px`,
-                    top: `${top}px`,
-                    height: `${height}px`,
-                }
-                this.operateClient = {x: left, y: event.clientY};
-                if (this.operateVisible) {
-                    try {
-                        this.$refs.operate.$refs.drop.popper.update()
-                    } catch (e) {}
-                } else {
-                    this.operateVisible = true;
-                }
+                this.operateItem.clientX = event.clientX
+                this.operateItem.clientY = event.clientY
+                this.onSelectionchange()
+                this.onUpdateOperate(el)
             })
+        },
+
+        onSelectionchange() {
+            if (!this.operateVisible) {
+                return
+            }
+            const selectedItem = this.operateCopys.find(({type}) => type === 'selected')
+            if (!selectedItem) {
+                return;
+            }
+            const selectText = this.getSelectedTextInElement(this.$refs.scroller.$el.querySelector(`[data-id="${this.operateItem.id}"]`))
+            selectedItem.value = selectText
+            selectedItem.visible = selectText.length > 0
+            //
+            const textItem = this.operateCopys.find(({type}) => type === 'text');
+            if (!textItem) {
+                return;
+            }
+            textItem.label = selectText.length > 0 ? '复制全部' : null
+        },
+
+        onUpdateOperate(el) {
+            if (!el) {
+                return
+            }
+            //
+            const rect = el.getBoundingClientRect();
+            const scrollerRect = this.$refs.scroller.$el.getBoundingClientRect();
+            let top = rect.top + this.windowScrollY,
+                height = rect.height;
+            if (rect.top < scrollerRect.top) {
+                top = scrollerRect.top
+                height -= scrollerRect.top - rect.top
+            }
+            if (rect.bottom > scrollerRect.bottom) {
+                height -= rect.bottom - scrollerRect.bottom
+            }
+            const left = this.windowWidth < 500 ? (this.windowWidth / 2) : this.operateItem.clientX
+            this.operateStyles = {
+                left: `${left}px`,
+                top: `${top}px`,
+                height: `${height}px`,
+            }
+            this.operateClient = {x: left, y: this.operateItem.clientY};
+            if (this.operateVisible) {
+                try {
+                    this.$refs.operate.$refs.drop.popper.update()
+                } catch (e) {}
+            } else {
+                this.operateVisible = true;
+            }
         },
 
         onOperate(action, value = null) {
@@ -3487,9 +3528,9 @@ export default {
                     break;
 
                 case 'text':
-                    const copyEl = $A(this.$refs.scroller.$el).find(`[data-id="${this.operateItem.id}"]`).find('.dialog-content')
-                    if (copyEl.length > 0) {
-                        let copyText = copyEl[0].innerText;
+                    const copyEl = this.$refs.scroller.$el.querySelector(`[data-id="${this.operateItem.id}"]`)?.querySelector(".dialog-content")
+                    if (copyEl) {
+                        let copyText = copyEl.innerText;
                         if ($A.getObject(this.operateItem.msg, 'type') !== 'md') {
                             copyText = copyText.replace(/\n\n/g, "\n").replace(/(^\s*)|(\s*$)/g, "")
                         }
@@ -4170,17 +4211,14 @@ export default {
         },
 
         getSelectedTextInElement(element) {
-            let selectedText = "";
-            if (window.getSelection) {
-                let selection = window.getSelection();
-                if (selection.rangeCount > 0) {
-                    const range = selection.getRangeAt(0);
-                    if (element.contains(range.commonAncestorContainer)) {
-                        selectedText = range.toString();
-                    }
+            const selection = document.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                if (element.contains(range.commonAncestorContainer)) {
+                    return range.toString();
                 }
             }
-            return selectedText;
+            return "";
         },
 
         onViewAvatar(e) {
