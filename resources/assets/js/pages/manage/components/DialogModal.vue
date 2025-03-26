@@ -8,7 +8,7 @@
         :beforeClose="onBeforeClose"
         :class-name="`dialog-modal${closIng > 0 ? ' dialog-closing' : ''}`"
         fullscreen>
-        <DialogWrapper v-if="windowPortrait && dialogId > 0" :dialogId="dialogId" :beforeBack="onBeforeClose" location="modal"/>
+        <DialogWrapper v-if="windowPortrait && dialogId > 0" ref="dialogWrapper" :dialogId="dialogId" :beforeBack="onBeforeClose" location="modal"/>
     </Modal>
 </template>
 
@@ -79,6 +79,9 @@ export default {
 
     methods: {
         onBeforeClose() {
+            if (this.$refs.dialogWrapper) {
+                this.$refs.dialogWrapper.operateVisible = false
+            }
             return new Promise(async _ => {
                 this.closIng++
                 await this.$store.dispatch("openDialog", 0)
