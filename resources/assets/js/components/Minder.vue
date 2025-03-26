@@ -79,9 +79,7 @@
         margin: 0;
         transition: 0.1s;
         font-weight: 500;
-        -moz-user-select: none;
-        -webkit-user-select: none;
-        -ms-user-select: none;
+        user-select: none;
         padding: 8px 12px;
         font-size: 14px;
         border-radius: 4px;

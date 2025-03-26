@@ -17,10 +17,6 @@ $--font-path: '../css/fonts';
 @import "~element-sea/packages/theme-chalk/src/dropdown-item";
 @import "~element-sea/packages/theme-chalk/src/notification";
 
-.el-dropdown-menu {
-    user-select: none;
-}
-
 .el-dropdown-menu__item {
     min-width: 100px;
     .item {

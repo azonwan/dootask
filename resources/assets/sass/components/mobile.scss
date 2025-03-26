@@ -7,7 +7,6 @@
     bottom: 0;
     right: 0;
     z-index: 99;
-    user-select: none;
 
     .common-network-exception {
         position: fixed;
@@ -323,14 +322,23 @@
 }
 
 body.window-touch {
+    user-select: none;
+    a, img {
+        -webkit-touch-callout: none;
+    }
+
     .mobile-back {
         display: block;
     }
 
     input,
     textarea,
-    .ql-editor {
+    .user-select-auto {
         caret-color: $flow-status-end-color;
+        user-select: auto;
+        a, img {
+            -webkit-touch-callout: default;
+        }
     }
 }
 

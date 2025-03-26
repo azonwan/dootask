@@ -36,7 +36,7 @@
             <!-- 输入框 -->
             <div
                 ref="editor"
-                class="no-dark-content"
+                class="no-dark-content user-select-auto"
                 @click.stop="onClickEditor"
                 @paste="handlePaste"></div>
 

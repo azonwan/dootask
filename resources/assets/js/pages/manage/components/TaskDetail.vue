@@ -74,7 +74,7 @@
                 <div v-if="taskDetail.archived_at" class="flow">
                     <span class="archived" @click.stop="openMenu($event, taskDetail)">{{$L('已归档')}}</span>
                 </div>
-                <div class="nav">
+                <div class="nav user-select-auto">
                     <p v-if="projectName"><span>{{projectName}}</span></p>
                     <p v-if="columnName"><span>{{columnName}}</span></p>
                     <p v-if="taskDetail.id"><span>{{taskDetail.id}}</span></p>

@@ -241,7 +241,6 @@
                                         padding: 0;
                                         height: auto;
                                         width: auto;
-                                        user-select: none;
                                     }
                                     .bot {
                                         color: $primary-color;
@@ -658,18 +657,6 @@
     }
 }
 
-body.window-touch {
-    .page-messenger {
-        .messenger-wrapper {
-            .messenger-select {
-                .messenger-list {
-                    user-select: none;
-                }
-            }
-        }
-    }
-}
-
 body.window-portrait {
     .page-messenger {
         .messenger-wrapper {
@@ -710,7 +697,6 @@ body.window-portrait {
                 .messenger-list {
                     ul {
                         &.dialog {
-                            user-select: none;
                             > li {
                                 .user-avatar {
                                     .common-avatar {
@@ -736,7 +722,6 @@ body.window-portrait {
                             }
                         }
                         &.contacts {
-                            user-select: none;
                             > li {
                                 &.loaded {
                                     height: 58px;

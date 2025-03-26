@@ -1,6 +1,6 @@
 <template>
     <div class="report-detail">
-        <div class="report-title">
+        <div class="report-title user-select-auto">
             {{ data.title }}
             <Icon v-if="loadIng > 0" type="ios-loading" class="icon-loading"></Icon>
         </div>
@@ -40,7 +40,7 @@
                     </div>
                 </li>
             </ul>
-            <div class="report-content" v-html="data.content"></div>
+            <div class="report-content user-select-auto" v-html="data.content"></div>
         </div>
     </div>
 </template>

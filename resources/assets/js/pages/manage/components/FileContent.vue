@@ -23,7 +23,7 @@
                         </div>
                         <span slot="reference">[{{$L('未保存')}}*]</span>
                     </EPopover>
-                    {{fileName}}
+                    <span class="user-select-auto">{{fileName}}</span>
                 </div>
                 <div class="header-user">
                     <ul>
@@ -75,7 +75,7 @@
                     <Button v-else :disabled="equalContent" :loading="loadSave > 0" class="header-button" size="small" type="primary" @click="handleClick('save')">{{$L('保存')}}</Button>
                 </template>
             </div>
-            <div class="content-body">
+            <div class="content-body user-select-auto">
                 <div v-if="historyShow" class="content-mask"></div>
                 <template v-if="file.type=='document'">
                     <template v-if="contentDetail.type=='md'">

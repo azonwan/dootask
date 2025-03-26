@@ -11,7 +11,7 @@
             @click="handleClick"
             v-longpress="{callback: handleLongpress, delay: 300}">
             <!--回复-->
-            <div v-if="!hideReply && msgData.reply_id && showReplyData(msgData.msg.reply_data)" class="dialog-reply no-dark-content" @click="viewReply">
+            <div v-if="!hideReply && msgData.reply_id && showReplyData(msgData.msg.reply_data)" class="dialog-reply no-dark-content" :class="replyClass" @click="viewReply">
                 <div class="reply-avatar">
                     <UserAvatar :userid="msgData.msg.reply_data.userid" :show-icon="false" :show-name="true"/>
                 </div>
@@ -297,24 +297,6 @@ export default {
             return this.isLoad(`msg-${this.msgData.id}`)
         },
 
-        viewClass() {
-            const {msgData, operateAction, operateEnter, pointerMouse} = this;
-            const array = [];
-            if (msgData.type) {
-                array.push(msgData.type)
-            }
-            if (operateAction) {
-                array.push('operate-action')
-                if (operateEnter) {
-                    array.push('pointer-mouse')
-                }
-            }
-            if (pointerMouse && array.indexOf('pointer-mouse') === -1) {
-                array.push('pointer-mouse')
-            }
-            return array
-        },
-
         readList({userId}) {
             return this.percentageList.filter(({userid, read_at}) => userid != userId && read_at)
         },
@@ -331,26 +313,50 @@ export default {
             return this.todoList.filter(({done_at}) => !done_at)
         },
 
+        viewClass() {
+            const {msgData} = this;
+            const classArray = [];
+            if (msgData.type) {
+                classArray.push(msgData.type)
+            }
+            return classArray
+        },
+
         headClass() {
-            const {id, reply_id, type, msg, emoji, dot} = this.msgData;
-            const array = [];
+            const {msgData, operateAction} = this;
+            const {id, reply_id, type, msg, emoji, dot} = msgData;
+            const classArray = [];
+            if (operateAction) {
+                classArray.push('operating')
+            }
             if (dot && !this.dotClicks.includes(id)) {
-                array.push('dot')
+                classArray.push('dot')
             }
             if (reply_id === 0 && $A.arrayLength(emoji) === 0) {
                 if (type === 'text') {
                     if (/^<img\s+class="emoticon"[^>]*?>$/.test(msg.text)
                         || /^\s*<p>\s*([\uD800-\uDBFF][\uDC00-\uDFFF]){1,3}\s*<\/p>\s*$/.test(msg.text)) {
-                        array.push('transparent')
+                        classArray.push('transparent')
                     }
                 }
             }
-            return array;
+            return classArray;
+        },
+
+        replyClass() {
+            const classArray = [];
+            if (this.operateEnter || this.pointerMouse) {
+                classArray.push('user-select-auto')
+            }
+            return classArray;
         },
 
         contentClass() {
             const {type, msg} = this.msgData;
             const classArray = [];
+            if (this.operateEnter || this.pointerMouse) {
+                classArray.push('user-select-auto')
+            }
             if (type === 'text') {
                 if (/^<img\s+class="emoticon"[^>]*?>$/.test(msg.text)) {
                     classArray.push('an-emoticon')

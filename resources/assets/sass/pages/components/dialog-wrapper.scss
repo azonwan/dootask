@@ -672,12 +672,6 @@
                     max-width: 70%;
                 }
 
-                &.operate-action {
-                    .dialog-head {
-                        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
-                    }
-                }
-
                 .dialog-username {
                     max-width: 100%;
                     height: 22px;
@@ -697,6 +691,10 @@
 
                     &.transparent {
                         background-color: transparent !important;
+                    }
+
+                    &.operating {
+                        box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
                     }
 
                     &.dot {
@@ -1940,7 +1938,6 @@
             background-color: #ffffff;
             border: 1px solid #eeeeee;
             cursor: pointer;
-            user-select: none;
             display: flex;
             align-content: center;
             justify-content: center;
@@ -2435,7 +2432,7 @@ body:not(.window-touch) {
             }
         }
     }
-    .operate-action-top{
+    .operate-action-top {
         width: auto;
         > li {
             margin-bottom: 0;
@@ -2493,7 +2490,6 @@ body:not(.window-touch) {
 body.window-touch {
     .dialog-wrapper {
         .dialog-scroller {
-            user-select: none;
             .dialog-item {
                 .dialog-view {
                     .dialog-head {
@@ -2514,13 +2510,6 @@ body.window-touch {
                                         }
                                     }
                                 }
-                            }
-                        }
-                    }
-                    &.pointer-mouse {
-                        .dialog-head {
-                            .dialog-content {
-                                user-select: text;
                             }
                         }
                     }
@@ -2666,15 +2655,13 @@ body.window-portrait {
             .dialog-item {
                 .dialog-view {
                     &.text,
+                    &.file,
                     &.location,
                     &.template {
                         max-width: calc(100% - 80px);
                     }
                     .dialog-head {
                         .dialog-content {
-                            a, img {
-                                -webkit-touch-callout: none;
-                            }
                             .content-text {
                                 > pre {
                                     font-size: 15px;
@@ -2690,15 +2677,6 @@ body.window-portrait {
                                     &:hover {
                                         transform: none;
                                     }
-                                }
-                            }
-                        }
-                    }
-                    &.pointer-mouse {
-                        .dialog-head {
-                            .dialog-content {
-                                a, img {
-                                    -webkit-touch-callout: default;
                                 }
                             }
                         }

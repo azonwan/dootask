@@ -6,7 +6,7 @@
                 <div class="project-back" @click="onBack">
                     <i class="taskfont">&#xe676;</i>
                 </div>
-                <h1 @click="showName">{{projectData.name}}</h1>
+                <h1 @click="showName" class="user-select-auto">{{projectData.name}}</h1>
                 <div v-if="loading" class="project-load"><Loading/></div>
             </div>
             <ul class="project-icons">
@@ -76,7 +76,7 @@
             </ul>
         </div>
         <div class="project-subbox">
-            <div class="project-subtitle" @click="showDesc">
+            <div class="project-subtitle user-select-auto" @click="showDesc">
                 <VMPreviewNostyle ref="descPreview" :value="projectData.desc"/>
             </div>
             <div class="project-switch">

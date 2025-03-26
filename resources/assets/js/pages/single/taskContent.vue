@@ -5,14 +5,14 @@
         <div v-else-if="info" class="file-preview">
             <div v-if="showHeader" class="edit-header">
                 <div class="header-title">
-                    <div class="title-name">{{pageName}}</div>
+                    <div class="title-name user-select-auto">{{pageName}}</div>
                     <Tag color="default">{{$L('只读')}}</Tag>
                     <div class="refresh">
                         <Icon type="ios-refresh" @click="getInfo" />
                     </div>
                 </div>
             </div>
-            <div class="content-body">
+            <div class="content-body user-select-auto">
                 <TEditor :value="info.content" height="100%" readOnly/>
             </div>
         </div>

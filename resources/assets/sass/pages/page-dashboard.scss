@@ -368,18 +368,6 @@
     opacity: 0;
 }
 
-body.window-touch {
-    .page-messenger {
-        .messenger-wrapper {
-            .messenger-select {
-                .messenger-list {
-                    user-select: none;
-                }
-            }
-        }
-    }
-}
-
 body.window-portrait {
     .page-dashboard {
         .dashboard-wrapper {
@@ -413,7 +401,6 @@ body.window-portrait {
                 }
                 .dashboard-ul {
                     margin-bottom: 20px;
-                    user-select: none;
                     &.ul-hidden {
                         margin-bottom: 0;
                     }

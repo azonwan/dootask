@@ -4,7 +4,7 @@
         <template v-else-if="contentDetail">
             <div v-show="headerShow && !['word', 'excel', 'ppt'].includes(file.type)" class="edit-header">
                 <div class="header-title">
-                    <div class="title-name">{{$A.getFileName(file)}}</div>
+                    <div class="title-name user-select-auto">{{$A.getFileName(file)}}</div>
                     <Tag color="default">{{$L('只读')}}</Tag>
                     <div class="refresh">
                         <Loading v-if="contentLoad"/>
@@ -12,7 +12,7 @@
                     </div>
                 </div>
             </div>
-            <div class="content-body">
+            <div class="content-body user-select-auto">
                 <template v-if="file.type=='document'">
                     <VMPreview v-if="contentDetail.type=='md'" :value="contentDetail.content"/>
                     <TEditor v-else :value="contentDetail.content" height="100%" readOnly/>
