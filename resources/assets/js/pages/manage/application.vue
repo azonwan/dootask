@@ -50,7 +50,7 @@
                 <div class="ivu-modal-wrap-apply-body full-body">
                     <div v-if="mybotList.length === 0" class="empty-data">
                         <Loading v-if="mybotLoad"/>
-                        <span>{{$L('您没有创建机器人')}}</span>
+                        <span v-else>{{$L('您没有创建机器人')}}</span>
                     </div>
                     <ul v-else class="ivu-modal-wrap-ul">
                         <li v-for="(item, key) in mybotList" :key="key">

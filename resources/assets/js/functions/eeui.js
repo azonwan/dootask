@@ -261,6 +261,22 @@
                 }
             })
         },
+
+        // 获取最新一张照片
+        eeuiAppGetLatestPhoto(callback) {
+            if (!$A.isEEUiApp) return;
+            $A.eeuiModule("eeui").then(obj => {
+                obj.getLatestPhoto(callback);
+            })
+        },
+
+        // 上传照片（通过 eeuiAppGetLatestPhoto 获取到的path，params 参数：{url,data,headers,path,fieldName}）
+        eeuiAppUploadPhoto(params, callback) {
+            if (!$A.isEEUiApp) return;
+            $A.eeuiModule("eeui").then(obj => {
+                obj.uploadPhoto(params, callback);
+            })
+        }
     });
 
     window.$A = $;
