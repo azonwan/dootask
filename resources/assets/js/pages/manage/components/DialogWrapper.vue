@@ -1350,6 +1350,9 @@ export default {
             }
             // 判断是否最后一条消息可见才重新获取消息
             const lastMsg = this.allMsgs[this.allMsgs.length - 1]
+            if (!lastMsg) {
+                return;
+            }
             const lastEl = $A(this.$refs.scroller.$el).find(`[data-id="${lastMsg.id}"]`)
             if (lastEl.length === 0) {
                 this.scrollToBottomRefresh = true

@@ -29302,5 +29302,53 @@
         "fr": "Les bots système ne peuvent pas être supprimés",
         "id": "Bot sistem tidak dapat dihapus",
         "ru": "Системные боты не могут быть удалены"
+    },
+    {
+        "key": "回复\/引用消息文本",
+        "zh": "",
+        "zh-CHT": "回覆\/引用消息文本",
+        "en": "Reply\/Quote Message Text",
+        "ko": "답장\/인용 메시지 텍스트",
+        "ja": "返信\/引用メッセージテキスト",
+        "de": "Antwort\/Nachrichtentext zitieren",
+        "fr": "Répondre\/Citer le texte du message",
+        "id": "Balas\/Kutip Teks Pesan",
+        "ru": "Ответить\/Цитировать текст сообщения"
+    },
+    {
+        "key": "默认：90天",
+        "zh": "",
+        "zh-CHT": "默認：90天",
+        "en": "Default: 90 days",
+        "ko": "기본값: 90일",
+        "ja": "デフォルト: 90日",
+        "de": "Standard: 90 Tage",
+        "fr": "Par défaut : 90 jours",
+        "id": "Default: 90 hari",
+        "ru": "По умолчанию: 90 дней"
+    },
+    {
+        "key": "后退",
+        "zh": "",
+        "zh-CHT": "後退",
+        "en": "Back",
+        "ko": "뒤로",
+        "ja": "戻る",
+        "de": "Zurück",
+        "fr": "Retour",
+        "id": "Kembali",
+        "ru": "Назад"
+    },
+    {
+        "key": "前进",
+        "zh": "",
+        "zh-CHT": "前進",
+        "en": "Forward",
+        "ko": "앞으로",
+        "ja": "進む",
+        "de": "Vorwärts",
+        "fr": "Avancer",
+        "id": "Maju",
+        "ru": "Вперед"
     }
 ]

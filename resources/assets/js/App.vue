@@ -600,6 +600,8 @@ export default {
             // 取消长按振动
             $A.eeuiAppSetHapticBackEnabled(false)
             // 设置语言
+            $A.eeuiAppSetCachesString("languageWebBack", this.$L("后退"))
+            $A.eeuiAppSetCachesString("languageWebForward", this.$L("前进"))
             $A.eeuiAppSetCachesString("languageWebBrowser", this.$L("浏览器打开"))
             $A.eeuiAppSetCachesString("languageWebRefresh", this.$L("刷新"))
             $A.eeuiAppSetCachesString("updateDefaultTitle", this.$L("发现新版本"))
