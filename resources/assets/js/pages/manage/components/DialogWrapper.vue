@@ -79,6 +79,9 @@
                             <EDropdownItem command="searchMsg">
                                 <div>{{$L('搜索消息')}}</div>
                             </EDropdownItem>
+                            <EDropdownItem v-if="$isMainElectron" command="single">
+                                <div>{{$L('独立窗口')}}</div>
+                            </EDropdownItem>
                             <template v-if="dialogData.type === 'user'">
                                 <EDropdownItem v-if="dialogData.userimg" command="previewAvatar">
                                     <div>{{$L('查看头像')}}</div>
@@ -2618,6 +2621,10 @@ export default {
 
         onDialogMenu(cmd) {
             switch (cmd) {
+                case "single":
+                    this.$store.dispatch('openDialogWindow', this.dialogData.id);
+                    break;
+
                 case "searchMsg":
                     this.searchShow = true
                     this.$nextTick(_ => {
