@@ -695,7 +695,6 @@ if (["dev"].includes(argv[2])) {
     });
 } else {
     // 手编译（默认）
-
     let cachedConfig = {};
     try {
         const buildConfigPath = path.join(__dirname, '.build');
@@ -736,7 +735,7 @@ if (["dev"].includes(argv[2])) {
             type: 'checkbox',
             name: 'arch',
             message: "选择系统架构",
-            choices: ({ platform }) => {
+            choices: ({platform}) => {
                 const array = [
                     {
                         name: "arm64",
@@ -774,14 +773,14 @@ if (["dev"].includes(argv[2])) {
                 name: "是",
                 value: true
             }],
-            default: (cachedConfig && cachedConfig.publish !== undefined) ? 
-                    (cachedConfig.publish ? 1 : 0) : 0
+            default: (cachedConfig && cachedConfig.publish !== undefined) ?
+                (cachedConfig.publish ? 1 : 0) : 0
         },
         {
             type: 'list',
             name: 'release',
             message: "选择升级方式",
-            when: ({ publish }) => publish,
+            when: ({publish}) => publish,
             choices: [{
                 name: "弹出提示",
                 value: true
@@ -789,14 +788,14 @@ if (["dev"].includes(argv[2])) {
                 name: "静默",
                 value: false
             }],
-            default: (cachedConfig && cachedConfig.release !== undefined) ? 
-                    (cachedConfig.release ? 0 : 1) : 0
+            default: (cachedConfig && cachedConfig.release !== undefined) ?
+                (cachedConfig.release ? 0 : 1) : 0
         },
         {
             type: 'list',
             name: 'notarize',
-            message: ({ platform }) => platform.length > 1 ? "选择是否公证（仅MacOS）" : "选择是否公证",
-            when: ({ platform }) => platform.find(item => item === 'build-mac'),
+            message: ({platform}) => platform.length > 1 ? "选择是否公证（仅MacOS）" : "选择是否公证",
+            when: ({platform}) => platform.find(item => item === 'build-mac'),
             choices: [{
                 name: "否",
                 value: false
@@ -804,8 +803,8 @@ if (["dev"].includes(argv[2])) {
                 name: "是",
                 value: true
             }],
-            default: (cachedConfig && cachedConfig.notarize !== undefined) ? 
-                    (cachedConfig.notarize ? 1 : 0) : 0
+            default: (cachedConfig && cachedConfig.notarize !== undefined) ?
+                (cachedConfig.notarize ? 1 : 0) : 0
         }
     ];
 
