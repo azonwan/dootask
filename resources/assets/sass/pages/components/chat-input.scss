@@ -737,6 +737,31 @@
         padding: 0 8px;
         border-radius: 4px;
 
+        &.maybe-photo {
+            align-items: flex-start;
+            flex-direction: column;
+            padding-bottom: 12px;
+            margin-bottom: 4px;
+            border-bottom: 1px solid #e8e8e8;
+            border-radius: 0;
+            line-height: 30px;
+
+            &:hover {
+                background-color: transparent;
+            }
+
+            > span {
+                font-size: 12px;
+                opacity: 0.8;
+            }
+
+            > img {
+                display: flex;
+                max-width: 100%;
+                width: 120px;
+            }
+        }
+
         &:hover {
             background-color: #ecf5ff;
         }

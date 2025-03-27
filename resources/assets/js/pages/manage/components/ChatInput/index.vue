@@ -90,6 +90,10 @@
                             <i class="taskfont">&#xe790;</i>
                         </ETooltip>
                         <template v-if="!isAiBot">
+                            <div v-if="maybePhotoSrc" class="chat-input-popover-item maybe-photo" @click="onToolbar('maybe-photo')">
+                                <span>{{$L('你可能要发送的照片')}}:</span>
+                                <img :src="maybePhotoSrc" :style="maybePhotoStyle">
+                            </div>
                             <div v-if="recordReady" class="chat-input-popover-item" @click="onToolbar('meeting')">
                                 <i class="taskfont">&#xe7c1;</i>
                                 {{$L('新会议')}}
@@ -381,6 +385,9 @@ export default {
             _options: {},
 
             mentionMode: '',
+
+            maybePhotoSrc: '',
+            maybePhotoStyle: {},
 
             userList: null,
             userCache: null,
