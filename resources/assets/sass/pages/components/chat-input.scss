@@ -755,10 +755,11 @@
                 opacity: 0.8;
             }
 
-            > img {
-                display: flex;
-                max-width: 100%;
-                width: 120px;
+            .photo-preview {
+                background-size: cover;
+                background-position: center center;
+                background-repeat: no-repeat;
+                border-radius: 4px;
             }
         }
 

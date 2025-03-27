@@ -90,9 +90,9 @@
                             <i class="taskfont">&#xe790;</i>
                         </ETooltip>
                         <template v-if="!isAiBot">
-                            <div v-if="maybePhotoSrc" class="chat-input-popover-item maybe-photo" @click="onToolbar('maybe-photo')">
+                            <div v-if="maybePhotoShow" class="chat-input-popover-item maybe-photo" @click="onToolbar('maybe-photo')">
                                 <span>{{$L('你可能要发送的照片')}}:</span>
-                                <img :src="maybePhotoSrc" :style="maybePhotoStyle">
+                                <div class="photo-preview" :style="maybePhotoStyle"></div>
                             </div>
                             <div v-if="recordReady" class="chat-input-popover-item" @click="onToolbar('meeting')">
                                 <i class="taskfont">&#xe7c1;</i>
@@ -386,7 +386,8 @@ export default {
 
             mentionMode: '',
 
-            maybePhotoSrc: '',
+            maybePhotoShow: false,
+            maybePhotoData: {},
             maybePhotoStyle: {},
 
             userList: null,
@@ -788,11 +789,33 @@ export default {
         },
 
         showMore(val) {
+            this.maybePhotoShow = false
             if (val) {
                 this.showMenu = false;
                 // this.showMore = false;
                 this.showEmoji = false;
                 this.emojiQuickShow = false;
+                //
+                $A.eeuiAppGetLatestPhoto(({status, created, thumbnail, original}) => {
+                    if (status !== 'success'
+                        // || created + 60 < $A.dayjs().unix()
+                        || !thumbnail.base64
+                        || !original.path) {
+                        return
+                    }
+                    const width = 120;
+                    const height = Math.min(150, thumbnail.height / (thumbnail.width / width));
+                    this.maybePhotoStyle = {
+                        width: width + 'px',
+                        height: height + 'px',
+                        backgroundImage: `url(${thumbnail.base64})`,
+                    }
+                    this.maybePhotoData = original
+                    this.maybePhotoShow = true
+                    this.$nextTick(() => {
+                        this.$refs.more?.updatePopper()
+                    })
+                })
             }
         },
 
@@ -1617,6 +1640,33 @@ export default {
 
                 case 'task':
                     this.openMenu("#");
+                    break;
+
+                case 'maybe-photo':
+                    $A.eeuiAppUploadPhoto({
+                        url: $A.apiUrl('dialog/msg/sendfile'),
+                        data: {
+                            dialog_id: this.dialogId,
+                        },
+                        headers: {
+                            token: this.userToken,
+                        },
+                        path: this.maybePhotoData.path,
+                        fieldName: "files"
+                    }, ({status, data}) => {
+                        /*switch (status) {
+                            case "uploading":
+                                break;
+                            case "success":
+                                if (data.ret !== 1) {
+                                    $A.messageError(data.msg || "上传失败")
+                                }
+                                break;
+                            case "error":
+                                $A
+                                break;
+                        }*/
+                    })
                     break;
 
                 case 'meeting':
