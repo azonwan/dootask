@@ -695,8 +695,12 @@ export default {
             return this.dialogId > 0 ? (this.cacheDialogs.find(({id}) => id == this.dialogId) || {}) : {};
         },
 
+        draftId() {
+            return this.dialogId || `t_${this.taskId}`
+        },
+
         draftData() {
-            return this.getDialogDraft(this.dialogId)?.content || ''
+            return this.getDialogDraft(this.draftId)?.content || ''
         },
 
         quoteData() {
@@ -727,7 +731,7 @@ export default {
                 }
             }
             if (!this.simpleMode) {
-                this.$store.dispatch("saveDialogDraft", {id: this.dialogId, content: val})
+                this.$store.dispatch("saveDialogDraft", {id: this.draftId, content: val})
             }
         },
 
