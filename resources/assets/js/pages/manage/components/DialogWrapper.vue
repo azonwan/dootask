@@ -1749,6 +1749,7 @@ export default {
                 url: $A.apiUrl('dialog/msg/sendfile'),
                 data: {
                     dialog_id: tempMsg.dialog_id,
+                    filename: msg.filename
                 },
                 headers: {
                     token: this.userToken,

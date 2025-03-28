@@ -1643,6 +1643,7 @@ export default {
                         type: 'photo',
                         msg: {
                             type: 'img',
+                            filename: this.maybePhotoData.original.name,
                             path: this.maybePhotoData.original.path,
                             width: this.maybePhotoData.original.width,
                             height: this.maybePhotoData.original.height,
