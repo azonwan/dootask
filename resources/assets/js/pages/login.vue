@@ -473,12 +473,11 @@ export default {
         },
 
         async setServerUrl(value) {
-            await $A.IDBSet("cachePrivacyShow", value ? "no" : "yes")
-            //
-            if (value != this.cacheServerUrl) {
-                await $A.IDBSet("cacheServerUrl", value)
-                $A.reloadUrl();
+            if (value == this.cacheServerUrl) {
+                return
             }
+            await $A.IDBSet("cacheServerUrl", value)
+            $A.reloadUrl();
         },
 
         isNotServer() {
@@ -511,6 +510,7 @@ export default {
             if (agree) {
                 this.privacyShow = false
                 this.chackServerUrl().catch(_ => {});
+                $A.IDBSet("cachePrivacyShow", "no")
             } else {
                 $A.eeuiAppGoDesktop()
             }
