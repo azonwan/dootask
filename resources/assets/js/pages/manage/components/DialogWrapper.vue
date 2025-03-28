@@ -1736,6 +1736,7 @@ export default {
             const tempMsg = {
                 id: $A.randNum(1000000000, 9999999999),
                 file_uid: 0,
+                file_method: 'photo',
                 dialog_id: this.dialogData.id,
                 reply_id: this.quoteId,
                 type: 'file',
@@ -1753,7 +1754,10 @@ export default {
                     token: this.userToken,
                 },
                 path: msg.path,
-                fieldName: "files"
+                fieldName: "files",
+                onReady: (id) => {
+                    this.$set(tempMsg, 'file_uid', id)
+                },
             }).then(data => {
                 this.sendSuccess(data, tempMsg.id)
             }).catch(({msg}) => {
@@ -2317,6 +2321,7 @@ export default {
                     const tempMsg = {
                         id: file.tempId,
                         file_uid: file.uid,
+                        file_method: 'uplaod',
                         dialog_id: this.dialogData.id,
                         reply_id: this.quoteId,
                         type: 'file',
@@ -3260,19 +3265,24 @@ export default {
                 content: '你确定要取消发送吗？',
                 loading: true,
                 onOk: () => {
-                    return new Promise((resolve, reject) => {
+                    return new Promise(async (resolve, reject) => {
                         if (this.operateItem.created_at) {
                             reject("消息已发送，不可取消");
                             return
                         }
-                        if (this.operateItem.type === 'file') {
+                        if (this.operateItem.type === "file") {
                             // 取消文件上传
-                            if (this.$refs.chatUpload.cancel(this.operateItem.file_uid)) {
+                            const {file_uid, file_method} = this.operateItem
+                            if (file_method === "photo") {
+                                await $A.eeuiAppCancelUploadPhoto(file_uid)
                                 this.forgetTempMsg(this.operateItem.id)
-                                resolve();
-                            } else {
-                                reject("取消发送失败");
+                                return resolve();
                             }
+                            if (this.$refs.chatUpload.cancel(file_uid)) {
+                                this.forgetTempMsg(this.operateItem.id)
+                                return resolve();
+                            }
+                            reject("取消发送失败");
                         } else {
                             // 取消消息发送
                             this.$store.dispatch('callCancel', this.operateItem.id).then(() => {

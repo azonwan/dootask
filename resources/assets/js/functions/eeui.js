@@ -289,6 +289,10 @@
                         if (expiration > 0 && (result.created + expiration) < $A.dayjs().unix()) {
                             return reject({msg: "photo expired"});
                         }
+                        if ($A.__latestPhotoCreated && $A.__latestPhotoCreated === result.created) {
+                            return reject({msg: "photo expired"});
+                        }
+                        $A.__latestPhotoCreated = result.created;
                         resolve(result);
                     });
                 } catch (e) {
@@ -296,6 +300,7 @@
                 }
             })
         },
+        __latestPhotoCreated: null,
 
         // 上传照片（通过 eeuiAppGetLatestPhoto 获取到的path，params 参数：{url,data,headers,path,fieldName}）
         eeuiAppUploadPhoto(params, timeout = 30) {
@@ -312,7 +317,21 @@
                         reject({msg: "timeout"});
                     }, timeout * 1000) : null;
                     //
+                    if (!$A.isJson(params)) {
+                        return reject({msg: "params error"});
+                    }
+                    let onReady = () => {};
+                    if (typeof params.onReady !== "undefined") {
+                        if (typeof params.onReady === "function") {
+                            onReady = params.onReady;
+                        }
+                        delete params.onReady;
+                    }
                     eeui.uploadPhoto(params, result => {
+                        if (result.status === 'ready') {
+                            onReady(result.id)
+                            return
+                        }
                         timer && clearTimeout(timer);
                         if (result.status !== 'success') {
                             return reject({msg: result.error || "upload failed"});
@@ -321,6 +340,29 @@
                             return reject({msg: result.data.msg || "upload failed"});
                         }
                         resolve(result.data.data);
+                    });
+                } catch (e) {
+                    reject({msg: e.message});
+                }
+            })
+        },
+
+        // 取消上传照片
+        eeuiAppCancelUploadPhoto(id) {
+            return new Promise(async (resolve, reject) => {
+                if (!$A.isEEUiApp) {
+                    return reject({msg: "not eeui app"});
+                }
+                try {
+                    const eeui = await $A.eeuiModule("eeui")
+                    if (!eeui) {
+                        return reject({msg: "not eeui module"});
+                    }
+                    eeui.cancelUploadPhoto(id, result => {
+                        if (result.status !== 'success') {
+                            return reject({msg: result.error || "cancel failed"});
+                        }
+                        resolve(result);
                     });
                 } catch (e) {
                     reject({msg: e.message});

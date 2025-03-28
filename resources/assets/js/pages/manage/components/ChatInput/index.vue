@@ -796,7 +796,7 @@ export default {
                 this.showEmoji = false;
                 this.emojiQuickShow = false;
                 //
-                $A.eeuiAppGetLatestPhoto(0).then(({thumbnail, original}) => {
+                $A.eeuiAppGetLatestPhoto().then(({thumbnail, original}) => {
                     const width = 120;
                     const height = Math.min(150, thumbnail.height / (thumbnail.width / width));
                     this.maybePhotoStyle = {
