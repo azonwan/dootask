@@ -802,16 +802,16 @@ class Base
             str_starts_with(str_replace(' ', '', $str), "data:image/")
         ) {
             return $str;
-        } else {
-            if (RequestContext::has('fill_url_remote_url')) {
-                return "{{RemoteURL}}" . $str;
-            }
-            try {
-                return url($str);
-            } catch (\Throwable) {
-                return self::getSchemeAndHost() . "/" . $str;
-            }
         }
+        if (RequestContext::has('fill_url_remote_url')) {
+            return "{{RemoteURL}}" . $str;
+        }
+        try {
+            $fillUrl = url($str);
+        } catch (\Throwable) {
+            $fillUrl = self::getSchemeAndHost() . "/" . $str;
+        }
+        return RequestContext::replaceBaseUrl($fillUrl);
     }
 
     /**

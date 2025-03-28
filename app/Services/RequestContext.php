@@ -139,4 +139,60 @@ class RequestContext
         self::$context[$requestId] ??= [];
         self::$context[$requestId] = array_merge(self::$context[$requestId], $data);
     }
+
+    /**
+     * 更新请求的基本URL
+     *
+     * @param Request $request
+     * @return void
+     */
+    public static function updateBaseUrl($request)
+    {
+        if ($request->path() !== 'api/system/setting') {
+            return;
+        }
+        $schemeAndHttpHost = $request->getSchemeAndHttpHost();
+        if (str_contains($schemeAndHttpHost, '127.0.0.1') || str_contains($schemeAndHttpHost, 'localhost')) {
+            return;
+        }
+        \Cache::forever('RequestContext::base_url', $schemeAndHttpHost);
+    }
+
+    /**
+     * 替换请求的基本URL
+     *
+     * @param string $url
+     * @return string
+     */
+    public static function replaceBaseUrl(string $url): string
+    {
+        // 先提取主机部分
+        $pattern = '/^(https?:\/\/[^\/?#:]+(:\d+)?)/i';
+        if (!preg_match($pattern, $url, $matches)) {
+            return $url; // 如果不是有效URL直接返回
+        }
+
+        $schemeAndHttpHost = $matches[1] ?? '';
+        if (!$schemeAndHttpHost) {
+            return $url;
+        }
+
+        // 只检查主机部分是否为本地主机
+        if (str_contains($schemeAndHttpHost, '127.0.0.1') || str_contains($schemeAndHttpHost, 'localhost')) {
+            $baseUrl = \Cache::get('RequestContext::base_url');
+            if ($baseUrl) {
+                return $baseUrl . substr($url, strlen($schemeAndHttpHost));
+            }
+        }
+
+        return $url;
+    }
+
+    /**
+     * 清除基本URL缓存
+     */
+    public static function clearBaseUrlCache(): void
+    {
+        \Cache::forget('RequestContext::base_url');
+    }
 }

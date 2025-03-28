@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\WebSocket;
+use App\Services\RequestContext;
 use Hhxsv5\LaravelS\Swoole\Events\WorkerStartInterface;
 use Swoole\Http\Server;
 
@@ -25,5 +26,6 @@ class WorkerStartEvent implements WorkerStartInterface
     private function handleFirstWorkerTasks()
     {
         WebSocket::query()->delete();
+        RequestContext::clearBaseUrlCache();
     }
 }

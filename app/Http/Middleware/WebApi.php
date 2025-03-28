@@ -24,6 +24,9 @@ class WebApi
         RequestContext::set('start_time', microtime(true));
         RequestContext::set('header_language', $request->header('language'));
 
+        // 更新请求的基本URL
+        RequestContext::updateBaseUrl($request);
+
         // 加载Doo类
         Doo::load();
 
