@@ -3075,7 +3075,7 @@ export default {
                         value: $A.thumbRestore(event.target.currentSrc),
                     })
                 }
-                if (!isLocalResourcePath(event.target.currentSrc)) {
+                if (msgData.type !== 'file' && !isLocalResourcePath(event.target.currentSrc)) {
                     this.operateCopys.push({
                         type: 'imagedown',
                         icon: '&#xe7a8;',
@@ -3163,7 +3163,7 @@ export default {
             if (rect.bottom > scrollerRect.bottom) {
                 height -= rect.bottom - scrollerRect.bottom
             }
-            const left = this.windowWidth < 500 ? (this.windowWidth / 2) : this.operateItem.clientX
+            const left = this.windowWidth < 500 && this.operateItem.created_at ? (this.windowWidth / 2) : this.operateItem.clientX
             this.operateStyles = {
                 left: `${left}px`,
                 top: `${top}px`,
