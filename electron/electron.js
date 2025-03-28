@@ -746,6 +746,10 @@ function createWebTabWindow(args) {
             browserView.webContents.toggleDevTools()
         }
     })
+
+    const originalUA = browserView.webContents.session.getUserAgent() || browserView.webContents.getUserAgent()
+    browserView.webContents.setUserAgent(originalUA + " SubTaskWindow/" + process.platform + "/" + os.arch() + "/1.0");
+
     browserView.webContents.loadURL(args.url).then(_ => { }).catch(_ => { })
 
     webTabWindow.addBrowserView(browserView)
