@@ -263,18 +263,68 @@
         },
 
         // 获取最新一张照片
-        eeuiAppGetLatestPhoto(callback) {
-            if (!$A.isEEUiApp) return;
-            $A.eeuiModule("eeui").then(obj => {
-                obj.getLatestPhoto(callback);
+        eeuiAppGetLatestPhoto(expiration = 60, timeout = 10) {
+            return new Promise(async (resolve, reject) => {
+                if (!$A.isEEUiApp) {
+                    return reject({msg: "not eeui app"});
+                }
+                try {
+                    const eeui = await $A.eeuiModule("eeui")
+                    if (!eeui) {
+                        return reject({msg: "not eeui module"});
+                    }
+                    const timer = timeout > 0 ? setTimeout(() => {
+                        reject({msg: "timeout"});
+                    }, timeout * 1000) : null;
+                    //
+                    eeui.getLatestPhoto(result => {
+                        timer && clearTimeout(timer);
+                        if (
+                            result.status !== 'success' ||
+                            result.thumbnail.width < 10 || !result.thumbnail.base64 ||
+                            result.original.width < 10 || !result.original.path
+                        ) {
+                            return reject({msg: result.error || "no photo"});
+                        }
+                        if (expiration > 0 && (result.created + expiration) < $A.dayjs().unix()) {
+                            return reject({msg: "photo expired"});
+                        }
+                        resolve(result);
+                    });
+                } catch (e) {
+                    reject({msg: e.message});
+                }
             })
         },
 
         // 上传照片（通过 eeuiAppGetLatestPhoto 获取到的path，params 参数：{url,data,headers,path,fieldName}）
-        eeuiAppUploadPhoto(params, callback) {
-            if (!$A.isEEUiApp) return;
-            $A.eeuiModule("eeui").then(obj => {
-                obj.uploadPhoto(params, callback);
+        eeuiAppUploadPhoto(params, timeout = 30) {
+            return new Promise(async (resolve, reject) => {
+                if (!$A.isEEUiApp) {
+                    return reject({msg: "not eeui app"});
+                }
+                try {
+                    const eeui = await $A.eeuiModule("eeui")
+                    if (!eeui) {
+                        return reject({msg: "not eeui module"});
+                    }
+                    const timer = timeout > 0 ? setTimeout(() => {
+                        reject({msg: "timeout"});
+                    }, timeout * 1000) : null;
+                    //
+                    eeui.uploadPhoto(params, result => {
+                        timer && clearTimeout(timer);
+                        if (result.status !== 'success') {
+                            return reject({msg: result.error || "upload failed"});
+                        }
+                        if (result.data.ret !== 1) {
+                            return reject({msg: result.data.msg || "upload failed"});
+                        }
+                        resolve(result.data.data);
+                    });
+                } catch (e) {
+                    reject({msg: e.message});
+                }
             })
         }
     });

@@ -1700,6 +1700,10 @@ export default {
                 this.pasteFile = [];
                 this.pasteItem = [];
                 files.some(file => {
+                    if (file.type === 'photo') {
+                        this.sendPhoto(file.msg)
+                        return false;
+                    }
                     const item = {
                         type: $A.getMiddle(file.type, null, '/'),
                         name: file.name,
@@ -1722,6 +1726,40 @@ export default {
                     }
                 });
             }
+        },
+
+        /**
+         * 发送照片
+         * @param msg
+         */
+        sendPhoto(msg) {
+            const tempMsg = {
+                id: $A.randNum(1000000000, 9999999999),
+                file_uid: 0,
+                dialog_id: this.dialogData.id,
+                reply_id: this.quoteId,
+                type: 'file',
+                userid: this.userId,
+                msg,
+            }
+            this.tempMsgs.push(tempMsg)
+            //
+            $A.eeuiAppUploadPhoto({
+                url: $A.apiUrl('dialog/msg/sendfile'),
+                data: {
+                    dialog_id: tempMsg.dialog_id,
+                },
+                headers: {
+                    token: this.userToken,
+                },
+                path: msg.path,
+                fieldName: "files"
+            }).then(data => {
+                this.sendSuccess(data, tempMsg.id)
+            }).catch(({msg}) => {
+                this.forgetTempMsg(tempMsg.id)
+                $A.messageError(msg || "上传失败")
+            })
         },
 
         /**

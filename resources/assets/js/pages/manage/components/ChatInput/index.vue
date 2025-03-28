@@ -796,13 +796,7 @@ export default {
                 this.showEmoji = false;
                 this.emojiQuickShow = false;
                 //
-                $A.eeuiAppGetLatestPhoto(({status, created, thumbnail, original}) => {
-                    if (status !== 'success'
-                        // || created + 60 < $A.dayjs().unix()
-                        || !thumbnail.base64
-                        || !original.path) {
-                        return
-                    }
+                $A.eeuiAppGetLatestPhoto(0).then(({thumbnail, original}) => {
                     const width = 120;
                     const height = Math.min(150, thumbnail.height / (thumbnail.width / width));
                     this.maybePhotoStyle = {
@@ -810,7 +804,7 @@ export default {
                         height: height + 'px',
                         backgroundImage: `url(${thumbnail.base64})`,
                     }
-                    this.maybePhotoData = original
+                    this.maybePhotoData = {thumbnail, original}
                     this.maybePhotoShow = true
                     this.$nextTick(() => {
                         this.$refs.more?.updatePopper()
@@ -1643,29 +1637,15 @@ export default {
                     break;
 
                 case 'maybe-photo':
-                    $A.eeuiAppUploadPhoto({
-                        url: $A.apiUrl('dialog/msg/sendfile'),
-                        data: {
-                            dialog_id: this.dialogId,
-                        },
-                        headers: {
-                            token: this.userToken,
-                        },
-                        path: this.maybePhotoData.path,
-                        fieldName: "files"
-                    }, ({status, data}) => {
-                        /*switch (status) {
-                            case "uploading":
-                                break;
-                            case "success":
-                                if (data.ret !== 1) {
-                                    $A.messageError(data.msg || "上传失败")
-                                }
-                                break;
-                            case "error":
-                                $A
-                                break;
-                        }*/
+                    this.$emit('on-file', {
+                        type: 'photo',
+                        msg: {
+                            type: 'img',
+                            path: this.maybePhotoData.original.path,
+                            width: this.maybePhotoData.original.width,
+                            height: this.maybePhotoData.original.height,
+                            thumb: this.maybePhotoData.thumbnail.base64,
+                        }
                     })
                     break;
 
