@@ -809,6 +809,8 @@ export default {
                     this.$nextTick(() => {
                         this.$refs.more?.updatePopper()
                     })
+                }).catch(_ => {
+                    // 获取图片失败
                 })
             }
         },

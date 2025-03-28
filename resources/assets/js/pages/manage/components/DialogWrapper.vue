@@ -3274,7 +3274,11 @@ export default {
                             // 取消文件上传
                             const {file_uid, file_method} = this.operateItem
                             if (file_method === "photo") {
-                                await $A.eeuiAppCancelUploadPhoto(file_uid)
+                                try {
+                                    await $A.eeuiAppCancelUploadPhoto(file_uid)
+                                } catch (e) {
+                                    // 取消失败
+                                }
                                 this.forgetTempMsg(this.operateItem.id)
                                 return resolve();
                             }
