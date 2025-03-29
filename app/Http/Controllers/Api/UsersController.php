@@ -1153,6 +1153,7 @@ class UsersController extends AbstractController
      * @apiParam {String} [userAgent]     浏览器信息
      * @apiParam {String} [deviceModel]   设备型号
      * @apiParam {String} [isNotified]    是否有通知权限（0不通知、1通知）
+     * @apiParam {Number} [isDebug]       是否调试（0不调试、1调试）
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -1161,6 +1162,10 @@ class UsersController extends AbstractController
     public function umeng__alias()
     {
         $data = Request::input();
+        // 判断是否调试
+        if (intval($data['isDebug'])) {
+            return Base::retError('调试模式下不允许使用');
+        }
         // 表单验证
         Base::validator($data, [
             'alias.required' => '别名不能为空',
