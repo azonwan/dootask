@@ -58,7 +58,7 @@ let childWindow = [],
     mediaType = null,
     webTabWindow = null,
     webTabView = [],
-    webTabHeight = 38;
+    webTabHeight = 40;
 
 let showState = {},
     onShowWindow = (win) => {
@@ -749,6 +749,8 @@ function createWebTabWindow(args) {
 
     const originalUA = browserView.webContents.session.getUserAgent() || browserView.webContents.getUserAgent()
     browserView.webContents.setUserAgent(originalUA + " SubTaskWindow/" + process.platform + "/" + os.arch() + "/1.0");
+
+    electronMenu.webContentsMenu(browserView.webContents, true)
 
     browserView.webContents.loadURL(args.url).then(_ => { }).catch(_ => { })
 

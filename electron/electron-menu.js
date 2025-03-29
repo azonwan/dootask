@@ -17,6 +17,11 @@ const PERMITTED_URL_SCHEMES = ["http:", "https:", MAILTO_PREFIX];
 
 const electronMenu = {
     language: {
+        copy: "复制",
+        back: "后退",
+        forward: "前进",
+        reload: "重新加载",
+        print: "打印",
         openInBrowser: "在浏览器中打开",
         saveImageAs: "图片存储为...",
         copyImage: "复制图片",
@@ -116,77 +121,100 @@ const electronMenu = {
         }
     },
 
-    webContentsMenu(webContents) {
+    webContentsMenu(webContents, isBrowser = false) {
         webContents.on("context-menu", function (e, params) {
+            const popupMenu = new Menu();
             if (params.linkURL || params.srcURL) {
                 const url = params.linkURL || params.srcURL;
-                const popupMenu = new Menu();
 
                 if (!electronMenu.isBlobOrDataUrl(url) && !utils.isLocalAssetPath(url)) {
-                    popupMenu.append(
-                        new MenuItem({
-                            label: electronMenu.language.openInBrowser,
-                            accelerator: "o",
-                            click() {
-                                electronMenu.safeOpenURL(url);
-                            },
-                        }),
-                    );
+                    popupMenu.append(new MenuItem({
+                        label: electronMenu.language.openInBrowser,
+                        click: async function () {
+                            electronMenu.safeOpenURL(url);
+                        },
+                    }));
                 }
 
                 if (params.hasImageContents) {
                     if (!electronMenu.isBlob(url)) {
-                        popupMenu.append(
-                            new MenuItem({
-                                label: electronMenu.language.saveImageAs,
-                                accelerator: "s",
-                                click: async function () {
-                                    await electronMenu.saveImageAs(url, params);
-                                },
-                            }),
-                        );
-                    }
-                    popupMenu.append(
-                        new MenuItem({
-                            label: electronMenu.language.copyImage,
-                            accelerator: "c",
-                            click() {
-                                webContents.copyImageAt(params.x, params.y);
+                        popupMenu.append(new MenuItem({
+                            label: electronMenu.language.saveImageAs,
+                            click: async function () {
+                                await electronMenu.saveImageAs(url, params);
                             },
-                        }),
-                    );
+                        }));
+                    }
+                    popupMenu.append(new MenuItem({
+                        label: electronMenu.language.copyImage,
+                        click: async function () {
+                            webContents.copyImageAt(params.x, params.y);
+                        },
+                    }));
                 }
 
                 if (!electronMenu.isBlobOrDataUrl(url)) {
                     if (url.startsWith(MAILTO_PREFIX)) {
-                        popupMenu.append(
-                            new MenuItem({
-                                label: electronMenu.language.copyEmailAddress,
-                                accelerator: "a",
-                                click() {
-                                    clipboard.writeText(url.substring(MAILTO_PREFIX.length));
-                                },
-                            }),
-                        );
+                        popupMenu.append(new MenuItem({
+                            label: electronMenu.language.copyEmailAddress,
+                            click: async function () {
+                                clipboard.writeText(url.substring(MAILTO_PREFIX.length));
+                            },
+                        }));
                     } else if (!utils.isLocalAssetPath(url)) {
-                        popupMenu.append(
-                            new MenuItem({
-                                label: params.hasImageContents ? electronMenu.language.copyImageAddress : electronMenu.language.copyLinkAddress,
-                                accelerator: "a",
-                                click() {
-                                    clipboard.writeText(url);
-                                },
-                            }),
-                        );
+                        popupMenu.append(new MenuItem({
+                            label: params.hasImageContents ? electronMenu.language.copyImageAddress : electronMenu.language.copyLinkAddress,
+                            click: async function () {
+                                clipboard.writeText(url);
+                            },
+                        }));
                     }
                 }
+            }
 
+            if (isBrowser) {
                 if (popupMenu.items.length > 0) {
-                    popupMenu.popup({});
-                    e.preventDefault();
+                    popupMenu.insert(0, new MenuItem({type: 'separator'}))
                 }
+
+                popupMenu.insert(0, new MenuItem({
+                    label: electronMenu.language.print,
+                    click: () => webContents.print()
+                }))
+
+                popupMenu.insert(0, new MenuItem({
+                    label: electronMenu.language.reload,
+                    click: () => webContents.reload()
+                }))
+
+                popupMenu.insert(0, new MenuItem({
+                    label: electronMenu.language.forward,
+                    enabled: webContents.navigationHistory.canGoForward(),
+                    click: () => webContents.navigationHistory.goForward()
+                }))
+
+                popupMenu.insert(0, new MenuItem({
+                    label: electronMenu.language.back,
+                    enabled: webContents.navigationHistory.canGoBack(),
+                    click: () => webContents.navigationHistory.goBack()
+                }))
+            }
+
+            if (params.selectionText) {
+                if (popupMenu.items.length > 0) {
+                    popupMenu.insert(0, new MenuItem({type: 'separator'}))
+                }
+                popupMenu.insert(0, new MenuItem({
+                    label: electronMenu.language.copy,
+                    role: 'copy'
+                }))
+            }
+
+            if (popupMenu.items.length > 0) {
+                popupMenu.popup({});
+                e.preventDefault();
             }
         })
-    }
+    },
 }
 module.exports = electronMenu;

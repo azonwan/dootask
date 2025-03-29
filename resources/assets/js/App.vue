@@ -452,6 +452,11 @@ export default {
             $A.bindScreenshotKey(this.$store.state.cacheKeyboard);
             //
             this.$Electron.sendMessage('setMenuLanguage', {
+                copy: this.$L("复制"),
+                back: this.$L("后退"),
+                forward: this.$L("前进"),
+                reload: this.$L("重新加载"),
+                print: this.$L("打印"),
                 openInBrowser: this.$L("在浏览器中打开"),
                 saveImageAs: this.$L("图片存储为..."),
                 copyImage: this.$L("复制图片"),

@@ -35,8 +35,8 @@ html, body {
 
 .nav ul {
     display: flex;
-    height: 30px;
-    margin: 8px 46px 0 0;
+    height: 35px;
+    margin: 5px 46px 0 0;
     user-select: none;
     overflow-x: auto;
     overflow-y: hidden;
@@ -51,7 +51,7 @@ html, body {
     position: relative;
     box-sizing: border-box;
     align-items: center;
-    height: 100%;
+    height: calc(100% - 5px);
     padding: 7px 8px;
     margin: 0 8px 0 0;
     min-width: 100px;
@@ -73,31 +73,7 @@ html, body {
 .nav ul li.active {
     color: var(--tab-active-color);
     background: var(--tab-active-background);
-    border-radius: 6px 6px 0 0;
-}
-
-.nav ul li.active::before {
-    position: absolute;
-    bottom: 0;
-    left: -6px;
-    width: 6px;
-    height: 6px;
-    background-image: url(../image/select_left.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    content: '';
-}
-
-.nav ul li.active::after {
-    position: absolute;
-    right: -6px;
-    bottom: 0;
-    width: 6px;
-    height: 6px;
-    background-image: url(../image/select_right.png);
-    background-repeat: no-repeat;
-    background-size: cover;
-    content: '';
+    border-radius: 4px;
 }
 
 .nav ul li.active .tab-icon.background {
@@ -246,13 +222,6 @@ body.darwin.full-screen .nav ul {
         --tab-active-color: #E1E1E1;
         --tab-active-background: #575757;
         --tab-close-color: #E3E3E3;
-    }
-    .nav ul li.active::before {
-        background-image: url(../image/dark/select_left.png);
-    }
-
-    .nav ul li.active::after {
-        background-image: url(../image/dark/select_right.png);
     }
 
     .nav ul li.active .tab-icon.background {
