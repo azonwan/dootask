@@ -2666,7 +2666,7 @@ export default {
         onDialogMenu(cmd) {
             switch (cmd) {
                 case "single":
-                    this.$store.dispatch('openDialogWindow', this.dialogData.id);
+                    this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id, single: true});
                     break;
 
                 case "searchMsg":

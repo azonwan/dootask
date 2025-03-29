@@ -1248,28 +1248,6 @@ export default {
         $A.Electron.sendMessage('openWebTabWindow', params)
     },
 
-    /**
-     * 打开会话独立窗口（客户端）
-     * @param state
-     * @param dispatch
-     * @param dialogId
-     * @returns {Promise<void>}
-     */
-    async openDialogWindow({state, dispatch}, dialogId) {
-        const dialogData = state.cacheDialogs.find(({id}) => id === dialogId) || {}
-        dispatch('openChildWindow', {
-            name: `dialog-${dialogId}`,
-            path: `/single/dialog/${dialogId}`,
-            force: false,
-            config: {
-                title: dialogData.name,
-                parent: null,
-                width: Math.min(window.screen.availWidth, 1024),
-                height: Math.min(window.screen.availHeight, 768),
-            },
-        });
-    },
-
     /** *****************************************************************************************/
     /** ************************************** 文件 **********************************************/
     /** *****************************************************************************************/
@@ -3048,21 +3026,18 @@ export default {
      */
     openDialog({state, dispatch}, dialog_id) {
         return new Promise(async (resolve, reject) => {
-            if ($A.isSubElectron) {
-                const data = $A.isJson(dialog_id) ? dialog_id : {dialog_id}
-                $A.syncDispatch("openDialog", data)
-                $A.Electron.sendMessage('mainWindowActive');
-                resolve()
-                return
-            }
-            //
+            let single_window = false
             let search_msg_id;
             let dialog_msg_id;
             if ($A.isJson(dialog_id)) {
+                single_window = (dialog_id.single || dialog_id.single_window) && $A.Electron;
                 search_msg_id = dialog_id.search_msg_id;
                 dialog_msg_id = dialog_id.dialog_msg_id;
                 dialog_id = dialog_id.dialog_id;
             }
+            search_msg_id = /^\d+$/.test(search_msg_id) ? parseInt(search_msg_id) : 0;
+            dialog_msg_id = /^\d+$/.test(dialog_msg_id) ? parseInt(dialog_msg_id) : 0;
+            dialog_id = /^\d+$/.test(dialog_id) ? parseInt(dialog_id) : 0;
             //
             if (dialog_id > 0 && state.cacheDialogs.findIndex(item => item.id == dialog_id) === -1) {
                 dispatch("showSpinner", 300)
@@ -3076,17 +3051,45 @@ export default {
                 }
             }
             //
+            if (single_window || $A.isSubElectron) {
+                dispatch('openDialogNewWindow', dialog_id);
+                resolve()
+                return
+            }
+            //
             requestAnimationFrame(_ => {
-                state.dialogSearchMsgId = /^\d+$/.test(search_msg_id) ? search_msg_id : 0;
-                state.dialogMsgId = /^\d+$/.test(dialog_msg_id) ? dialog_msg_id : 0;
-                state.dialogId = /^\d+$/.test(dialog_id) ? dialog_id : 0;
+                state.dialogSearchMsgId = search_msg_id;
+                state.dialogMsgId = dialog_msg_id;
+                state.dialogId = dialog_id;
                 resolve()
             })
         })
     },
 
     /**
-     * 打开个人会话
+     * 打开会话（客户端新窗口）
+     * @param state
+     * @param dispatch
+     * @param dialogId
+     * @returns {Promise<void>}
+     */
+    openDialogNewWindow({state, dispatch}, dialogId) {
+        const dialogData = state.cacheDialogs.find(({id}) => id === dialogId) || {}
+        dispatch('openChildWindow', {
+            name: `dialog-${dialogId}`,
+            path: `/single/dialog/${dialogId}`,
+            force: false,
+            config: {
+                title: dialogData.name,
+                parent: null,
+                width: Math.min(window.screen.availWidth, 1024),
+                height: Math.min(window.screen.availHeight, 768),
+            },
+        });
+    },
+
+    /**
+     * 打开会话（通过会员ID打开个人会话）
      * @param state
      * @param dispatch
      * @param userid

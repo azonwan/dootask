@@ -1130,7 +1130,7 @@ export default {
                     break;
 
                 case 'single':
-                    this.$store.dispatch('openDialogWindow', this.operateItem.id);
+                    this.$store.dispatch('openDialog', {dialog_id: this.operateItem.id, single: true});
                     break;
 
                 case 'hide':

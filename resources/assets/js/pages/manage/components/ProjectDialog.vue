@@ -70,7 +70,7 @@ export default {
         },
 
         onOpenDialog() {
-            this.$store.dispatch('openDialogWindow', this.projectData.dialog_id);
+            this.$store.dispatch('openDialog', {dialog_id: this.projectData.dialog_id, single: true});
             this.toggleParameter();
         },
 
