@@ -3164,7 +3164,14 @@ export default {
             if (rect.bottom > scrollerRect.bottom) {
                 height -= rect.bottom - scrollerRect.bottom
             }
-            const left = this.windowWidth < 500 && this.operateItem.created_at ? (this.windowWidth / 2) : this.operateItem.clientX
+            let left = this.operateItem.clientX
+            if (this.windowWidth < 500) {
+                if (this.operateItem.created_at) {
+                    left = this.windowWidth / 2
+                } else {
+                    left = rect.left + (rect.width / 2)
+                }
+            }
             this.operateStyles = {
                 left: `${left}px`,
                 top: `${top}px`,
