@@ -765,6 +765,16 @@
         &:hover {
             background-color: #ecf5ff;
         }
+
+        > em {
+            font-style: normal;
+            display: inline-block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 120px;
+        }
+
         .taskfont {
             font-size: 20px;
             margin-right: 8px;

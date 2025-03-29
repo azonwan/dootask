@@ -96,42 +96,42 @@
                             </div>
                             <div v-if="recordReady" class="chat-input-popover-item" @click="onToolbar('meeting')">
                                 <i class="taskfont">&#xe7c1;</i>
-                                {{$L('新会议')}}
+                                <em>{{$L('新会议')}}</em>
                             </div>
                             <div v-if="canCall" class="chat-input-popover-item" @click="onToolbar('call')">
                                 <i class="taskfont">&#xe7ba;</i>
-                                {{$L('拨打电话')}}
+                                <em>{{$L('拨打电话')}}</em>
                             </div>
                             <div class="chat-input-popover-item" @click="onToolbar('image')">
                                 <i class="taskfont">&#xe7bc;</i>
-                                {{$L('发送图片')}}
+                                <em>{{$L('发送图片')}}</em>
                             </div>
                             <div class="chat-input-popover-item" @click="onToolbar('file')">
                                 <i class="taskfont">&#xe7c0;</i>
-                                {{$L('上传文件')}}
+                                <em>{{$L('上传文件')}}</em>
                             </div>
                             <div v-if="canAnon" class="chat-input-popover-item" @click="onToolbar('anon')">
                                 <i class="taskfont">&#xe690;</i>
-                                {{$L('匿名消息')}}
+                                <em>{{$L('匿名消息')}}</em>
                             </div>
                             <div v-if="dialogData.type == 'group'" class="chat-input-popover-item" @click="onToolbar('word-chain')">
                                 <i class="taskfont">&#xe80a;</i>
-                                {{$L('发起接龙')}}
+                                <em>{{$L('发起接龙')}}</em>
                             </div>
                             <div v-if="dialogData.type == 'group'" class="chat-input-popover-item" @click="onToolbar('vote')">
                                 <i class="taskfont">&#xe7fd;</i>
-                                {{$L('发起投票')}}
+                                <em>{{$L('发起投票')}}</em>
                             </div>
                         </template>
                         <template v-else>
                             <div class="chat-input-popover-item" @click="onToolbar('file')">
                                 <i class="taskfont">&#xe7c0;</i>
-                                {{$L('上传文件')}}
+                                <em>{{$L('上传文件')}}</em>
                             </div>
                         </template>
                         <div class="chat-input-popover-item" @click="onToolbar('full')">
                             <i class="taskfont">&#xe6a7;</i>
-                            {{$L('全屏输入')}}
+                            <em>{{$L('全屏输入')}}</em>
                         </div>
                     </EPopover>
                 </li>
@@ -167,15 +167,15 @@
                         </ETooltip>
                         <div class="chat-input-popover-item" @click="onSend('silence')">
                             <i class="taskfont">&#xe7d7;</i>
-                            {{$L('无声发送')}}
+                            <em>{{$L('无声发送')}}</em>
                         </div>
                         <div class="chat-input-popover-item" @click="onSend('md')">
                             <i class="taskfont">&#xe647;</i>
-                            {{$L('MD 格式发送')}}
+                            <em>{{$L('MD 格式发送')}}</em>
                         </div>
                         <div class="chat-input-popover-item" @click="onSend('normal')">
                             <i class="taskfont">&#xe71b;</i>
-                            {{$L('普通格式发送')}}
+                            <em>{{$L('普通格式发送')}}</em>
                         </div>
                     </EPopover>
                 </li>
