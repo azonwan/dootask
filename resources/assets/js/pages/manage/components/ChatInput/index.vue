@@ -796,6 +796,9 @@ export default {
                 this.showEmoji = false;
                 this.emojiQuickShow = false;
                 //
+                if (this.isAiBot) {
+                    return
+                }
                 $A.eeuiAppGetLatestPhoto().then(({thumbnail, original}) => {
                     const width = 120;
                     const height = Math.min(150, thumbnail.height / (thumbnail.width / width));

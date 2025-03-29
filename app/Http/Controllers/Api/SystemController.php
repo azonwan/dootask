@@ -951,7 +951,7 @@ class SystemController extends AbstractController
      *
      * @apiParam {File} image               post-图片对象
      * @apiParam {String} [image64]         post-图片base64（与'image'二选一）
-     * @apiParam {String} filename          post-文件名
+     * @apiParam {String} [filename]        post-文件名
      * @apiParam {Number} [width]           压缩图片宽（默认0）
      * @apiParam {Number} [height]          压缩图片高（默认0）
      * @apiParam {String} [whcut]           压缩方式（等比缩放）
@@ -1112,9 +1112,9 @@ class SystemController extends AbstractController
      * @apiGroup system
      * @apiName fileupload
      *
-     * @apiParam {String} [image64]         图片base64
-     * @apiParam {String} filename          文件名
-     * @apiParam {String} [files]           文件名
+     * @apiParam {File} files               文件名
+     * @apiParam {String} [image64]         图片base64（与'files'二选一）
+     * @apiParam {String} [filename]        文件名
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）

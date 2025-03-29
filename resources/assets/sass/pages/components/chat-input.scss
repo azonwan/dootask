@@ -741,16 +741,15 @@
             align-items: flex-start;
             flex-direction: column;
             padding-bottom: 12px;
-            margin-bottom: 4px;
-            border-bottom: 1px solid #e8e8e8;
             border-radius: 0;
-            line-height: 30px;
 
             &:hover {
                 background-color: transparent;
             }
 
             > span {
+                line-height: 34px;
+                padding-bottom: 2px;
                 font-size: 12px;
                 opacity: 0.8;
             }

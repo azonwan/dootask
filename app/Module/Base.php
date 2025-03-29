@@ -1872,18 +1872,18 @@ class Base
             if (!in_array($extension, ['mp3', 'wav'])) {
                 return Base::retError('语音格式错误');
             }
-            $fileName = 'record_' . md5($base64) . '.' . $extension;
+            $saveName = 'record_' . md5($base64) . '.' . $extension;
             $fileDir = $param['path'];
             $filePath = public_path($fileDir);
             Base::makeDir($filePath);
-            if (file_put_contents($filePath . $fileName, base64_decode(str_replace($res[1], '', $base64)))) {
-                $fileSize = filesize($filePath . $fileName);
+            if (file_put_contents($filePath . $saveName, base64_decode(str_replace($res[1], '', $base64)))) {
+                $fileSize = filesize($filePath . $saveName);
                 $array = [
-                    "name" => $fileName,                                                //原文件名
+                    "name" => $saveName,                                                //原文件名
                     "size" => Base::twoFloat($fileSize / 1024, true),         //大小KB
-                    "file" => $filePath . $fileName,                                    //文件的完整路径                "D:\www....KzZ.jpg"
-                    "path" => $fileDir . $fileName,                                     //相对路径                     "uploads/pic....KzZ.jpg"
-                    "url" => Base::fillUrl($fileDir . $fileName),                   //完整的URL                    "https://.....hhsKzZ.jpg"
+                    "file" => $filePath . $saveName,                                    //文件的完整路径                "D:\www....KzZ.jpg"
+                    "path" => $fileDir . $saveName,                                     //相对路径                     "uploads/pic....KzZ.jpg"
+                    "url" => Base::fillUrl($fileDir . $saveName),                   //完整的URL                    "https://.....hhsKzZ.jpg"
                     "ext" => $extension,                                                //文件后缀名
                 ];
                 return Base::retSuccess('success', $array);
@@ -1894,8 +1894,23 @@ class Base
 
     /**
      * image64图片保存
-     * @param array $param [ image64=带前缀的base64, path=>文件路径, fileName=>文件名称, scale=>[压缩原图宽,高, 压缩方式], autoThumb=>false不要自动生成缩略图, 'quality'=>压缩图片质量(默认：0不压缩) ]
-     * @return array [name=>文件名, size=>文件大小(单位KB),file=>绝对地址, path=>相对地址, url=>全路径地址, ext=>文件后缀名]
+     * @param array $param [
+        image64=带前缀的base64,
+        path=>文件路径,
+        fileName=>文件名称,
+        saveName=>保存文件名称,
+        scale=>[压缩原图宽,高, 压缩方式],
+        autoThumb=>false不要自动生成缩略图,
+        quality=>压缩图片质量(默认：0不压缩)
+     ]
+     * @return array [
+        name=>文件名,
+        size=>文件大小(单位KB),
+        file=>绝对地址,
+        path=>相对地址,
+        url=>全路径地址,
+        ext=>文件后缀名
+     ]
      */
     public static function image64save($param)
     {
@@ -1906,8 +1921,8 @@ class Base
                 return Base::retError('图片格式错误');
             }
             $scaleName = "";
-            if ($param['fileName']) {
-                $fileName = basename($param['fileName']);
+            if ($param['saveName']) {
+                $saveName = basename($param['saveName']);
             } else {
                 if ($param['scale'] && is_array($param['scale'])) {
                     list($width, $height) = $param['scale'];
@@ -1918,21 +1933,21 @@ class Base
                         }
                     }
                 }
-                $fileName = 'paste_' . md5($imgBase64) . '.' . $extension;
+                $saveName = 'paste_' . md5($imgBase64) . '.' . $extension;
                 $scaleName = md5_file($imgBase64) . $scaleName . '.' . $extension;
             }
             $fileDir = $param['path'];
             $filePath = public_path($fileDir);
-            $fileFullPath = $filePath . $fileName;
+            $fileFullPath = $filePath . $saveName;
             Base::makeDir($filePath);
             if (file_put_contents($fileFullPath, base64_decode(str_replace($res[1], '', $imgBase64)))) {
                 $fileSize = filesize($fileFullPath);
                 $array = [
-                    "name" => $fileName,                                                //原文件名
+                    "name" => $param['fileName'] ?: $saveName,                      //原文件名
                     "size" => Base::twoFloat($fileSize / 1024, true),         //大小KB
                     "file" => $fileFullPath,                                            //文件的完整路径                "D:\www....KzZ.jpg"
-                    "path" => $fileDir . $fileName,                                     //相对路径                     "uploads/pic....KzZ.jpg"
-                    "url" => Base::fillUrl($fileDir . $fileName),                   //完整的URL                    "https://.....hhsKzZ.jpg"
+                    "path" => $fileDir . $saveName,                                     //相对路径                     "uploads/pic....KzZ.jpg"
+                    "url" => Base::fillUrl($fileDir . $saveName),                   //完整的URL                    "https://.....hhsKzZ.jpg"
                     "thumb" => '',                                                      //缩略图（预览图）               "https://.....hhsKzZ.jpg_thumb.jpg"
                     "width" => -1,                                                      //图片宽度
                     "height" => -1,                                                     //图片高度
@@ -1963,10 +1978,10 @@ class Base
                         // 重命名
                         if ($scaleName) {
                             $scaleName = str_replace(['{WIDTH}', '{HEIGHT}'], [$array['width'], $array['height']], $scaleName);
-                            if (rename($array['file'], Base::rightDelete($array['file'], $fileName) . $scaleName)) {
-                                $array['file'] = Base::rightDelete($array['file'], $fileName) . $scaleName;
-                                $array['path'] = Base::rightDelete($array['path'], $fileName) . $scaleName;
-                                $array['url'] = Base::rightDelete($array['url'], $fileName) . $scaleName;
+                            if (rename($array['file'], Base::rightDelete($array['file'], $saveName) . $scaleName)) {
+                                $array['file'] = Base::rightDelete($array['file'], $saveName) . $scaleName;
+                                $array['path'] = Base::rightDelete($array['path'], $saveName) . $scaleName;
+                                $array['url'] = Base::rightDelete($array['url'], $saveName) . $scaleName;
                             }
                         }
                     }
@@ -2000,6 +2015,7 @@ class Base
         file=>Request::file,
         path=>文件路径,
         fileName=>文件名称,
+        saveName=>保存文件名称,
         scale=>[压缩原图宽,高, 压缩方式],
         size=>限制大小KB,
         autoThumb=>false不要自动生成缩略图,
@@ -2091,10 +2107,10 @@ class Base
                 }
             }
             $scaleName = "";
-            if ($param['fileName'] === true) {
-                $fileName = $file->getClientOriginalName();
-            } elseif ($param['fileName']) {
-                $fileName = basename($param['fileName']);
+            if ($param['saveName'] === true) {
+                $saveName = $file->getClientOriginalName();
+            } elseif ($param['saveName']) {
+                $saveName = basename($param['saveName']);
             } else {
                 if ($param['scale'] && is_array($param['scale'])) {
                     list($width, $height) = $param['scale'];
@@ -2105,19 +2121,19 @@ class Base
                         }
                     }
                 }
-                $fileName = md5_file($file);
+                $saveName = md5_file($file);
                 $scaleName = md5_file($file) . $scaleName;
                 if ($extension) {
-                    $fileName = $fileName . '.' . $extension;
+                    $saveName = $saveName . '.' . $extension;
                     $scaleName = $scaleName . '.' . $extension;
                 }
             }
             //
-            $file->move(public_path($param['path']), $fileName);
+            $file->move(public_path($param['path']), $saveName);
             //
-            $path = $param['path'] . $fileName;
+            $path = $param['path'] . $saveName;
             $array = [
-                "name" => $file->getClientOriginalName(),                       //原文件名
+                "name" => $param['fileName'] ?: $file->getClientOriginalName(), //原文件名
                 "size" => Base::twoFloat($fileSize / 1024, true),     //大小KB
                 "file" => public_path($path),                                   //文件的完整路径                "D:\www....KzZ.jpg"
                 "path" => $path,                                                //相对路径                     "uploads/pic....KzZ.jpg"
@@ -2207,10 +2223,10 @@ class Base
                         // 重命名
                         if ($scaleName) {
                             $scaleName = str_replace(['{WIDTH}', '{HEIGHT}'], [$array['width'], $array['height']], $scaleName);
-                            if (rename($array['file'], Base::rightDelete($array['file'], $fileName) . $scaleName)) {
-                                $array['file'] = Base::rightDelete($array['file'], $fileName) . $scaleName;
-                                $array['path'] = Base::rightDelete($array['path'], $fileName) . $scaleName;
-                                $array['url'] = Base::rightDelete($array['url'], $fileName) . $scaleName;
+                            if (rename($array['file'], Base::rightDelete($array['file'], $saveName) . $scaleName)) {
+                                $array['file'] = Base::rightDelete($array['file'], $saveName) . $scaleName;
+                                $array['path'] = Base::rightDelete($array['path'], $saveName) . $scaleName;
+                                $array['url'] = Base::rightDelete($array['url'], $saveName) . $scaleName;
                             }
                         }
                     }
