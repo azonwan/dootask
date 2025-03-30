@@ -284,7 +284,7 @@ export default {
                                 this.getDialogUser();
                             } else {
                                 this.$store.dispatch("forgetDialog", {id: this.dialogId});
-                                this.goForward({name: 'manage-messenger'});
+                                this.$emit("on-close")
                             }
                         }).catch(({msg}) => {
                             reject(msg);

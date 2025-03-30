@@ -3026,11 +3026,11 @@ export default {
      */
     openDialog({state, dispatch}, dialog_id) {
         return new Promise(async (resolve, reject) => {
-            let single_window = false
+            let single_window = $A.isSubElectron || (state.isModKey && $A.Electron)
             let search_msg_id;
             let dialog_msg_id;
             if ($A.isJson(dialog_id)) {
-                single_window = (dialog_id.single || dialog_id.single_window) && $A.Electron;
+                single_window = single_window || (dialog_id.single && $A.Electron);
                 search_msg_id = dialog_id.search_msg_id;
                 dialog_msg_id = dialog_id.dialog_msg_id;
                 dialog_id = dialog_id.dialog_id;
@@ -3051,7 +3051,7 @@ export default {
                 }
             }
             //
-            if (single_window || $A.isSubElectron) {
+            if (single_window) {
                 dispatch('openDialogNewWindow', dialog_id);
                 resolve()
                 return
@@ -3139,6 +3139,9 @@ export default {
         //
         const ids = $A.isArray(data.id) ? data.id : [data.id];
         ids.some(id => {
+            if ($A.isJson(id)) {
+                id = id.id
+            }
             const index = state.cacheDialogs.findIndex(dialog => dialog.id == id);
             if (index > -1) {
                 dispatch("forgetDialogMsg", {id: state.dialogMsgs.filter(item => item.dialog_id == data.id).map(item => item.id)})

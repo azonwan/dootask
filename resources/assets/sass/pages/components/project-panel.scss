@@ -142,6 +142,11 @@
                 margin-right: 14px;
                 opacity: 0.9;
                 height: 30px;
+                .ivu-checkbox-wrapper {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
                 .ivu-checkbox-focus {
                     box-shadow: none;
                 }
@@ -164,6 +169,9 @@
                     align-items: center;
                     justify-content: center;
                     cursor: pointer;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
                     &.start {
                         background-color: rgba($flow-status-start-color, 0.1);
                         border-color: rgba($flow-status-start-color, 0.1);

@@ -2800,7 +2800,6 @@ export default {
                         }).then(({msg}) => {
                             resolve(msg);
                             this.$store.dispatch("forgetDialog", {id: this.dialogId});
-                            this.goForward({name: 'manage-messenger'});
                         }).catch(({msg}) => {
                             reject(msg);
                         });
@@ -2823,7 +2822,6 @@ export default {
                         }).then(({msg}) => {
                             resolve(msg);
                             this.$store.dispatch("forgetDialog", {id: this.dialogId});
-                            this.goForward({name: 'manage-messenger'});
                         }).catch(({msg}) => {
                             reject(msg);
                         });
