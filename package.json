@@ -1,7 +1,7 @@
 {
     "name": "DooTask",
-    "version": "0.44.91",
-    "codeVerson": 183,
+    "version": "0.45.33",
+    "codeVerson": 184,
     "description": "DooTask is task management system.",
     "scripts": {
         "start": "./cmd dev",

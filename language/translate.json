@@ -29314,5 +29314,89 @@
         "fr": "Avancer",
         "id": "Maju",
         "ru": "Вперед"
+    },
+    {
+        "key": "网络异常，请稍后重试。",
+        "zh": "",
+        "zh-CHT": "網絡異常，請稍後重試。",
+        "en": "Network error, please try again later.",
+        "ko": "네트워크 오류입니다. 나중에 다시 시도하세요.",
+        "ja": "ネットワーク異常が発生しました。しばらくしてから再試行してください。",
+        "de": "Netzwerkfehler, bitte versuchen Sie es später erneut.",
+        "fr": "Erreur réseau, veuillez réessayer plus tard.",
+        "id": "Kesalahan jaringan, silakan coba lagi nanti.",
+        "ru": "Сетевая ошибка, повторите попытку позже."
+    },
+    {
+        "key": "请求失败，请稍后重试。",
+        "zh": "",
+        "zh-CHT": "請求失敗，請稍後重試。",
+        "en": "Request failed, please try again later.",
+        "ko": "요청 실패입니다. 나중에 다시 시도하세요.",
+        "ja": "リクエストに失敗しました。しばらくしてからもう一度お試しください。",
+        "de": "Anforderung fehlgeschlagen, bitte versuchen Sie es später erneut.",
+        "fr": "Échec de la demande, veuillez réessayer plus tard.",
+        "id": "Permintaan gagal, silakan coba lagi nanti.",
+        "ru": "Запрос не выполнен, повторите попытку позже."
+    },
+    {
+        "key": "忽略",
+        "zh": "",
+        "zh-CHT": "忽略",
+        "en": "Ignore",
+        "ko": "무시",
+        "ja": "無視する",
+        "de": "Ignorieren",
+        "fr": "Ignorer",
+        "id": "Abaikan",
+        "ru": "Игнорировать"
+    },
+    {
+        "key": "独立窗口",
+        "zh": "",
+        "zh-CHT": "獨立視窗",
+        "en": "Standalone Window",
+        "ko": "독립 창",
+        "ja": "スタンドアロンウィンドウ",
+        "de": "Eigenständiges Fenster",
+        "fr": "Fenêtre indépendante",
+        "id": "Jendela Mandiri",
+        "ru": "Отдельное окно"
+    },
+    {
+        "key": "重新加载",
+        "zh": "",
+        "zh-CHT": "重新加載",
+        "en": "Reload",
+        "ko": "다시 로드",
+        "ja": "再読み込み",
+        "de": "Neu laden",
+        "fr": "Recharger",
+        "id": "Muat Ulang",
+        "ru": "Перезагрузить"
+    },
+    {
+        "key": "打印",
+        "zh": "",
+        "zh-CHT": "打印",
+        "en": "Print",
+        "ko": "인쇄",
+        "ja": "印刷",
+        "de": "Drucken",
+        "fr": "Imprimer",
+        "id": "Cetak",
+        "ru": "Печать"
+    },
+    {
+        "key": "你可能要发送的照片",
+        "zh": "",
+        "zh-CHT": "你可能要發送的照片",
+        "en": "Photos you might want to send",
+        "ko": "보낼 수 있는 사진들",
+        "ja": "送信したいかもしれない写真",
+        "de": "Fotos, die Sie möglicherweise senden möchten",
+        "fr": "Photos que vous pourriez vouloir envoyer",
+        "id": "Foto yang mungkin ingin Anda kirim",
+        "ru": "Фотографии, которые вы, возможно, хотите отправить"
     }
 ]
