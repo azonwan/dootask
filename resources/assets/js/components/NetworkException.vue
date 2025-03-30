@@ -18,7 +18,7 @@
                         <div>{{ajaxNetworkException}}</div>
                     </div>
                     <div class="ivu-modal-confirm-footer">
-                        <Button type="text" @click="onClose">{{$L('关闭提示')}}</Button>
+                        <Button type="text" @click="onClose">{{$L('忽略')}}</Button>
                         <Button type="primary" :loading="loadIng" @click="onCheck">{{$L('检查')}}</Button>
                     </div>
                 </div>

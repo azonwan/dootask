@@ -314,7 +314,7 @@ export default {
 
             // 请求失败
             params.error = async (xhr, status) => {
-                const reason = {ret: -1, data: {}, msg: $A.L('请求失败，请重试。')}
+                const reason = {ret: -1, data: {}, msg: $A.L('请求失败，请稍后重试。')}
                 const isNetworkException = window.navigator.onLine === false || (status === 0 && xhr.readyState === 4)
 
                 // 网络异常
@@ -327,7 +327,7 @@ export default {
                     }
                     // 异常提示
                     reason.ret = -1001
-                    reason.msg = params.checkNetwork !== false ? false : $A.L('网络异常，请重试。')
+                    reason.msg = params.checkNetwork !== false ? false : $A.L('网络异常，请稍后重试。')
                     if (params.checkNetwork !== false) {
                         state.ajaxNetworkException = $A.L("网络连接失败，请检查网络设置。")
                     }

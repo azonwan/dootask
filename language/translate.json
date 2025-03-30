@@ -18288,30 +18288,6 @@
         "ru": "Неизвестная ошибка"
     },
     {
-        "key": "网络异常，请重试。",
-        "zh": "",
-        "zh-CHT": "網絡異常，請重試。",
-        "en": "Network error, please try again.",
-        "ko": "네트워크 오류, 다시 시도해 주세요.",
-        "ja": "ネットワークエラー、再試行してください。",
-        "de": "Netzwerkfehler, bitte versuchen Sie es erneut.",
-        "fr": "Erreur réseau, veuillez réessayer.",
-        "id": "Kesalahan jaringan, silakan coba lagi.",
-        "ru": "Ошибка сети, пожалуйста, попробуйте еще раз."
-    },
-    {
-        "key": "请求失败，请重试。",
-        "zh": "",
-        "zh-CHT": "請求失敗，請重試。",
-        "en": "Request failed, please try again.",
-        "ko": "요청 실패, 다시 시도해 주세요.",
-        "ja": "リクエストが失敗しました。再試行してください。",
-        "de": "Anfrage fehlgeschlagen, bitte versuchen Sie es erneut.",
-        "fr": "La demande a échoué, veuillez réessayer.",
-        "id": "Permintaan gagal, silakan coba lagi.",
-        "ru": "Запрос не удался, пожалуйста, попробуйте еще раз."
-    },
-    {
         "key": "文件下载打包已完成",
         "zh": "",
         "zh-CHT": "文件下載打包已完成",
@@ -28786,18 +28762,6 @@
         "fr": "Fermer la fenêtre",
         "id": "Tutup jendela",
         "ru": "Закрыть окно"
-    },
-    {
-        "key": "关闭提示",
-        "zh": "",
-        "zh-CHT": "關閉提示",
-        "en": "Close Prompt",
-        "ko": "알림 닫기",
-        "ja": "プロンプトを閉じる",
-        "de": "Hinweis schließen",
-        "fr": "Fermer l'invite",
-        "id": "Tutup Petunjuk",
-        "ru": "Закрыть подсказку"
     },
     {
         "key": "网络连接失败",
