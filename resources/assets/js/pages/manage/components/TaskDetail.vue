@@ -1617,44 +1617,40 @@ export default {
                 data: {
                     task_id: this.taskDetail.id,
                 },
-            }).then(({data}) => {
-                this.$store.dispatch("saveTask", {
-                    id: data.id,
-                    dialog_id: data.dialog_id,
-                });
-                this.$store.dispatch("saveDialog", data.dialog_data);
+            }).then(async ({data}) => {
+                await this.$store.dispatch("saveTask", {id: data.id, dialog_id: data.dialog_id});
+                await this.$store.dispatch("saveDialog", data.dialog_data);
                 //
                 if ($A.isSubElectron) {
-                    this.resizeDialog().then(() => {
-                        this.sendDialogMsg(msgText);
-                    });
-                } else {
-                    this.$nextTick(() => {
-                        if (this.windowPortrait) {
-                            $A.onBlur();
-                            const transferData = {
-                                time: $A.dayjs().unix() + 10,
-                                msgRecord: this.msgRecord,
-                                msgFile: this.msgFile,
-                                msgText: typeof msgText === 'string' && msgText ? msgText : this.msgText,
-                                dialogId: data.dialog_id,
-                            };
-                            this.msgRecord = {};
-                            this.msgFile = [];
-                            this.msgText = "";
-                            this.$nextTick(_ => {
-                                if (this.dialogId > 0) {
-                                    this.$store.dispatch("openTask", 0)    // 如果当前打开着对话窗口则关闭任务窗口
-                                }
-                                this.$store.dispatch('openDialog', data.dialog_id).then(_ => {
-                                    this.$store.state.dialogMsgTransfer = transferData
-                                })
-                            })
-                        } else {
-                            this.sendDialogMsg(msgText);
-                        }
-                    });
+                    await this.resizeDialog()
+                    this.sendDialogMsg(msgText);
+                    return
                 }
+                this.$nextTick(() => {
+                    if (this.windowPortrait) {
+                        $A.onBlur();
+                        const transferData = {
+                            time: $A.dayjs().unix() + 10,
+                            msgRecord: this.msgRecord,
+                            msgFile: this.msgFile,
+                            msgText: typeof msgText === 'string' && msgText ? msgText : this.msgText,
+                            dialogId: data.dialog_id,
+                        };
+                        this.msgRecord = {};
+                        this.msgFile = [];
+                        this.msgText = "";
+                        this.$nextTick(_ => {
+                            if (this.dialogId > 0) {
+                                this.$store.dispatch("openTask", 0)    // 如果当前打开着对话窗口则关闭任务窗口
+                            }
+                            this.$store.dispatch('openDialog', data.dialog_id).then(_ => {
+                                this.$store.state.dialogMsgTransfer = transferData
+                            })
+                        })
+                    } else {
+                        this.sendDialogMsg(msgText);
+                    }
+                });
             }).catch(({msg}) => {
                 $A.modalError(msg);
             }).finally(_ => {

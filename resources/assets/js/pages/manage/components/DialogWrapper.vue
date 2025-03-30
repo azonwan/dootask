@@ -1205,25 +1205,6 @@ export default {
     },
 
     watch: {
-        '$route': {
-            handler(data) {
-                const { name, params } = data || {}
-                if (name != 'manage-messenger') {
-                    return
-                }
-                if (params.dialog_id && params.open && ['word-chain', 'vote'].includes(params.open)) {
-                    this.$nextTick(_ => {
-                        this.$store.state[params.open == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'] = {
-                            type: 'create',
-                            dialog_id: params.dialog_id
-                        }
-                        params.open = "";
-                    })
-                }
-            },
-            immediate: true
-        },
-
         dialogId: {
             handler(dialog_id, old_id) {
                 this.getDialogBase(dialog_id)

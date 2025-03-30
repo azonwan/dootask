@@ -382,6 +382,7 @@ export default {
             'cacheDialogs',
             'windowOrientation',
             'formOptions',
+            'routeLoading',
         ]),
         isExistAdminList() {
             return this.applyList.map(h => h.type).indexOf('admin') !== -1;
@@ -543,7 +544,6 @@ export default {
         chatMybot(userid) {
             this.$store.dispatch("openDialogUserid", userid).then(_ => {
                 this.mybotShow = false;
-                this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
             }).catch(({msg}) => {
                 $A.modalError(msg || this.$L('打开会话失败'))
             });
@@ -635,11 +635,7 @@ export default {
                 }
             })
             if (dialogId) {
-                if (this.windowOrientation == 'landscape') {
-                    this.goForward({ name: 'manage-messenger', params: { dialog_id: dialogId } });
-                } else {
-                    this.$store.dispatch("openDialog", dialogId)
-                }
+                this.$store.dispatch("openDialog", dialogId)
                 this.aibotShow = false;
             } else {
                 this.aibotDialogSearchLoad = type;
@@ -745,23 +741,15 @@ export default {
         // 前往接龙与投票
         goWordChainAndVote() {
             const dialog_id = Number(this.sendData[0].replace('d:', ''))
-            const type = this.sendType == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'
-            if (this.windowPortrait) {
-                this.$store.dispatch("openDialog", dialog_id).then(() => {
-                    this.$store.state[type] = {
-                        type: 'create',
-                        dialog_id: dialog_id
-                    }
-                })
-            } else {
-                this.goForward({
-                    name: 'manage-messenger',
-                    params: {
-                        open: this.sendType,
-                        dialog_id: dialog_id
-                    }
-                })
-            }
+            this.$store.dispatch("openDialog", dialog_id).then(async () => {
+                try {
+                    await $A.waitForCondition(() => this.routeLoading === 0);
+                    const type = this.sendType == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'
+                    this.$store.state[type] = {type: 'create', dialog_id: dialog_id}
+                } catch (error) {
+                    // Handle the error
+                }
+            })
         }
     }
 }

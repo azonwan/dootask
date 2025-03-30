@@ -3061,6 +3061,9 @@ export default {
                 state.dialogSearchMsgId = search_msg_id;
                 state.dialogMsgId = dialog_msg_id;
                 state.dialogId = dialog_id;
+                if (dialog_id > 0 && state.windowLandscape) {
+                    $A.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
+                }
                 resolve()
             })
         })

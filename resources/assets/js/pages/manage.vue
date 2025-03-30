@@ -1,6 +1,6 @@
 <template>
     <div class="page-manage" :class="{'show-tabbar': showMobileTabbar, 'not-logged': userId <= 0}">
-        <div class="manage-box-menu" :class="{'show-mobile-menu': showMobileMenu}">
+        <div class="manage-box-menu">
             <Dropdown
                 class="page-manage-menu-dropdown main-menu"
                 trigger="click"
@@ -433,7 +433,6 @@ export default {
 
             openMenu: {},
             visibleMenu: false,
-            showMobileMenu: false,
 
             allUserShow: false,
             allProjectShow: false,
@@ -766,9 +765,8 @@ export default {
         },
 
         async toggleRoute(path, params) {
-            this.showMobileMenu = false;
-            let location = {name: 'manage-' + path, params: params || {}};
-            let fileFolderId = await $A.IDBInt("fileFolderId");
+            const location = {name: 'manage-' + path, params: params || {}};
+            const fileFolderId = await $A.IDBInt("fileFolderId");
             if (path === 'file' && fileFolderId > 0) {
                 location.params.folderId = fileFolderId
             }
@@ -1050,7 +1048,6 @@ export default {
                 this.createGroupData = {};
                 this.$store.dispatch("saveDialog", data);
                 this.$store.dispatch('openDialog', data.id)
-                this.toggleRoute('messenger', {dialogAction: 'dialog'})
             }).catch(({msg}) => {
                 $A.modalError(msg);
             }).finally(_ => {
@@ -1089,7 +1086,6 @@ export default {
                             title,
                             desc: body,
                             callback: () => {
-                                this.goForward({name: 'manage-messenger'});
                                 this.$store.dispatch('openDialog', dialog_id)
                             }
                         })
@@ -1259,7 +1255,6 @@ export default {
                 if (!$A.isJson(data)) {
                     return;
                 }
-                this.goForward({name: 'manage-messenger'});
                 this.$nextTick(_ => {
                     this.$store.dispatch('openDialog', data.dialog_id)
                 })

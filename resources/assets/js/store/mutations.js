@@ -1,4 +1,13 @@
 export default {
+    // 路由加载
+    'route/loading': function(state, load) {
+        if (load) {
+            state.routeLoading++
+        } else {
+            state.routeLoading--
+        }
+    },
+
     // 会员管理
     'user/push': function(state, data) {
         state.cacheUserBasic.push(data)

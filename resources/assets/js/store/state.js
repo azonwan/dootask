@@ -52,6 +52,7 @@ export default {
     routeName: null,
     routeHistorys: [],
     routeHistoryLast: {},
+    routeLoading: 0,
 
     // 请求时间
     callAt: [],

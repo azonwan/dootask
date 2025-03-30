@@ -86,27 +86,31 @@ const routeMode = isSoftware && !/https?:/i.test(window.location.protocol) ? 'ha
 const router = new VueRouter({mode: routeMode, routes});
 
 // 进度条配置
-if (!isSoftware) {
-    ViewUI.LoadingBar.config({
-        color: '#3fcc25',
-        failedColor: '#ff0000'
-    });
-    router.beforeEach((to, from, next) => {
+ViewUI.LoadingBar.config({
+    color: '#3fcc25',
+    failedColor: '#ff0000'
+});
+router.beforeEach((to, from, next) => {
+    if (!isSoftware) {
         ViewUI.LoadingBar._timer && clearTimeout(ViewUI.LoadingBar._timer)
         ViewUI.LoadingBar._timer = setTimeout(_ => {
             ViewUI.LoadingBar._load = true;
             ViewUI.LoadingBar.start();
         }, 300)
-        next();
-    });
-    router.afterEach(() => {
+    }
+    store.commit('route/loading', true);
+    next();
+});
+router.afterEach(() => {
+    if (!isSoftware) {
         ViewUI.LoadingBar._timer && clearTimeout(ViewUI.LoadingBar._timer)
         if (ViewUI.LoadingBar._load === true) {
             ViewUI.LoadingBar._load = false;
             ViewUI.LoadingBar.finish();
         }
-    });
-}
+    }
+    store.commit('route/loading', false);
+});
 
 // 加载路由
 Vue.prototype.goForward = function(route, isReplace, autoBroadcast = true) {

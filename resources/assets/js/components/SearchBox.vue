@@ -218,7 +218,6 @@ export default {
                 case 'message':
                     this.$store.dispatch("openDialog", item.id).then(() => {
                         this.onHide()
-                        this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
                         this.$store.state.dialogSearchMsgId = /^\d+$/.test(item.rawData.search_msg_id) ? item.rawData.search_msg_id : 0
                     }).catch(({msg}) => {
                         $A.modalError(msg || this.$L('打开会话失败'))

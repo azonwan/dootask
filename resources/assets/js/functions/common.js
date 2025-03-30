@@ -1322,6 +1322,27 @@ const timezone = require("dayjs/plugin/timezone");
                 }
             }
             throw new Error(`Element not found after ${maxAttempts} attempts`);
+        },
+
+        /**
+         * 轮询等待条件满足
+         * @param {Function} conditionFn - 返回布尔值的条件函数
+         * @param {number} intervalMs - 轮询间隔(毫秒,默认300ms)
+         * @param {number} timeoutMs - 超时时间(毫秒,默认3000ms)
+         * @returns {Promise<boolean>}
+         */
+        async waitForCondition(conditionFn, intervalMs = 300, timeoutMs = 3000) {
+            const startTime = Date.now();
+
+            while (Date.now() - startTime < timeoutMs) {
+                if (conditionFn()) {
+                    return true; // 条件满足
+                }
+                // 等待指定时间
+                await new Promise(resolve => setTimeout(resolve, intervalMs));
+            }
+
+            throw new Error('等待条件超时');
         }
     });
 
@@ -2204,7 +2225,7 @@ const timezone = require("dayjs/plugin/timezone");
 
     /**
      * =============================================================================
-     * ***********************************   time   ********************************
+     * ***********************************   sort   ********************************
      * =============================================================================
      */
     $.extend({

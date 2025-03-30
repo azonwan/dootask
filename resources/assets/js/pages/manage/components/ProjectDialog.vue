@@ -65,7 +65,6 @@ export default {
     methods: {
         onMsgOpen() {
             this.$store.dispatch("openDialog", this.projectData.dialog_id);
-            this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
             this.beforeDestroyClose = true;
         },
 

@@ -446,16 +446,7 @@ body.window-portrait {
             }
         }
         .manage-box-menu {
-            position: fixed;
-            z-index: 49;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-            transform: translateX(-120%);
-            &.show-mobile-menu {
-                transform: translateX(0);
-            }
+            display: none;
         }
     }
 }
