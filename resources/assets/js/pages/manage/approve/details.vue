@@ -522,7 +522,6 @@ export default {
                 } else if (this.$parent.$options.name === "Modal") {
                     this.$parent.close()
                 }
-                this.goForward({name: 'manage-messenger'})
             }).catch(({msg}) => {
                 $A.modalError(msg)
             });

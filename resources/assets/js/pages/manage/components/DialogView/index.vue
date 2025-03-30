@@ -505,9 +505,7 @@ export default {
         },
 
         openDialog(userid) {
-            this.$store.dispatch("openDialogUserid", userid).then(_ => {
-                this.goForward({name: 'manage-messenger'})
-            }).catch(({msg}) => {
+            this.$store.dispatch("openDialogUserid", userid).catch(({msg}) => {
                 $A.modalError(msg)
             });
         },

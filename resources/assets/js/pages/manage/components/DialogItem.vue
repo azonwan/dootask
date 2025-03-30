@@ -219,9 +219,7 @@ export default {
 
         onOpenDialog(userid) {
             if (this.dialogData.type == 'group' || ![this.dialogData.dialog_user?.userid, this.userId].includes(userid)) {
-                this.$store.dispatch("openDialogUserid", userid).then(_ => {
-                    this.goForward({name: 'manage-messenger'})
-                }).catch(({msg}) => {
+                this.$store.dispatch("openDialogUserid", userid).catch(({msg}) => {
                     $A.modalError(msg)
                 });
             }

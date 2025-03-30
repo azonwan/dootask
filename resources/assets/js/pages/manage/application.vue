@@ -636,28 +636,26 @@ export default {
             })
             if (dialogId) {
                 this.$store.dispatch("openDialog", dialogId)
-                this.aibotShow = false;
-            } else {
-                this.aibotDialogSearchLoad = type;
-                this.$store.dispatch("call", {
-                    url: 'users/search/ai',
-                    data: {type},
-                }).then(({data}) => {
-                    this.$store.dispatch("openDialogUserid", data.userid).then(_ => {
-                        if (this.windowOrientation == 'landscape') {
-                            this.goForward({ name: 'manage-messenger' })
-                        }
-                        this.aibotShow = false;
-                    }).catch(({ msg }) => {
-                        $A.modalError(msg)
-                    }).finally(_ => {
-                        this.aibotDialogSearchLoad = '';
-                    });
-                }).catch(({msg}) => {
-                    this.aibotDialogSearchLoad = '';
-                    $A.messageError(msg || '机器人暂未开启');
-                });
+                this.aibotShow = false
+                return
             }
+            //
+            this.aibotDialogSearchLoad = type;
+            this.$store.dispatch("call", {
+                url: 'users/search/ai',
+                data: {type},
+            }).then(({data}) => {
+                this.$store.dispatch("openDialogUserid", data.userid).then(_ => {
+                    this.aibotShow = false;
+                }).catch(({ msg }) => {
+                    $A.modalError(msg)
+                }).finally(_ => {
+                    this.aibotDialogSearchLoad = '';
+                });
+            }).catch(({msg}) => {
+                this.aibotDialogSearchLoad = '';
+                $A.messageError(msg || '机器人暂未开启');
+            });
         },
         // 会议
         onMeeting(name) {

@@ -182,9 +182,7 @@ export default {
         },
 
         openDialog() {
-            this.$store.dispatch("openDialogUserid", this.userid).then(_ => {
-                this.goForward({name: 'manage-messenger'})
-            }).catch(({msg}) => {
+            this.$store.dispatch("openDialogUserid", this.userid).catch(({msg}) => {
                 $A.modalError(msg)
             });
         },

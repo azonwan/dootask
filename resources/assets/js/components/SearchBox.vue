@@ -227,7 +227,6 @@ export default {
                 case 'contact':
                     this.$store.dispatch("openDialogUserid", item.id).then(_ => {
                         this.onHide()
-                        this.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}})
                     }).catch(({msg}) => {
                         $A.modalError(msg || this.$L('打开会话失败'))
                     });
