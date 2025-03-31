@@ -2662,9 +2662,11 @@ export default {
      */
     taskDefaultTime({state, dispatch}, array) {
         return new Promise(async resolve => {
-            if ($A.isArray(array)) {
-                array[0] = await dispatch("taskDefaultStartTime", array[0])
-                array[1] = await dispatch("taskDefaultEndTime", array[1])
+            if ($A.isArray(array) && array.length === 2) {
+                if (/\s+(00:00|23:59)$/.test(array[0]) && /\s+(00:00|23:59)$/.test(array[1])) {
+                    array[0] = await dispatch("taskDefaultStartTime", array[0])
+                    array[1] = await dispatch("taskDefaultEndTime", array[1])
+                }
             }
             resolve(array)
         });

@@ -416,9 +416,7 @@ export default {
 
         async taskTimeChange(data) {
             const times = $A.newDateString(data.times, "YYYY-MM-DD HH:mm");
-            if (/\s+(00:00|23:59)$/.test(times[0]) && /\s+(00:00|23:59)$/.test(times[1])) {
-                this.$set(data, 'times', await this.$store.dispatch("taskDefaultTime", times))
-            }
+            this.$set(data, 'times', await this.$store.dispatch("taskDefaultTime", times))
         },
 
         taskTimeOpenChange(val) {
@@ -463,7 +461,7 @@ export default {
             const days = $A.runNum(item.days);
             if (days > 0) {
                 const end = start.clone().add(days, 'day');
-                this.$set(this.addData, 'times', await this.$store.dispatch("taskDefaultTime", $A.newDateString([start, end])))
+                this.$set(this.addData, 'times', await this.$store.dispatch("taskDefaultTime", $A.newDateString([start, end], 'YYYY-MM-DD 00:00')))
             } else {
                 this.$set(this.addData, 'times', [])
             }

@@ -297,7 +297,7 @@ export default {
             return currentDate.format(format);
         },
 
-        onBeforeCreateSchedule({start, end, isAllDay, guide}) {
+        async onBeforeCreateSchedule({start, end, isAllDay, guide}) {
             if (isAllDay || this.calendarView == 'month') {
                 start = $A.dayjs(start.toDate()).startOf('day')
                 end = $A.dayjs(end.toDate()).endOf('day')
@@ -305,16 +305,12 @@ export default {
                 start = $A.dayjs(start.toDate())
                 end = $A.dayjs(end.toDate())
             }
-            this.$store.dispatch("taskDefaultTime", [
-                start.format('YYYY-MM-DD HH:mm:ss'),
-                end.format('YYYY-MM-DD HH:mm:ss')
-            ]).then(times => {
-                emitter.emit('addTask', {
-                    times,
-                    owner: [this.userId],
-                    beforeClose: () => guide.clearGuideElement()
-                });
-            })
+            const times = await this.$store.dispatch("taskDefaultTime", $A.newDateString([start, end], "YYYY-MM-DD HH:mm"))
+            emitter.emit('addTask', {
+                times,
+                owner: [this.userId],
+                beforeClose: () => guide.clearGuideElement()
+            });
         },
 
         onBeforeClickSchedule(event) {
