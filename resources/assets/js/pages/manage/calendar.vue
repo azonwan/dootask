@@ -4,54 +4,54 @@
         <div class="calendar-head">
             <div class="calendar-titbox">
                 <div class="calendar-title">
-                    <div class="common-nav-back portrait" @click="goForward({name: 'manage-application'},true)"><i class="taskfont">&#xe676;</i></div>
-                    <h1>{{rangeText}}</h1>
+                    <div class="common-nav-back portrait" @click="goForward({name: 'manage-application'}, true)"><i class="taskfont">&#xe676;</i></div>
+                    <h1>{{ rangeText }}</h1>
                 </div>
                 <ButtonGroup class="calendar-arrow" size="small">
-                    <Button @click="preMonth"><Icon type="ios-arrow-back"></Icon></Button>
-                    <Button @click="afterMonth"><Icon type="ios-arrow-forward"></Icon></Button>
+                    <Button @click="onMove(-1)">
+                        <Icon type="ios-arrow-back"></Icon>
+                    </Button>
+                    <Button @click="onMove(1)">
+                        <Icon type="ios-arrow-forward"></Icon>
+                    </Button>
                 </ButtonGroup>
                 <ButtonGroup class="calendar-arrow" size="small">
-                    <Button @click="curMonth">{{$L('今天')}}</Button>
+                    <Button @click="onToDay">{{ $L('今天') }}</Button>
                 </ButtonGroup>
                 <ButtonGroup class="calendar-view">
-                    <Button @click="setView('day')" :type="calendarView == 'day' ? 'primary' : 'default'">{{$L('日')}}</Button>
-                    <Button @click="setView('week')" :type="calendarView == 'week' ? 'primary' : 'default'">{{$L('周')}}</Button>
-                    <Button @click="setView('month')" :type="calendarView == 'month' ? 'primary' : 'default'">{{$L('月')}}</Button>
+                    <Button @click="setView('day')" :type="options.view == 'day' ? 'primary' : 'default'">{{ $L('日') }}</Button>
+                    <Button @click="setView('week')" :type="options.view == 'week' ? 'primary' : 'default'">{{ $L('周') }}</Button>
+                    <Button @click="setView('month')" :type="options.view == 'month' ? 'primary' : 'default'">{{ $L('月') }}</Button>
                 </ButtonGroup>
             </div>
         </div>
         <div class="calendar-box">
             <Calendar
-                ref="cal"
-                :view="calendarView"
-                :week="calendarWeek"
-                :month="calendarMonth"
-                :theme="calendarTheme"
-                :template="calendarTemplate"
-                :schedules="list"
-                :taskView="false"
-                :useCreationPopup="false"
-                @beforeCreateSchedule="onBeforeCreateSchedule"
-                @beforeClickSchedule="onBeforeClickSchedule"
-                @beforeUpdateSchedule="onBeforeUpdateSchedule"
-                disable-click/>
-        </div>
-        <div class="calendar-menu" :style="calendarMenuStyles">
-            <TaskMenu ref="calendarTaskMenu" :task="calendarTask" updateBefore/>
+                ref="calendar"
+                :view="options.view"
+                :week="options.week"
+                :month="options.month"
+                :theme="options.theme"
+                :template="options.template"
+                :events="events"
+                @selectDateTime="onSelectDateTime"
+                @beforeUpdateEvent="onBeforeUpdateEvent"
+                @clickDayName="onClickDayName"
+                @clickEvent="onClickEvent"/>
         </div>
     </div>
 </template>
 
 <script>
-import {mapState, mapGetters} from "vuex";
+import 'tui-calendar-hi/toastui-calendar.css';
 import Calendar from "./components/Calendar";
-import TaskMenu from "./components/TaskMenu";
-import {addLanguage} from "../../language";
+import {theme} from './components/Calendar/theme';
 import emitter from "../../store/events";
+import {addLanguage} from "../../language";
+import {mapGetters, mapState} from "vuex";
 
 export default {
-    components: {TaskMenu, Calendar},
+    components: {Calendar},
     data() {
         return {
             lists: [],
@@ -59,19 +59,26 @@ export default {
             rangeText: 'Calendar',
             rangeTime: [],
 
-            calendarView: 'month',
-            calendarWeek: {},
-            calendarMonth: {},
-            calendarTheme: {},
-            calendarTemplate: {},
-            calendarTask: {},
-            calendarMenuStyles: {
-                top: 0,
-                left: 0
-            },
-
             loadIng: 0,
-            loadTimeout: null,
+            loadTimer: null,
+
+            options: {
+                view: 'month',
+                week: {
+                    showTimezoneCollapseButton: true,
+                    timezonesCollapsed: false,
+                    eventView: true,
+                    taskView: false,
+                },
+                month: {
+                    startDayOfWeek: 0
+                },
+                theme: theme,
+                template: {
+                    allday: this.getTemplateForGeneral,
+                    time: this.getTemplateForGeneral,
+                },
+            },
         }
     },
 
@@ -85,7 +92,7 @@ export default {
             {"key": "{五}", "zh": "五", "general": "Fri"},
             {"key": "{六}", "zh": "六", "general": "Sat"},
         ]);
-        let daynames = [
+        const dayNames = [
             this.$L('{日}'),
             this.$L('{一}'),
             this.$L('{二}'),
@@ -94,41 +101,13 @@ export default {
             this.$L('{五}'),
             this.$L('{六}')
         ];
-        this.calendarWeek = {daynames};
-        this.calendarMonth = {daynames};
-        this.calendarTheme = {
-            'common.border': '1px solid rgba(0,0,0,0)',
-            'month.dayname.fontSize': '14px',
-            'month.dayname.borderLeft': '1px solid rgba(0,0,0,0)',
-            'month.dayname.height': '50px',
-        }
-        if (this.windowLandscape) {
-            this.calendarTheme = {
-                'common.border': '1px solid #f4f5f5',
-                'month.dayname.fontSize': '14px',
-                'month.dayname.borderLeft': '1px solid #f4f5f5',
-                'month.dayname.height': '50px',
-            }
-        }
-        this.calendarTemplate = {
-            titlePlaceholder: () => {
-                return this.$L("任务描述")
-            },
-            popupSave: () => {
-                return this.$L("保存");
-            },
-            popupEdit: () => {
-                return this.$L("详情");
-            },
-            popupDelete: () => {
-                return this.$L("删除");
-            }
-        }
+        this.options.week.dayNames = dayNames;
+        this.options.month.dayNames = dayNames;
+        this.options.view = this.$store.state.cacheCalendarView || this.options.view;
     },
 
     activated() {
-        this.$refs.cal.resetRender();
-        this.setRenderRange();
+        this.setDateRangeText();
     },
 
     deactivated() {
@@ -137,11 +116,13 @@ export default {
 
     computed: {
         ...mapState(['cacheTasks', 'taskCompleteTemps', 'wsOpenNum', 'themeName']),
-
         ...mapGetters(['transforTasks']),
 
-        list() {
-            const {cacheTasks, taskCompleteTemps} = this;
+        calendar() {
+            return this.$refs.calendar.getInstance();
+        },
+
+        events({cacheTasks, taskCompleteTemps}) {
             const filterTask = (task, chackCompleted = true) => {
                 if (task.archived_at) {
                     return false;
@@ -162,61 +143,39 @@ export default {
                     array.push(...tmps);
                 }
             }
+            const todayStartPlusOne = $A.dayjs().startOf('day').add(1, 'second');
+            const todayEndMinusOne = $A.dayjs().endOf('day').subtract(1, 'second');
             return this.transforTasks(array).map(data => {
-                const isAllday = $A.rightExists(data.start_at, "00:00:00") && $A.rightExists(data.end_at, "23:59:59")
+                const start = $A.dayjs(data.start_at);
+                const end = $A.dayjs(data.end_at);
+                const isAllday = start.isBefore(todayStartPlusOne) && end.isAfter(todayEndMinusOne);
                 const task = {
                     id: data.id,
                     calendarId: String(data.project_id),
                     title: data.name,
                     body: data.desc,
-                    isAllDay: isAllday,
+                    isAllday: isAllday,
                     category: isAllday ? 'allday' : 'time',
-                    start: $A.dayjs(data.start_at).toISOString(),
-                    end: $A.dayjs(data.end_at).toISOString(),
+                    start: start,
+                    end: end,
                     color: "#515a6e",
-                    bgColor: data.color || '#E3EAFD',
+                    backgroundColor: data.color || '#E3EAFD',
                     borderColor: data.p_color,
-                    priority: '',
-                    preventClick: true,
-                    preventCheckHide: true,
-                    isChecked: !!data.complete_at,
-                    //
-                    complete_at: data.complete_at,
-                    start_at: data.start_at,
-                    end_at: data.end_at,
-                    _time: data._time,
-                };
-                if (data.p_name) {
-                    let priorityStyle = `background-color:${data.p_color}`;
-                    if (this.themeName === 'dark') {
-                        priorityStyle = `color:${data.p_color};border:1px solid ${data.p_color};padding:1px 3px;`;
-                    }
-                    task.priority = `<span class="priority" style="${priorityStyle}">${data.p_name}</span>`;
-                }
-                if (data.sub_my && data.sub_my.length > 0) {
-                    task.title = `[+${data.sub_my.length}] ${task.title}`
-                }
-                if (data.sub_top === true) {
-                    task.title = `[${this.$L('子任务')}] ${task.title}`
-                }
-                if (data.flow_item_name) {
-                    task.title = `[${data.flow_item_name}] ${task.title}`
+                    raw: data,
                 }
                 if (data.complete_at) {
                     task.color = "#c3c2c2"
-                    task.bgColor = "#f3f3f3"
+                    task.backgroundColor = "#f3f3f3"
                     task.borderColor = "#e3e3e3"
                 } else if (data.overdue) {
-                    task.title = `[${this.$L('超期')}] ${task.title}`
                     task.color = "#f56c6c"
-                    task.bgColor = data.color || "#fef0f0"
-                    task.priority+= `<span class="overdue">${this.$L('超期未完成')}</span>`;
+                    task.backgroundColor = data.color || "#fef0f0"
                 }
                 if (!task.borderColor) {
-                    task.borderColor = task.bgColor;
+                    task.borderColor = task.backgroundColor;
                 }
-                return task;
-            });
+                return task
+            })
         }
     },
 
@@ -227,20 +186,22 @@ export default {
 
         wsOpenNum(num) {
             if (num <= 1) return
-            this.wsOpenTimeout && clearTimeout(this.wsOpenTimeout)
-            this.wsOpenTimeout = setTimeout(() => {
-                this.$route.name == 'manage-calendar' && this.setRenderRange();
+            this.wsTimer && clearTimeout(this.wsTimer)
+            this.wsTimer = setTimeout(() => {
+                this.$route.name == 'manage-calendar' && this.setDateRangeText();
             }, 5000)
         }
     },
 
     methods: {
+        /**
+         * 获取任务
+         * @param time
+         */
         getTask(time) {
             if (this.loadIng > 0) {
-                clearTimeout(this.loadTimeout)
-                this.loadTimeout = setTimeout(() => {
-                    this.getTask(time)
-                }, 100)
+                this.loadTimer && clearTimeout(this.loadTimer)
+                this.loadTimer = setTimeout(() => this.getTask(time), 100)
                 return;
             }
             //
@@ -250,158 +211,168 @@ export default {
             })
         },
 
-        preMonth() {
-            this.$refs.cal.getInstance().prev();
-            this.setRenderRange()
-        },
-
-        curMonth() {
-            this.$refs.cal.getInstance().today();
-            this.setRenderRange()
-        },
-
-        afterMonth() {
-            this.$refs.cal.getInstance().next();
-            this.setRenderRange()
-        },
-
-        setView(view) {
-            this.calendarView = view;
-            this.setRenderRange()
-        },
-
-        setRenderRange() {
-            this.$nextTick(() => {
-                const cal = this.$refs.cal.getInstance();
-                let options = cal.getOptions();
-                let viewName = cal.getViewName();
-                let html = [];
-                if (viewName === 'day') {
-                    html.push(this.currentCalendarDate('YYYY.MM.DD'));
-                } else if (viewName === 'month' &&
-                    (!options.month.visibleWeeksCount || options.month.visibleWeeksCount > 4)) {
-                    html.push(this.currentCalendarDate('YYYY.MM'));
-                } else {
-                    html.push($A.dayjs(cal.getDateRangeStart().getTime()).format('YYYY.MM.DD'));
-                    html.push(' ~ ');
-                    html.push($A.dayjs(cal.getDateRangeEnd().getTime()).format(' MM.DD'));
-                }
-                this.rangeText = html.join('');
-                this.rangeTime = [$A.dayjs(cal.getDateRangeStart().getTime()).format('YYYY-MM-DD'), $A.dayjs(cal.getDateRangeEnd().getTime()).format('YYYY-MM-DD')];
-            })
-        },
-
-        currentCalendarDate(format) {
-            const cal = this.$refs.cal.getInstance();
-            const currentDate = $A.dayjs(cal.getDate().toDate());
-            return currentDate.format(format);
-        },
-
-        async onBeforeCreateSchedule({start, end, isAllDay, guide}) {
-            if (isAllDay || this.calendarView == 'month') {
-                start = $A.dayjs(start.toDate()).startOf('day')
-                end = $A.dayjs(end.toDate()).endOf('day')
-            } else {
-                start = $A.dayjs(start.toDate())
-                end = $A.dayjs(end.toDate())
+        /**
+         * 任务标题
+         * @param title
+         * @param data
+         * @returns {string}
+         */
+        getTemplateForGeneral({title, raw: data}) {
+            if (data.sub_my && data.sub_my.length > 0) {
+                title = `[+${data.sub_my.length}] ${title}`
             }
-            const times = await this.$store.dispatch("taskDefaultTime", $A.newDateString([start, end], "YYYY-MM-DD HH:mm"))
+            if (data.sub_top === true) {
+                title = `[${this.$L('子任务')}] ${title}`
+            }
+            if (data.flow_item_name) {
+                title = `[${data.flow_item_name}] ${title}`
+            }
+            if (data.overdue) {
+                title = `[${this.$L('超期')}] ${title}`
+            }
+            return title;
+        },
+
+        /**
+         * 选择时间
+         * @param start
+         * @param end
+         * @returns {Promise<void>}
+         */
+        async onSelectDateTime({start, end}) {
+            const timer = [$A.dayjs(start), $A.dayjs(end)]
+            if (this.options.view == 'month') {
+                timer[0] = timer[0].startOf('day')
+                timer[1] = timer[1].startOf('day')
+            }
+            const times = await this.$store.dispatch("taskDefaultTime", $A.newDateString(timer, "YYYY-MM-DD HH:mm"))
             emitter.emit('addTask', {
                 times,
                 owner: [this.userId],
-                beforeClose: () => guide.clearGuideElement()
+                beforeClose: () => this.calendar.clearGridSelections()
             });
         },
 
-        onBeforeClickSchedule(event) {
-            const {type, schedule} = event;
-            let data = this.cacheTasks.find(({id}) => id === schedule.id);
+        /**
+         * 更新任务
+         * @param changes
+         * @param event
+         */
+        onBeforeUpdateEvent({changes, event}) {
+            if (!changes.start && !changes.end) {
+                return;
+            }
+            // 查找任务
+            const data = this.cacheTasks.find(({id}) => id === event.id);
             if (!data) {
                 return;
             }
-            switch (type) {
-                case "check":
-                    this.calendarMenuStyles = {
-                        left: `${this.getElementLeft(event.target)}px`,
-                        top: `${this.getElementTop(event.target) - 8}px`
+            // dayjs 处理
+            const start = $A.dayjs(changes.start || data.start_at),
+                end = $A.dayjs(changes.end || data.end_at),
+                taskStart = $A.dayjs(data.start_at),
+                taskEnd = $A.dayjs(data.end_at);
+            // 判断相差1分钟内不修改
+            if (start.isSame(taskStart, 'minute') && end.isSame(taskEnd, 'minute')) {
+                return;
+            }
+            // 更新日历
+            this.calendar.updateEvent(event.id, event.calendarId, { ...changes });
+            // 更新任务
+            this.$store.dispatch("taskUpdate", {
+                task_id: data.id,
+                times: $A.newDateString([start, end], "YYYY-MM-DD HH:mm"),
+            }).then(({msg}) => {
+                $A.messageSuccess(msg);
+            }).catch(({msg}) => {
+                $A.modalError({
+                    content: msg,
+                    onOk: _ => {
+                        this.calendar.updateEvent(event.id, event.calendarId, {
+                            start: taskStart,
+                            end: taskEnd
+                        });
                     }
-                    this.calendarTask = data;
-                    this.$nextTick(this.$refs.calendarTaskMenu.show);
-                    break;
-
-                case "edit":
-                    this.$store.dispatch("openTask", data)
-                    break;
-
-                case "delete":
-                    $A.modalConfirm({
-                        title: '删除任务',
-                        content: '你确定要删除任务【' + data.name + '】吗？',
-                        loading: true,
-                        onOk: () => {
-                            return new Promise((resolve, reject) => {
-                                this.$store.dispatch("removeTask", {task_id: data.id}).then(({msg}) => {
-                                    resolve(msg);
-                                }).catch(({msg}) => {
-                                    reject(msg);
-                                    this.setRenderRange();
-                                });
-                            })
-                        }
-                    });
-                    break;
-            }
+                })
+            });
         },
 
-        onBeforeUpdateSchedule(res) {
-            const {changes, schedule} = res;
-            let data = this.cacheTasks.find(({id}) => id === schedule.id);
-            if (!data) {
-                return;
-            }
-            if(changes?.start?.getTime() == schedule?.start?.getTime() && changes?.end?.getTime() == schedule?.end?.getTime()){
-                return;
-            }
-            if (changes?.start || changes?.end) {
-                const cal = this.$refs.cal.getInstance();
-                cal.updateSchedule(schedule.id, schedule.calendarId, changes);
-                //
-                this.$store.dispatch("taskUpdate", {
-                    task_id: data.id,
-                    times: [
-                        (changes.start || schedule.start).toDate(),
-                        (changes.end || schedule.end).toDate(),
-                    ],
-                }).then(({msg}) => {
-                    $A.messageSuccess(msg);
-                }).catch(({msg}) => {
-                    $A.modalError(msg);
-                    this.setRenderRange();
-                });
-            }
+        /**
+         * 点击日期
+         * @param event
+         */
+        onClickDayName(event) {
+            this.onSelectDateTime({
+                start: $A.newDateString(event.date, "YYYY-MM-DD 00:00"),
+                end: $A.newDateString(event.date, "YYYY-MM-DD 23:59"),
+            })
         },
 
-        getElementLeft(element) {
-            let actualLeft = element.offsetLeft;
-            let current = element.offsetParent;
-            while (current !== null) {
-                if (current == this.$el) break;
-                actualLeft += (current.offsetLeft + current.clientLeft);
-                current = current.offsetParent;
-            }
-            return actualLeft;
+        /**
+         * 点击事件
+         * @param event
+         */
+        onClickEvent({event}) {
+            this.$store.dispatch("openTask", event.raw)
         },
 
-        getElementTop(element) {
-            let actualTop = element.offsetTop;
-            let current = element.offsetParent;
-            while (current !== null) {
-                if (current == this.$el) break;
-                actualTop += (current.offsetTop + current.clientTop);
-                current = current.offsetParent;
+        /**
+         * 上一天/周/月 下一天/周/月
+         * @param offset
+         */
+        onMove(offset) {
+            this.calendar.move(offset);
+            this.setDateRangeText();
+        },
+
+        /**
+         * 今天
+         */
+        onToDay() {
+            this.calendar.today();
+            this.setDateRangeText()
+        },
+
+        /**
+         * 切换天/周/月
+         * @param v
+         */
+        setView(v) {
+            this.options.view = v;
+            this.calendar.changeView(v);
+            this.setDateRangeText();
+            $A.IDBSave("cacheCalendarView", this.$store.state.cacheCalendarView = v)
+        },
+
+        /**
+         * 更新日历标题
+         */
+        setDateRangeText() {
+            const date = this.calendar.getDate();
+            const start = this.calendar.getDateRangeStart();
+            const end = this.calendar.getDateRangeEnd();
+
+            switch (this.calendar.getViewName()) {
+                case "month":
+                    this.rangeText = $A.dayjs(date).format("YYYY.MM");
+                    break;
+
+                case "day":
+                    this.rangeText = $A.dayjs(date).format("YYYY.MM.DD");
+                    break;
+
+                default:
+                    const startYear = start.getFullYear();
+                    const endYear = end.getFullYear();
+                    if (startYear !== endYear) {
+                        this.rangeText = $A.dayjs(date).format("YYYY.MM.DD") + " ~ " + $A.dayjs(end).format("YYYY.MM.DD");
+                    } else {
+                        this.rangeText = $A.dayjs(date).format("YYYY.MM.DD") + " ~ " + $A.dayjs(end).format("MM.DD");
+                    }
+                    break;
             }
-            return actualTop;
-        }
+            this.rangeTime = [$A.dayjs(start).format('YYYY-MM-DD'), $A.dayjs(end).format('YYYY-MM-DD')];
+        },
     }
 }
 </script>

@@ -75,6 +75,9 @@ export default {
     cacheUserWait: [],
     cacheUserBasic: [],
 
+    // 日历
+    cacheCalendarView: null,
+
     // Dialog
     cacheDialogs: [],
 

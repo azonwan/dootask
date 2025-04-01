@@ -1020,6 +1020,7 @@ export default {
             const cacheItems = {
                 clientId: await $A.IDBString("clientId"),
                 cacheServerUrl: await $A.IDBString("cacheServerUrl"),
+                cacheCalendarView: await $A.IDBString("cacheCalendarView"),
                 cacheProjectParameter: await $A.IDBArray("cacheProjectParameter"),
                 cacheLoginEmail: await $A.IDBString("cacheLoginEmail"),
                 cacheFileSort: await $A.IDBJson("cacheFileSort"),
@@ -1061,6 +1062,7 @@ export default {
                 string: [
                     'clientId',
                     'cacheServerUrl',
+                    'cacheCalendarView',
                     'cacheTranslationLanguage',
                     'cacheTranscriptionLanguage'
                 ],
