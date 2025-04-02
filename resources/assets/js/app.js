@@ -17,7 +17,7 @@ import VueRouter from 'vue-router'
 import VueClipboard from 'vue-clipboard2'
 import ViewUI from 'view-design-hi'
 import store from './store/index'
-import mixin from "./store/mixin"
+import state from "./mixins/state"
 
 import "../sass/app.scss";
 
@@ -284,7 +284,7 @@ Vue.prototype.$isEEUiApp = $A.isEEUiApp;
 Vue.prototype.$isSoftware = $A.isSoftware;
 
 Vue.config.productionTip = false;
-Vue.mixin(mixin)
+Vue.mixin(state)
 
 let app;
 const $init = async () => {

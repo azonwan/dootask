@@ -50,7 +50,7 @@ import '@kangc/v-md-editor/lib/plugins/copy-code/copy-code.css';
 VMdPreview.use(createCopyCodePlugin());
 
 import {previewMixin} from "../mixin";
-import {MarkdownPluginUtils} from "../../../store/markdown";
+import {MarkdownPluginUtils} from "../../../utils/markdown";
 
 export default {
     mixins: [previewMixin],

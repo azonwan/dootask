@@ -1,4 +1,4 @@
-import {MarkdownPreview} from "../store/markdown";
+import {MarkdownPreview} from "../utils/markdown";
 import {convertLocalResourcePath} from "../components/Replace/utils";
 
 /**

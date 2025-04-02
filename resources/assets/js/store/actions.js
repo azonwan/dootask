@@ -1,6 +1,6 @@
 import * as openpgp from 'openpgp_hi/lightweight';
 import {initLanguage, languageList, languageName} from "../language";
-import {$callData, $urlSafe, SSEClient} from './utils'
+import {$callData, $urlSafe, SSEClient} from '../utils'
 import emitter from "./events";
 
 const dialogDraftState = { timer: {}, subTemp: null }

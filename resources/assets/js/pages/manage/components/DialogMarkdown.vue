@@ -4,7 +4,7 @@
 
 <script>
 import '../../../../sass/pages/components/dialog-markdown/markdown.less'
-import {MarkdownConver} from "../../../store/markdown";
+import {MarkdownConver} from "../../../utils/markdown";
 
 export default {
     name: "DialogMarkdown",

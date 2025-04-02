@@ -60,7 +60,7 @@
 
 <script>
 import {mapState} from "vuex";
-import {AIModelNames, AISystemConfig} from "../../../../store/ai";
+import {AIModelNames, AISystemConfig} from "../../../../utils/ai";
 
 export default {
     name: "SystemAibot",

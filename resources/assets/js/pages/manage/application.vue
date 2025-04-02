@@ -311,7 +311,7 @@ import SystemThirdAccess from "./setting/components/SystemThirdAccess";
 import SystemEmailSetting from "./setting/components/SystemEmailSetting";
 import SystemAppPush from "./setting/components/SystemAppPush";
 import emitter from "../../store/events";
-import {AIBotList, AIModelNames} from "../../store/ai";
+import {AIBotList, AIModelNames} from "../../utils/ai";
 import ImgUpload from "../../components/ImgUpload.vue";
 
 export default {

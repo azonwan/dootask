@@ -306,7 +306,7 @@ import clickoutside from "../../../../directives/clickoutside";
 import longpress from "../../../../directives/longpress";
 import {inputLoadAdd, inputLoadIsLast, inputLoadRemove} from "./one";
 import {languageList} from "../../../../language";
-import {isMarkdownFormat} from "../../../../store/markdown";
+import {isMarkdownFormat} from "../../../../utils/markdown";
 import emitter from "../../../../store/events";
 
 export default {
