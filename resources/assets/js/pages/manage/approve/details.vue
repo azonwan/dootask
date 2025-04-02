@@ -516,11 +516,17 @@ export default {
             if (!/^\d+$/.test(userid)) {
                 return
             }
-            this.$store.dispatch("openDialogUserid", userid).then(_ => {
-                if (this.$parent.$options.name === "DrawerOverlayView") {
-                    this.$parent.onClose()
-                } else if (this.$parent.$options.name === "Modal") {
-                    this.$parent.close()
+            this.$store.dispatch("openDialogUserid", userid).then(route => {
+                if (!route) {
+                    return;
+                }
+                switch (this.$parent.$options.name) {
+                    case "DrawerOverlayView":
+                        this.$parent.onClose()
+                        break;
+                    case "Modal":
+                        this.$parent.close()
+                        break;
                 }
             }).catch(({msg}) => {
                 $A.modalError(msg)

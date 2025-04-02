@@ -542,8 +542,8 @@ export default {
         },
         // 与我的机器人聊天
         chatMybot(userid) {
-            this.$store.dispatch("openDialogUserid", userid).then(_ => {
-                this.mybotShow = false;
+            this.$store.dispatch("openDialogUserid", userid).then(route => {
+                route && (this.mybotShow = false)
             }).catch(({msg}) => {
                 $A.modalError(msg || this.$L('打开会话失败'))
             });
@@ -635,8 +635,9 @@ export default {
                 }
             })
             if (dialogId) {
-                this.$store.dispatch("openDialog", dialogId)
-                this.aibotShow = false
+                this.$store.dispatch("openDialog", dialogId).then(route => {
+                    route && (this.aibotShow = false)
+                })
                 return
             }
             //
@@ -645,8 +646,8 @@ export default {
                 url: 'users/search/ai',
                 data: {type},
             }).then(({data}) => {
-                this.$store.dispatch("openDialogUserid", data.userid).then(_ => {
-                    this.aibotShow = false;
+                this.$store.dispatch("openDialogUserid", data.userid).then(route => {
+                    route && (this.aibotShow = false)
                 }).catch(({ msg }) => {
                     $A.modalError(msg)
                 }).finally(_ => {

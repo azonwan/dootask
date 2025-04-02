@@ -3057,7 +3057,7 @@ export default {
             //
             if (single_window) {
                 dispatch('openDialogNewWindow', dialog_id);
-                resolve()
+                resolve(false)
                 return
             }
             //
@@ -3065,10 +3065,9 @@ export default {
                 state.dialogSearchMsgId = search_msg_id;
                 state.dialogMsgId = dialog_msg_id;
                 state.dialogId = dialog_id;
-                if (dialog_id > 0 && state.windowLandscape) {
-                    $A.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
-                }
-                resolve()
+                const route = dialog_id > 0 && state.windowLandscape
+                route && $A.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
+                resolve(route)
             })
         })
     },
@@ -3102,7 +3101,7 @@ export default {
      * @param userid
      */
     openDialogUserid({state, dispatch}, userid) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(async (resolve, reject) => {
             const dialog = state.cacheDialogs.find(item => {
                 if (item.type !== 'user' || !item.dialog_user) {
                     return false
@@ -3110,9 +3109,8 @@ export default {
                 return item.dialog_user.userid === userid
             });
             if (dialog) {
-                dispatch("openDialog", dialog.id);
-                resolve(dialog);
-                return;
+                const route = await dispatch("openDialog", dialog.id);
+                return resolve(route);
             }
             dispatch("call", {
                 url: 'dialog/open/user',
@@ -3120,10 +3118,10 @@ export default {
                     userid,
                 },
                 spinner: 600
-            }).then(({data}) => {
+            }).then(async ({data}) => {
                 dispatch("saveDialog", data);
-                dispatch("openDialog", data.id);
-                resolve(data);
+                const route = await dispatch("openDialog", data.id);
+                resolve(route);
             }).catch(e => {
                 console.warn(e);
                 reject(e);
