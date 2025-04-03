@@ -28,27 +28,12 @@ import {mapState} from "vuex";
 
 export default {
     name: 'AuthException',
-    data() {
-        return {
-            routePath: null,
-        }
-    },
-
     computed: {
         ...mapState(['ajaxAuthException']),
 
         show() {
             return this.routePath !== '/login' && !!this.ajaxAuthException
         }
-    },
-
-    watch: {
-        '$route': {
-            handler(to) {
-                this.routePath = to.path
-            },
-            immediate: true,
-        },
     },
 
     methods: {

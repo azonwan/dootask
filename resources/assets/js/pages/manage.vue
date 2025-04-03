@@ -523,10 +523,6 @@ export default {
 
         ...mapGetters(['dashboardTask']),
 
-        routeName() {
-            return this.$route.name
-        },
-
         // okr路由
         okrUrl() {
             return import.meta.env.VITE_OKR_WEB_URL || $A.mainUrl("apps/okr")
@@ -872,12 +868,12 @@ export default {
         },
 
         classNameRoute(path) {
-            let routeName = this.routeName
-            if(routeName == 'manage-approve' || routeName == 'manage-apps'){
-                routeName = `manage-application`
+            let name = this.routeName
+            if (name == 'manage-approve' || name == 'manage-apps') {
+                name = `manage-application`
             }
             return {
-                "active": routeName === `manage-${path}`,
+                "active": name === `manage-${path}`,
             };
         },
 

@@ -45,10 +45,6 @@ export default {
         ...mapState(['cacheDialogs', 'reportUnreadNumber', 'approveUnreadNumber']),
         ...mapGetters(['dashboardTask']),
 
-        routeName() {
-            return this.$route.name
-        },
-
         /**
          * 综合数（未读、提及、待办）
          * @returns {string|string}

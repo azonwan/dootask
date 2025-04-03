@@ -57,10 +57,6 @@ export default {
             }
         },
 
-        routeName() {
-            return this.$route.name
-        },
-
         fileFolderId() {
             const {folderId} = this.$route.params;
             return parseInt(/^\d+$/.test(folderId) ? folderId : 0);

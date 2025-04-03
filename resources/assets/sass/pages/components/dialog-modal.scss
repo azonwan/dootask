@@ -8,10 +8,6 @@ body {
                 .ivu-modal-content {
                     background: transparent;
 
-                    .ivu-modal-close {
-                        display: none;
-                    }
-
                     .ivu-modal-body {
                         padding: 0;
                         display: flex;
@@ -29,12 +25,23 @@ body {
             .ivu-modal {
                 margin: 0;
                 padding: 0;
+
+                .ivu-modal-content {
+                    .ivu-modal-close {
+                        display: none;
+                    }
+                }
             }
         }
 
         &.dialog-landscape {
             .ivu-modal {
                 .ivu-modal-content {
+                    .ivu-modal-close {
+                        top: 12px;
+                        z-index: 2;
+                    }
+
                     .ivu-modal-body {
                         .dialog-wrapper {
                             position: relative;
@@ -45,6 +52,10 @@ body {
                             .dialog-nav {
                                 .nav-wrapper {
                                     padding: 0 20px;
+
+                                    .dialog-menu {
+                                        margin-right: 18px;
+                                    }
                                 }
                             }
 

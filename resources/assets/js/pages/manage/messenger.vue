@@ -371,10 +371,6 @@ export default {
 
         ...mapGetters(['getDialogDraft', 'tagDialogDraft']),
 
-        routeName() {
-            return this.$route.name
-        },
-
         contactAvatarSize() {
             return this.windowPortrait ? 36 : 30
         },

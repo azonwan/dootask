@@ -64,10 +64,6 @@ export default {
     computed: {
         ...mapState(['userInfo', 'userIsAdmin', 'clientNewVersion', 'systemConfig']),
 
-        routeName() {
-            return this.$route.name
-        },
-
         showContent() {
             return this.$route.path.match(/^\/manage\/setting\/\w+$/)
         },

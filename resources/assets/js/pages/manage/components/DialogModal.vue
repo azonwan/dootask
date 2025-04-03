@@ -36,7 +36,7 @@ export default {
     },
 
     computed: {
-        ...mapState(['dialogId', 'routeName', 'windowOrientation']),
+        ...mapState(['dialogId', 'windowOrientation']),
 
         modalStyles() {
             if (this.windowPortrait) {

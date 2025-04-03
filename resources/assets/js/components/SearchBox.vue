@@ -216,15 +216,22 @@ export default {
                     break;
 
                 case 'message':
-                    this.$store.dispatch("openDialog", item.id).then(() => {
+                    this.$store.dispatch("openDialog", item.id).then(_ => {
                         this.$store.state.dialogSearchMsgId = /^\d+$/.test(item.rawData.search_msg_id) ? item.rawData.search_msg_id : 0
+                        if (this.routeName === 'manage-messenger') {
+                            this.onHide()
+                        }
                     }).catch(({msg}) => {
                         $A.modalError(msg || this.$L('打开会话失败'))
                     })
                     break;
 
                 case 'contact':
-                    this.$store.dispatch("openDialogUserid", item.id).catch(({msg}) => {
+                    this.$store.dispatch("openDialogUserid", item.id).then(_ => {
+                        if (this.routeName === 'manage-messenger') {
+                            this.onHide()
+                        }
+                    }).catch(({msg}) => {
                         $A.modalError(msg || this.$L('打开会话失败'))
                     });
                     break;

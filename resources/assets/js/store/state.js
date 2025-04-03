@@ -50,6 +50,7 @@ export default {
 
     // 路由记录
     routeName: null,
+    routePath: null,
     routeHistorys: [],
     routeHistoryLast: {},
     routeLoading: 0,

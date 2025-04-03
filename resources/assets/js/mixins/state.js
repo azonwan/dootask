@@ -17,6 +17,9 @@ export default {
 
             'userId',
             'userToken',
+
+            'routeName',
+            'routePath',
         ])
     }
 }

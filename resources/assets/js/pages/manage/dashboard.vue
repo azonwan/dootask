@@ -149,12 +149,7 @@ export default {
 
     computed: {
         ...mapState(['systemConfig', 'userInfo', 'userIsAdmin', 'cacheTasks', 'taskCompleteTemps', 'loadDashboardTasks']),
-
         ...mapGetters(['dashboardTask', 'assistTask', 'transforTasks']),
-
-        routeName() {
-            return this.$route.name
-        },
 
         columns({hiddenColumns, dashboardTask, assistTask}) {
             const list = [];

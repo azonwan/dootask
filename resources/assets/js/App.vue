@@ -73,7 +73,6 @@ export default {
 
     data() {
         return {
-            routePath: null,
             appInter: null,
             countDown: Math.min(30, 60 - $A.daytz().second()),
             lastCheckUpgradeYmd: $A.daytz().format('YYYY-MM-DD')
@@ -102,8 +101,8 @@ export default {
     watch: {
         '$route': {
             handler(to) {
-                this.routePath = to.path
                 this.$store.state.routeName = to.name
+                this.$store.state.routePath = to.path
             },
             immediate: true,
         },
