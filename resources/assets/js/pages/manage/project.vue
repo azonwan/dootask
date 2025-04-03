@@ -1,9 +1,6 @@
 <template>
     <div class="page-project">
-        <template v-if="projectId > 0">
-            <ProjectPanel ref="panel"/>
-            <ProjectDialog @on-close="onDialogClose"/>
-        </template>
+        <ProjectPanel v-if="projectId > 0" ref="panel"/>
         <ProjectList v-if="windowPortrait" v-show="projectId === 0"/>
     </div>
 </template>
@@ -11,10 +8,9 @@
 <script>
 import {mapState} from "vuex";
 import ProjectPanel from "./components/ProjectPanel";
-import ProjectDialog from "./components/ProjectDialog";
 import ProjectList from "./components/ProjectList";
 export default {
-    components: {ProjectList, ProjectDialog, ProjectPanel},
+    components: {ProjectList, ProjectPanel},
 
     deactivated() {
         this.$store.dispatch("forgetTaskCompleteTemp", true);
@@ -73,10 +69,6 @@ export default {
                 });
                 this.$store.dispatch("forgetTaskCompleteTemp", true);
             });
-        },
-
-        onDialogClose() {
-            this.$refs.panel?.handleColumnDebounce();
         }
     }
 }

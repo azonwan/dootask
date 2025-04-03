@@ -77,7 +77,7 @@ export default {
                         }
                     }
                     // 关闭聊天
-                    if (this.windowPortrait && this.dialogId > 0){
+                    if (this.windowPortrait){
                         this.$store.dispatch("openDialog", 0)
                     }
                     //

@@ -542,9 +542,7 @@ export default {
         },
         // 与我的机器人聊天
         chatMybot(userid) {
-            this.$store.dispatch("openDialogUserid", userid).then(route => {
-                route && (this.mybotShow = false)
-            }).catch(({msg}) => {
+            this.$store.dispatch("openDialogUserid", userid).catch(({msg}) => {
                 $A.modalError(msg || this.$L('打开会话失败'))
             });
         },
@@ -629,15 +627,14 @@ export default {
         // 开始聊天
         onGoToChat(type) {
             let dialogId = 0;
-            this.cacheDialogs.map(h => {
+            this.cacheDialogs.some(h => {
                 if (h.email == `ai-${type}@bot.system`) {
                     dialogId = h.id;
+                    return true;
                 }
             })
             if (dialogId) {
-                this.$store.dispatch("openDialog", dialogId).then(route => {
-                    route && (this.aibotShow = false)
-                })
+                this.$store.dispatch("openDialog", dialogId)
                 return
             }
             //
@@ -646,9 +643,7 @@ export default {
                 url: 'users/search/ai',
                 data: {type},
             }).then(({data}) => {
-                this.$store.dispatch("openDialogUserid", data.userid).then(route => {
-                    route && (this.aibotShow = false)
-                }).catch(({ msg }) => {
+                this.$store.dispatch("openDialogUserid", data.userid).catch(({ msg }) => {
                     $A.modalError(msg)
                 }).finally(_ => {
                     this.aibotDialogSearchLoad = '';
@@ -739,15 +734,18 @@ export default {
         },
         // 前往接龙与投票
         goWordChainAndVote() {
-            const dialog_id = Number(this.sendData[0].replace('d:', ''))
-            this.$store.dispatch("openDialog", dialog_id).then(async () => {
-                try {
-                    await $A.waitForCondition(() => this.routeLoading === 0);
+            return new Promise((resolve, reject) => {
+                if (this.sendData.length === 0) {
+                    $A.messageError("请选择对话或成员");
+                    reject()
+                    return
+                }
+                const dialog_id = Number(this.sendData[0].replace('d:', ''))
+                this.$store.dispatch("openDialog", dialog_id).then(async () => {
                     const type = this.sendType == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'
                     this.$store.state[type] = {type: 'create', dialog_id: dialog_id}
-                } catch (error) {
-                    // Handle the error
-                }
+                })
+                resolve()
             })
         }
     }

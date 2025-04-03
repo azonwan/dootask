@@ -1311,9 +1311,7 @@ export default {
 
             if ($A.leftExists(val, 'dialog_')) {
                 const dialogId = parseInt(val.substr(7))
-                this.$store.dispatch("openDialog", dialogId).then(() => {
-                    this.$emit('on-close')
-                }).catch(({msg}) => {
+                this.$store.dispatch("openDialog", dialogId).catch(({msg}) => {
                     $A.modalError(msg || this.$L('打开会话失败'))
                 })
                 return;

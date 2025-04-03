@@ -17,7 +17,7 @@
                 <Tag v-if="datas.state == 3" color="red">{{$L('已拒绝')}}</Tag>
                 <Tag v-if="datas.state == 4" color="red">{{$L('已撤回')}}</Tag>
             </h2>
-            <h3 class="approve-details-subtitle">
+            <h3 class="approve-details-subtitle" @click="onAvatar(datas.start_user_id)">
                 <Avatar :src="datas.userimg" size="24"/>
                 <span>{{datas.start_user_name}}</span>
             </h3>
@@ -516,19 +516,7 @@ export default {
             if (!/^\d+$/.test(userid)) {
                 return
             }
-            this.$store.dispatch("openDialogUserid", userid).then(route => {
-                if (!route) {
-                    return;
-                }
-                switch (this.$parent.$options.name) {
-                    case "DrawerOverlayView":
-                        this.$parent.onClose()
-                        break;
-                    case "Modal":
-                        this.$parent.close()
-                        break;
-                }
-            }).catch(({msg}) => {
+            this.$store.dispatch("openDialogUserid", userid).catch(({msg}) => {
                 $A.modalError(msg)
             });
         }

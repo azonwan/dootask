@@ -75,7 +75,7 @@ export default {
 
     watch: {
         dialogId(id) {
-            this.show = id > 0 && this.routeName !== 'manage-messenger'
+            this.show = id > 0 && (this.windowPortrait || this.routeName !== 'manage-messenger')
         },
 
         show(v) {
@@ -91,9 +91,8 @@ export default {
             return new Promise(async _ => {
                 this.closIng++
                 await this.$store.dispatch("openDialog", 0)
-                setTimeout(() => {
-                    this.closIng--
-                }, 300)
+                await new Promise(resolve => setTimeout(resolve, 300))
+                this.closIng--
             })
         },
     }

@@ -1705,11 +1705,10 @@ export default {
 
         toggleParameter(data) {
             if (data === 'chat') {
-                if (this.windowPortrait) {
-                    this.$store.dispatch('openDialog', this.projectData.dialog_id)
-                    return;
-                }
-            } else if (data === 'completedTask') {
+                this.$store.dispatch('openDialog', this.projectData.dialog_id)
+                return;
+            }
+            if (data === 'completedTask') {
                 this.$store.dispatch("forgetTaskCompleteTemp", true);
             }
             this.$store.dispatch('toggleProjectParameter', data);

@@ -550,13 +550,6 @@ export default {
                 if (['dialog', 'contacts'].includes(params.dialogAction)) {
                     this.tabActive = params.dialogAction
                 }
-                if (params.dialog_id) {
-                    this.tabActive = 'dialog'
-                    const id = $A.runNum(params.dialog_id);
-                    if (id > 0) {
-                        this.openDialog(id)
-                    }
-                }
             },
             immediate: true
         },
@@ -769,9 +762,9 @@ export default {
                 this.$store.dispatch("openDialogUserid", $A.leftDelete(dialogId.dialog_id, "u:")).catch(({msg}) => {
                     $A.modalError(msg)
                 })
-            } else {
-                this.$store.dispatch("openDialog", dialogId)
+                return;
             }
+            this.$store.dispatch("openDialog", dialogId)
         },
 
         openContacts(user) {
@@ -779,11 +772,7 @@ export default {
                 return
             }
             this.$set(user, 'loading', true);
-            this.$store.dispatch("openDialogUserid", user.userid).then(_ => {
-                if (this.windowLandscape) {
-                    this.tabActive = 'dialog';
-                }
-            }).catch(({msg}) => {
+            this.$store.dispatch("openDialogUserid", user.userid).catch(({msg}) => {
                 $A.modalError(msg)
             }).finally(_ => {
                 this.$set(user, 'loading', false);
@@ -1130,7 +1119,7 @@ export default {
                     break;
 
                 case 'single':
-                    this.$store.dispatch('openDialog', {dialog_id: this.operateItem.id, single: true});
+                    this.$store.dispatch('openDialog', this.operateItem.id);
                     break;
 
                 case 'hide':

@@ -285,7 +285,7 @@
         <!--任务详情-->
         <TaskModal ref="taskModal"/>
 
-        <!--聊天窗口（移动端）-->
+        <!--聊天窗口-->
         <DialogModal ref="dialogModal"/>
 
         <!--搜索框-->

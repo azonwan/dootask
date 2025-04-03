@@ -2568,6 +2568,7 @@ export default {
                 return;
             }
             if (this.windowPortrait) {
+                // 如果是竖屏则关闭对话窗口
                 this.$store.dispatch("openDialog", 0);
             }
             this.goForward({name: 'manage-project', params: {projectId:this.dialogData.group_info.id}});
@@ -2647,7 +2648,7 @@ export default {
         onDialogMenu(cmd) {
             switch (cmd) {
                 case "single":
-                    this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id, single: true});
+                    this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id});
                     break;
 
                 case "searchMsg":

@@ -471,6 +471,7 @@ export default {
         }
         dispatch('openTask', 0)
         if (state.windowPortrait) {
+            // 如果是宽屏则关闭对话窗口
             dispatch("openDialog", 0);
         }
         $A.goForward({name: 'manage-file', params: data});
@@ -2944,19 +2945,19 @@ export default {
      * 获取单个会话信息
      * @param state
      * @param dispatch
-     * @param dialog_id
+     * @param dialogId
      * @returns {Promise<unknown>}
      */
-    getDialogOne({state, dispatch}, dialog_id) {
+    getDialogOne({state, dispatch}, dialogId) {
         return new Promise(function (resolve, reject) {
-            if ($A.runNum(dialog_id) === 0) {
+            if ($A.runNum(dialogId) === 0) {
                 reject({msg: 'Parameter error'});
                 return;
             }
             dispatch("call", {
                 url: 'dialog/one',
                 data: {
-                    dialog_id,
+                    dialog_id: dialogId,
                 },
             }).then(result => {
                 dispatch("saveDialog", result.data);
@@ -2973,28 +2974,28 @@ export default {
      * @param commit
      * @param state
      * @param dispatch
-     * @param dialog_id
+     * @param dialogId
      */
-    getDialogTodo({commit, state, dispatch}, dialog_id) {
+    getDialogTodo({commit, state, dispatch}, dialogId) {
         dispatch("call", {
             url: 'dialog/todo',
             data: {
-                dialog_id,
+                dialog_id: dialogId,
             },
         }).then(({data}) => {
             if ($A.arrayLength(data) > 0) {
-                if (dialog_id > 0) {
+                if (dialogId > 0) {
                     dispatch("saveDialog", {
-                        id: dialog_id,
+                        id: dialogId,
                         todo_num: $A.arrayLength(data)
                     });
-                    commit("dialog/todo/save", state.dialogTodos.filter(item => item.dialog_id != dialog_id))
+                    commit("dialog/todo/save", state.dialogTodos.filter(item => item.dialog_id != dialogId))
                 }
                 dispatch("saveDialogTodo", data)
             } else {
-                if (dialog_id > 0) {
+                if (dialogId > 0) {
                     dispatch("saveDialog", {
-                        id: dialog_id,
+                        id: dialogId,
                         todo_num: 0
                     });
                 }
@@ -3006,13 +3007,13 @@ export default {
      * 获取会话消息置顶
      * @param state
      * @param dispatch
-     * @param dialog_id
+     * @param dialogId
      */
-    getDialogMsgTop({state, dispatch}, dialog_id) {
+    getDialogMsgTop({state, dispatch}, dialogId) {
         dispatch("call", {
             url: 'dialog/msg/topinfo',
             data: {
-                dialog_id,
+                dialog_id: dialogId,
             },
         }).then(({data}) => {
             if ($A.isJson(data)) {
@@ -3025,28 +3026,28 @@ export default {
      * 打开会话
      * @param state
      * @param dispatch
-     * @param dialog_id
+     * @param dialogId
      * @returns {Promise<unknown>}
      */
-    openDialog({state, dispatch}, dialog_id) {
+    openDialog({state, dispatch}, dialogId) {
         return new Promise(async (resolve, reject) => {
-            let single_window = $A.isSubElectron || (state.isModKey && $A.Electron)
-            let search_msg_id;
-            let dialog_msg_id;
-            if ($A.isJson(dialog_id)) {
-                single_window = single_window || (dialog_id.single && $A.Electron);
-                search_msg_id = dialog_id.search_msg_id;
-                dialog_msg_id = dialog_id.dialog_msg_id;
-                dialog_id = dialog_id.dialog_id;
+            let singleWindow = state.routeName !== 'manage-messenger',
+                searchMsgId = 0,
+                dialogMsgId = 0;
+            if ($A.isJson(dialogId)) {
+                singleWindow = singleWindow || !!dialogId.single;
+                searchMsgId = dialogId.search_msg_id;
+                dialogMsgId = dialogId.dialog_msg_id;
+                dialogId = dialogId.dialog_id;
             }
-            search_msg_id = /^\d+$/.test(search_msg_id) ? parseInt(search_msg_id) : 0;
-            dialog_msg_id = /^\d+$/.test(dialog_msg_id) ? parseInt(dialog_msg_id) : 0;
-            dialog_id = /^\d+$/.test(dialog_id) ? parseInt(dialog_id) : 0;
+            searchMsgId = /^\d+$/.test(searchMsgId) ? parseInt(searchMsgId) : 0;
+            dialogMsgId = /^\d+$/.test(dialogMsgId) ? parseInt(dialogMsgId) : 0;
+            dialogId = /^\d+$/.test(dialogId) ? parseInt(dialogId) : 0;
             //
-            if (dialog_id > 0 && state.cacheDialogs.findIndex(item => item.id == dialog_id) === -1) {
+            if (dialogId > 0 && state.cacheDialogs.findIndex(item => item.id == dialogId) === -1) {
                 dispatch("showSpinner", 300)
                 try {
-                    await dispatch("getDialogOne", dialog_id)
+                    await dispatch("getDialogOne", dialogId)
                 } catch (e) {
                     reject(e);
                     return;
@@ -3055,20 +3056,52 @@ export default {
                 }
             }
             //
-            if (single_window) {
-                dispatch('openDialogNewWindow', dialog_id);
-                resolve(false)
+            if ($A.Electron && singleWindow) {
+                dispatch('openDialogNewWindow', dialogId);
+                resolve()
                 return
             }
             //
             requestAnimationFrame(_ => {
-                state.dialogSearchMsgId = search_msg_id;
-                state.dialogMsgId = dialog_msg_id;
-                state.dialogId = dialog_id;
-                const route = dialog_id > 0 && state.windowLandscape
-                resolve(route)
+                state.dialogSearchMsgId = searchMsgId;
+                state.dialogMsgId = dialogMsgId;
+                state.dialogId = dialogId;
+                resolve()
             })
         })
+    },
+
+    /**
+     * 打开会话（通过会员ID打开个人会话）
+     * @param state
+     * @param dispatch
+     * @param userid
+     */
+    openDialogUserid({state, dispatch}, userid) {
+        return new Promise((resolve, reject) => {
+            const dialog = state.cacheDialogs.find(item => {
+                if (item.type !== 'user' || !item.dialog_user) {
+                    return false
+                }
+                return item.dialog_user.userid === userid
+            });
+            if (dialog) {
+                return dispatch("openDialog", dialog.id).then(resolve).catch(reject)
+            }
+            dispatch("call", {
+                url: 'dialog/open/user',
+                data: {
+                    userid,
+                },
+                spinner: 600
+            }).then(async ({data}) => {
+                dispatch("saveDialog", data);
+                dispatch("openDialog", data.id).then(resolve).catch(reject)
+            }).catch(e => {
+                console.warn(e);
+                reject(e);
+            })
+        });
     },
 
     /**
@@ -3090,41 +3123,6 @@ export default {
                 width: Math.min(window.screen.availWidth, 1024),
                 height: Math.min(window.screen.availHeight, 768),
             },
-        });
-    },
-
-    /**
-     * 打开会话（通过会员ID打开个人会话）
-     * @param state
-     * @param dispatch
-     * @param userid
-     */
-    openDialogUserid({state, dispatch}, userid) {
-        return new Promise(async (resolve, reject) => {
-            const dialog = state.cacheDialogs.find(item => {
-                if (item.type !== 'user' || !item.dialog_user) {
-                    return false
-                }
-                return item.dialog_user.userid === userid
-            });
-            if (dialog) {
-                const route = await dispatch("openDialog", dialog.id);
-                return resolve(route);
-            }
-            dispatch("call", {
-                url: 'dialog/open/user',
-                data: {
-                    userid,
-                },
-                spinner: 600
-            }).then(async ({data}) => {
-                dispatch("saveDialog", data);
-                const route = await dispatch("openDialog", data.id);
-                resolve(route);
-            }).catch(e => {
-                console.warn(e);
-                reject(e);
-            })
         });
     },
 

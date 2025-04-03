@@ -8,14 +8,6 @@
         height: 100%;
         background-color: #fafafa;
     }
-    .project-dialog {
-        position: relative;
-        height: 100%;
-        width: 35%;
-        min-width: 320px;
-        max-width: 520px;
-        flex-shrink: 0;
-    }
 }
 
 @media (max-height: 700px) {
