@@ -3066,7 +3066,6 @@ export default {
                 state.dialogMsgId = dialog_msg_id;
                 state.dialogId = dialog_id;
                 const route = dialog_id > 0 && state.windowLandscape
-                route && $A.goForward({name: 'manage-messenger', params: {dialogAction: 'dialog'}});
                 resolve(route)
             })
         })

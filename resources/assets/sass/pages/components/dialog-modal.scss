@@ -1,0 +1,66 @@
+body {
+    .ivu-modal-wrap {
+        &.dialog-modal {
+            position: absolute;
+            overflow: hidden;
+
+            .ivu-modal {
+                .ivu-modal-content {
+                    background: transparent;
+
+                    .ivu-modal-close {
+                        display: none;
+                    }
+
+                    .ivu-modal-body {
+                        padding: 0;
+                        display: flex;
+                        flex-direction: column;
+                        overflow: hidden;
+                    }
+                }
+            }
+        }
+
+        &.dialog-portrait {
+            position: absolute;
+            overflow: hidden;
+
+            .ivu-modal {
+                margin: 0;
+                padding: 0;
+            }
+        }
+
+        &.dialog-landscape {
+            .ivu-modal {
+                .ivu-modal-content {
+                    .ivu-modal-body {
+                        .dialog-wrapper {
+                            position: relative;
+                            border-radius: 18px;
+                            padding: 0 0 8px 0;
+                            overflow: hidden;
+
+                            .dialog-nav {
+                                .nav-wrapper {
+                                    padding: 0 20px;
+                                }
+                            }
+
+                            .dialog-footer {
+                                padding: 0 22px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        &.dialog-closing {
+            .ql-editor {
+                caret-color: transparent;
+            }
+        }
+    }
+}

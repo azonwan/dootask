@@ -1,52 +1,23 @@
 <template>
     <Modal
-        :value="visible"
-        :mask="false"
+        :value="show"
+        :styles="modalStyles"
         :mask-closable="false"
         :footer-hide="true"
-        :transition-names="['mobile-dialog', '']"
-        :beforeClose="onBeforeClose"
-        :class-name="`dialog-modal${closIng > 0 ? ' dialog-closing' : ''}`"
-        fullscreen>
-        <DialogWrapper v-if="windowPortrait && dialogId > 0" ref="dialogWrapper" :dialogId="dialogId" :beforeBack="onBeforeClose" location="modal"/>
+        :mask="!windowPortrait"
+        :fullscreen="windowPortrait"
+        :transition-names="transitionNames"
+        :class-name="className"
+        :beforeClose="onBeforeClose">
+        <DialogWrapper
+            v-if="show"
+            ref="dialogWrapper"
+            :dialogId="dialogId"
+            :style="dialogStyles"
+            :beforeBack="onBeforeClose"
+            location="modal"/>
     </Modal>
 </template>
-
-<style lang="scss">
-body {
-    .ivu-modal-wrap {
-        &.dialog-modal {
-            position: absolute;
-            overflow: hidden;
-
-            .ivu-modal {
-                margin: 0;
-                padding: 0;
-
-                .ivu-modal-content {
-                    background: transparent;
-
-                    .ivu-modal-close {
-                        display: none;
-                    }
-
-                    .ivu-modal-body {
-                        padding: 0;
-                        display: flex;
-                        flex-direction: column;
-                        overflow: hidden;
-                    }
-                }
-            }
-        }
-        &.dialog-closing {
-            .ql-editor {
-                caret-color: transparent;
-            }
-        }
-    }
-}
-</style>
 
 <script>
 import {mapState} from "vuex";
@@ -58,21 +29,56 @@ export default {
 
     data() {
         return {
+            show: false,
             timer: null,
             closIng: false,
         }
     },
 
     computed: {
-        ...mapState(['dialogId']),
+        ...mapState(['dialogId', 'routeName', 'windowOrientation']),
 
-        visible() {
-            return this.dialogId > 0 && this.windowPortrait
+        modalStyles() {
+            if (this.windowPortrait) {
+                return {}
+            }
+            return {
+                width: '90%',
+                maxWidth: '720px'
+            }
+        },
+
+        dialogStyles() {
+            if (this.windowPortrait) {
+                return {}
+            }
+            const height = Math.min(1100, this.windowHeight)
+            const factor = height > 900 ? 200 : 70;
+            return {
+                height: '600px',
+                maxHeight: (height - factor - 30) + 'px'
+            }
+        },
+
+        transitionNames() {
+            return this.windowPortrait ? ['mobile-dialog', ''] : ['ease', 'fade']
+        },
+
+        className() {
+            const cls = ['dialog-modal', `dialog-${this.windowOrientation}`]
+            if (this.closIng > 0) {
+                cls.push('dialog-closing')
+            }
+            return cls.join(' ')
         }
     },
 
     watch: {
-        visible(v) {
+        dialogId(id) {
+            this.show = id > 0 && this.routeName !== 'manage-messenger'
+        },
+
+        show(v) {
             $A.eeuiAppSetScrollEnabled(!v)
         }
     },
