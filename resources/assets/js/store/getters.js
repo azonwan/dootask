@@ -12,6 +12,15 @@ export default {
     },
 
     /**
+     * 是否在消息页面
+     * @param state
+     * @returns {boolean}
+     */
+    isMessengerPage(state) {
+        return state.routeName === 'manage-messenger'
+    },
+
+    /**
      * 当前打开的项目
      * @param state
      * @returns {{cacheParameter: {}}}

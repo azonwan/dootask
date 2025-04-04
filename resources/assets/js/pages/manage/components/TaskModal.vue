@@ -1,5 +1,6 @@
 <template>
     <Modal
+        ref="modal"
         :value="show"
         :styles="styles"
         :mask-closable="false"
@@ -26,6 +27,7 @@ body {
 <script>
 import {mapGetters, mapState} from "vuex";
 import TaskDetail from "./TaskDetail";
+import emitter from "../../../store/events";
 
 export default {
     name: "TaskModal",
@@ -47,6 +49,14 @@ export default {
         }
     },
 
+    mounted() {
+        emitter.on('taskModalMoveTop', this.handleMoveTop);
+    },
+
+    beforeDestroy() {
+        emitter.off('taskModalMoveTop', this.handleMoveTop);
+    },
+
     methods: {
         onBeforeClose() {
             return new Promise(_ => {
@@ -58,6 +68,9 @@ export default {
                 this.$refs.taskDetail.checkUpdate(true);
                 return true;
             }
+        },
+        handleMoveTop() {
+            this.$refs.modal?.handleMoveTop();
         }
     }
 }

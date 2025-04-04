@@ -1,5 +1,6 @@
 <template>
     <Modal
+        ref="modal"
         :value="show"
         :styles="modalStyles"
         :mask-closable="false"
@@ -22,6 +23,7 @@
 <script>
 import {mapState} from "vuex";
 import DialogWrapper from "./DialogWrapper";
+import emitter from "../../../store/events";
 
 export default {
     name: "DialogModal",
@@ -33,6 +35,14 @@ export default {
             timer: null,
             closIng: false,
         }
+    },
+
+    mounted() {
+        emitter.on('dialogModalMoveTop', this.handleMoveTop);
+    },
+
+    beforeDestroy() {
+        emitter.off('dialogModalMoveTop', this.handleMoveTop);
     },
 
     computed: {
@@ -95,6 +105,9 @@ export default {
                 this.closIng--
             })
         },
+        handleMoveTop() {
+            this.$refs.modal?.handleMoveTop();
+        }
     }
 }
 </script>

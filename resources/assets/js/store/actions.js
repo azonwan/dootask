@@ -460,18 +460,19 @@ export default {
     /**
      * 显示文件（打开文件所在位置）
      * @param state
+     * @param getters
      * @param dispatch
      * @param data
      */
-    filePos({state, dispatch}, data) {
+    filePos({state, getters, dispatch}, data) {
         if ($A.isSubElectron) {
             $A.syncDispatch("filePos", data)
             $A.Electron.sendMessage('mainWindowActive');
             return
         }
         dispatch('openTask', 0)
-        if (state.windowPortrait) {
-            // 如果是宽屏则关闭对话窗口
+        if (!getters.isMessengerPage || state.windowPortrait) {
+            // 如果 当前不是消息页面 或 是竖屏 则关闭对话窗口
             dispatch("openDialog", 0);
         }
         $A.goForward({name: 'manage-file', params: data});
@@ -2294,6 +2295,9 @@ export default {
             }
             return
         }
+        if (state.taskId > 0) {
+            emitter.emit('taskModalMoveTop');   // 已打开任务时将任务窗口置顶
+        }
         state.taskArchiveView = task_id;
         state.taskId = task_id;
         if (task_id > 0) {
@@ -3061,6 +3065,10 @@ export default {
                 dispatch('openDialogNewWindow', dialogId);
                 resolve()
                 return
+            }
+            //
+            if (state.dialogId) {
+                emitter.emit('dialogModalMoveTop'); // 已打开对话时将对话窗口置顶
             }
             //
             requestAnimationFrame(_ => {

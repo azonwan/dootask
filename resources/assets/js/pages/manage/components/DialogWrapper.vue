@@ -882,7 +882,7 @@ export default {
             'cacheTranslationLanguage'
         ]),
 
-        ...mapGetters(['isLoad', 'getDialogQuote']),
+        ...mapGetters(['isLoad', 'isMessengerPage', 'getDialogQuote']),
 
         isReady() {
             return this.dialogId > 0 && this.dialogData.id > 0
@@ -2567,8 +2567,8 @@ export default {
             if (!this.dialogData.group_info) {
                 return;
             }
-            if (this.windowPortrait) {
-                // 如果是竖屏则关闭对话窗口
+            if (!this.isMessengerPage || this.windowPortrait) {
+                // 如果 当前不是消息页面 或 是竖屏 则关闭对话窗口
                 this.$store.dispatch("openDialog", 0);
             }
             this.goForward({name: 'manage-project', params: {projectId:this.dialogData.group_info.id}});
@@ -2577,10 +2577,6 @@ export default {
         openTask() {
             if (!this.dialogData.group_info) {
                 return;
-            }
-            if (this.taskId > 0) {
-                // 如果当前打开着任务窗口则关闭对话窗口
-                this.$store.dispatch("openDialog", 0);
             }
             this.$store.dispatch("openTask", {
                 id: this.dialogData.group_info.id,
@@ -2649,7 +2645,7 @@ export default {
             switch (cmd) {
                 case "single":
                     this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id, single: true});
-                    this.routeName !== 'manage-messenger' && this.$store.dispatch('openDialog', 0);
+                    !this.isMessengerPage && this.$store.dispatch('openDialog', 0);
                     break;
 
                 case "searchMsg":

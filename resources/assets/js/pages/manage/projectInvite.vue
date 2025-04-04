@@ -7,7 +7,7 @@
         <div v-else class="invite-warp">
             <Card v-if="project.id > 0">
                 <p slot="title">{{project.name}}</p>
-                <div v-if="project.desc" class="invite-desc">{{project.desc}}</div>
+                <div v-if="project.desc" class="invite-desc" :title="$L('项目介绍')">{{project.desc}}</div>
                 <div v-else>{{$L('暂无介绍')}}</div>
                 <div class="invite-footer">
                     <Button v-if="already" type="success" icon="ios-checkmark-circle-outline" @click="goProject">{{$L('已加入')}}</Button>
@@ -47,6 +47,7 @@
 </style>
 <script>
 import {mapState} from "vuex";
+
 export default {
     data() {
         return {
@@ -58,37 +59,24 @@ export default {
         }
     },
     computed: {
-        ...mapState(['dialogId','windowPortrait']),
+        ...mapState(['dialogId', 'windowPortrait']),
     },
     watch: {
         '$route': {
             handler(route) {
-                if(route.name == 'manage-project-invite'){
-                    // 唤醒app
-                    if (!$A.Electron && !$A.isEEUiApp && navigator.userAgent.indexOf("MicroMessenger") === -1){
-                        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                            try {
-                                if(/Android/i.test(navigator.userAgent)){
-                                    window.open("dootask://" + route.fullPath)
-                                }else{
-                                    window.location.href = "dootask://" + route.fullPath
-                                }
-                            } catch (error) {}
-                        }
-                    }
-                    // 关闭聊天
-                    if (this.windowPortrait){
-                        this.$store.dispatch("openDialog", 0)
-                    }
-                    //
+                if (route.name == 'manage-project-invite') {
                     this.code = route.query ? route.query.code : '';
                     this.getData();
+                    this.wakeApp();
                 }
             },
             immediate: true
         },
     },
     methods: {
+        /**
+         * 获取邀请信息
+         */
         getData() {
             this.loadIng++;
             this.$store.dispatch("call", {
@@ -106,6 +94,9 @@ export default {
             });
         },
 
+        /**
+         * 加入项目
+         */
         joinProject() {
             this.joinLoad++;
             this.$store.dispatch("call", {
@@ -124,11 +115,33 @@ export default {
             });
         },
 
+        /**
+         * 跳转到项目
+         */
         goProject() {
             this.$nextTick(() => {
                 $A.goForward({name: 'manage-project', params: {projectId: this.project.id}});
             })
-        }
+        },
+
+        /**
+         * 唤醒APP
+         */
+        wakeApp() {
+            if (!$A.Electron && !$A.isEEUiApp && navigator.userAgent.indexOf("MicroMessenger") === -1) {
+                if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                    try {
+                        if (/Android/i.test(navigator.userAgent)) {
+                            window.open("dootask://" + route.fullPath)
+                        } else {
+                            window.location.href = "dootask://" + route.fullPath
+                        }
+                    } catch (error) {
+                        //
+                    }
+                }
+            }
+        },
     }
 }
 </script>
