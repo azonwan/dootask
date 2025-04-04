@@ -188,7 +188,7 @@ export default {
             if (num <= 1) return
             this.wsTimer && clearTimeout(this.wsTimer)
             this.wsTimer = setTimeout(() => {
-                this.$route.name == 'manage-calendar' && this.setDateRangeText();
+                this.routeName == 'manage-calendar' && this.setDateRangeText();
             }, 5000)
         }
     },

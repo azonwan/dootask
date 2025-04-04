@@ -37,7 +37,7 @@ export default {
             if (num <= 1) return
             this.wsOpenTimeout && clearTimeout(this.wsOpenTimeout)
             this.wsOpenTimeout = setTimeout(() => {
-                this.$route.name == 'manage-project' && this.getProjectData();
+                this.routeName == 'manage-project' && this.getProjectData();
             }, 5000)
         }
     },

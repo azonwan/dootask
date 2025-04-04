@@ -3031,15 +3031,16 @@ export default {
      */
     openDialog({state, dispatch}, dialogId) {
         return new Promise(async (resolve, reject) => {
-            let singleWindow = state.routeName !== 'manage-messenger',
-                searchMsgId = 0,
-                dialogMsgId = 0;
+            let singleWindow,
+                searchMsgId,
+                dialogMsgId;
             if ($A.isJson(dialogId)) {
-                singleWindow = singleWindow || !!dialogId.single;
+                singleWindow = dialogId.single;
                 searchMsgId = dialogId.search_msg_id;
                 dialogMsgId = dialogId.dialog_msg_id;
                 dialogId = dialogId.dialog_id;
             }
+            singleWindow = typeof singleWindow === "boolean" ? singleWindow : $A.isSubElectron;
             searchMsgId = /^\d+$/.test(searchMsgId) ? parseInt(searchMsgId) : 0;
             dialogMsgId = /^\d+$/.test(dialogMsgId) ? parseInt(dialogMsgId) : 0;
             dialogId = /^\d+$/.test(dialogId) ? parseInt(dialogId) : 0;

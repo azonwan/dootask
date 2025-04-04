@@ -381,7 +381,7 @@ export default {
                             }
                         }).then(({msg}) => {
                             $A.messageSuccess(msg);
-                            if (this.$route.name == 'manage-approve-details' || this.$route.name == 'manage-messenger') {
+                            if (this.routeName == 'manage-approve-details' || this.routeName == 'manage-messenger') {
                                 this.getInfo()
                             } else {
                                 this.$emit('approve')
@@ -411,7 +411,7 @@ export default {
                         }).then(({msg}) => {
                             $A.messageSuccess(msg);
                             resolve();
-                            if (this.$route.name == 'manage-approve-details' || this.$route.name == 'manage-messenger') {
+                            if (this.routeName == 'manage-approve-details' || this.routeName == 'manage-messenger') {
                                 this.getInfo()
                             } else {
                                 this.$emit('revocation')

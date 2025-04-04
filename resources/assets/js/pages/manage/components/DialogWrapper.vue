@@ -2648,7 +2648,8 @@ export default {
         onDialogMenu(cmd) {
             switch (cmd) {
                 case "single":
-                    this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id});
+                    this.$store.dispatch('openDialog', {dialog_id: this.dialogData.id, single: true});
+                    this.routeName !== 'manage-messenger' && this.$store.dispatch('openDialog', 0);
                     break;
 
                 case "searchMsg":
@@ -3000,9 +3001,13 @@ export default {
         },
 
         handleBack() {
+            if ($A.isSubElectron) {
+                window.close()
+                return
+            }
             const {name, params} = this.$store.state.routeHistoryLast;
-            if (name === this.$route.name && /^\d+$/.test(params.dialogId)) {
-                this.goForward({name: this.$route.name});
+            if (name === this.routeName && /^\d+$/.test(params.dialogId)) {
+                this.goForward({name: this.routeName});
             } else {
                 this.goBack();
             }

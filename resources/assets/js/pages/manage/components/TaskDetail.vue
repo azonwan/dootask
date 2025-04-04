@@ -1755,7 +1755,7 @@ export default {
         },
 
         openNewWin() {
-            let config = {
+            const config = {
                 title: this.taskDetail.name,
                 titleFixed: true,
                 parent: null,

@@ -93,15 +93,15 @@ export default {
 
     computed: {
         showSSO() {
-            return this.$isSoftware && ['login'].includes(this.$route.name)
+            return this.$isSoftware && ['login'].includes(this.routeName)
         },
 
         showDown() {
-            return !this.$isEEUiApp && !this.windowTouch && ['login', 'index', 'manage-dashboard'].includes(this.$route.name)
+            return !this.$isEEUiApp && !this.windowTouch && ['login', 'index', 'manage-dashboard'].includes(this.routeName)
         },
 
         showPrivacy() {
-            return $A.isDooServer() && this.$isEEUiApp && ['login'].includes(this.$route.name)
+            return $A.isDooServer() && this.$isEEUiApp && ['login'].includes(this.routeName)
         }
     },
 

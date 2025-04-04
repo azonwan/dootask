@@ -38,7 +38,7 @@ body {
             .ivu-modal {
                 .ivu-modal-content {
                     .ivu-modal-close {
-                        top: 12px;
+                        top: 11px;
                         z-index: 2;
                     }
 
@@ -52,6 +52,12 @@ body {
                             .dialog-nav {
                                 .nav-wrapper {
                                     padding: 0 20px;
+
+                                    &.completed {
+                                        &:after {
+                                            right: 102px;
+                                        }
+                                    }
 
                                     .dialog-menu {
                                         margin-right: 18px;

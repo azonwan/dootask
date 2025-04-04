@@ -956,7 +956,7 @@ export default {
             if (num <= 1) return
             this.wsOpenTimeout && clearTimeout(this.wsOpenTimeout)
             this.wsOpenTimeout = setTimeout(() => {
-                this.$route.name == 'manage-file' && this.getFileList();
+                this.routeName == 'manage-file' && this.getFileList();
             }, 5000)
         },
 
@@ -975,7 +975,7 @@ export default {
 
     methods: {
         getFileList() {
-            if (this.$route.name !== 'manage-file') {
+            if (this.routeName !== 'manage-file') {
                 return;
             }
             this.loadIng++;
@@ -1076,7 +1076,7 @@ export default {
         },
 
         openFileJudge() {
-            if (this.$route.name !== 'manage-file') {
+            if (this.routeName !== 'manage-file') {
                 this.fileShow = false;
                 return;
             }

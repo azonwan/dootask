@@ -366,7 +366,7 @@ export default {
         },
 
         qrcodeStatus() {
-            if (this.$route.name !== 'login' || this.loginMode != 'qrcode') {
+            if (this.routeName !== 'login' || this.loginMode != 'qrcode') {
                 return;
             }
             if (this.qrcodeLoad) {
