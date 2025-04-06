@@ -607,6 +607,12 @@ body {
                 max-width: 200px;
                 margin-right: 3px;
             }
+            .ivu-btn {
+                em {
+                    font-style: normal;
+                    padding-left: 2px;
+                }
+            }
         }
         .ivu-page {
             padding: 0;

@@ -580,8 +580,9 @@ class ReportController extends AbstractController
             return Base::retError("报告不存在或已被删除");
         }
         $reportTag = count($reportMsgs) > 1 ? 'li' : 'p';
-        $reportMsgs = array_map(function ($item) use ($reportTag) {
-            return "<{$reportTag}>{$item}</{$reportTag}>";
+        $reportAttr = $reportTag === 'li' ? ' data-list="ordered"' : '';
+        $reportMsgs = array_map(function ($item) use ($reportAttr, $reportTag) {
+            return "<{$reportTag}{$reportAttr}>{$item}</{$reportTag}>";
         }, $reportMsgs);
         if ($reportTag === 'li') {
             array_unshift($reportMsgs, "<ol>");

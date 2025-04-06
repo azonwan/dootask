@@ -93,7 +93,10 @@
                         <Option value="unread">{{ $L('标记未读') }}</Option>
                         <Option value="share">{{ $L('分享到消息') }}</Option>
                     </Select>
-                    <Button :loading="loadIng > 0" type="primary" @click="selectClick" :disabled="selectAction=='' || selectIds.length==0">{{$L('执行')}}</Button>
+                    <Button :loading="loadIng > 0" type="primary" @click="selectClick" :disabled="selectAction=='' || selectIds.length==0">
+                        <span>{{$L('执行')}}</span>
+                        <em v-if="selectIds.length > 0">({{selectIds.length}})</em>
+                    </Button>
                 </div>
                 <!-- 分页 -->
                 <Page
