@@ -88,14 +88,14 @@
             <div class="table-attach">
                 <!-- 选择执行 -->
                 <div class="select-box">
-                    <Select v-model="selectAction" :disabled="selectIds.length==0" @on-change="groupSelect=true" :placeholder="$L('请选择')" transfer>
+                    <Select v-model="selectAction" :disabled="selected.length==0" @on-change="groupSelect=true" :placeholder="$L('请选择')" transfer>
                         <Option value="read">{{ $L('标记已读') }}</Option>
                         <Option value="unread">{{ $L('标记未读') }}</Option>
                         <Option value="share">{{ $L('分享到消息') }}</Option>
                     </Select>
-                    <Button :loading="loadIng > 0" type="primary" @click="selectClick" :disabled="selectAction=='' || selectIds.length==0">
+                    <Button :loading="loadIng > 0" type="primary" @click="selectClick" :disabled="selectAction=='' || selected.length==0">
                         <span>{{$L('执行')}}</span>
-                        <em v-if="selectIds.length > 0">({{selectIds.length}})</em>
+                        <em v-if="selected.length > 0">({{selected.length}})</em>
                     </Button>
                 </div>
                 <!-- 分页 -->
@@ -122,6 +122,7 @@
             :confirm-placeholder="$L('附言')"
             :multiple-max="50"
             :before-submit="onShare"
+            :msg-detail="forwardMsgPreview"
             sender-hidden/>
     </div>
 </template>
@@ -239,7 +240,7 @@ export default {
             keys: {},
             keyIs: false,
 
-            selectIds: [],
+            selected: [],
             selectAction: '',
 
             reportTypeList: [
@@ -255,6 +256,8 @@ export default {
             ],
 
             departmentList: [],
+
+            forwardMsgPreview: null,
         }
     },
     async mounted() {
@@ -313,26 +316,29 @@ export default {
         },
 
         selectChange(items) {
-            this.selectIds = items.map(({id}) => id);
+            this.selected = items.map(item => {
+                return {
+                    id: item.id,
+                    title: item.title,
+                }
+            });
         },
 
         selectClick() {
-            if (this.selectIds.length === 0) {
+            if (this.selected.length === 0) {
                 $A.messageWarning('请选择线路');
                 return;
             }
             switch (this.selectAction) {
                 case 'read':
                 case 'unread':
-                    this.readReport(this.selectIds, this.selectAction)
+                    this.readReport(this.selected.map(({id}) => id), this.selectAction)
                     break;
+
                 case 'share':
-                    if (this.selectIds.length > 20) {
-                        $A.messageWarning('每次最多分享20个');
-                        return;
-                    }
-                    this.$refs.forwarder.onSelection()
+                    this.selectShare()
                     break;
+
                 default:
                     $A.messageWarning('请选择执行方式');
                     break;
@@ -366,12 +372,41 @@ export default {
             });
         },
 
+        selectShare() {
+            if (this.selected.length > 20) {
+                $A.messageWarning('每次最多分享20个');
+                return;
+            }
+            //
+            const previewTag = this.selected.length > 1 ? 'li' : 'p';
+            const previewAttr = previewTag === 'li' ? ' data-list="ordered"' : '';
+            const msg = {
+                text: this.selected.map(({title}) => {
+                    const previewContent = `<a class="mention report" href="javascript:void(0)">%${title}</a>`;
+                    return `<${previewTag}${previewAttr}>${previewContent}</${previewTag}>`;
+                }).join(''),
+            }
+            if (previewTag === 'li') {
+                msg.text = `<ol>${msg.text}</ol>`;
+            }
+            this.forwardMsgPreview = {
+                id: 0,
+                dialog_id: 0,
+                reply_id: 0,
+                type: 'text',
+                userid: this.userId,
+                msg,
+            }
+            //
+            this.$refs.forwarder.onSelection()
+        },
+
         onShare({dialogids, userids, message}) {
             return new Promise((resolve, reject) => {
                 this.$store.dispatch("call", {
                     url: 'report/share',
                     data: {
-                        id: this.selectIds,
+                        id: this.selected.map(({id}) => id),
                         dialogids,
                         userids,
                         leave_message: message,

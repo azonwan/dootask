@@ -138,7 +138,7 @@ export default {
         },
 
         isUnreadStart() {
-            return this.unreadOne === this.source.id
+            return this.unreadOne === this.source.id && this.source.id > 0
         },
 
         hidePercentage() {
