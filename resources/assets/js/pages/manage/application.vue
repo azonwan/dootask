@@ -147,7 +147,7 @@
                             <div class="aibot-setting">
                                 <SystemAibot
                                     v-if="aibotTabAction == item.value"
-                                    :type="aibotTabAction"
+                                    :type="item.value"
                                     @on-update-setting="handleAITags" />
                             </div>
                         </TabPane>

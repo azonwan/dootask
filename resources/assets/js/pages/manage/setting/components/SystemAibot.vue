@@ -78,6 +78,7 @@ export default {
         }
     },
     mounted() {
+        this.formData = $A.getStorageJson(`systemAibot.${this.type}`);
         this.systemSetting();
     },
     computed: {
@@ -190,6 +191,7 @@ export default {
                 this.$emit('on-update-setting', data);
                 this.formData = data;
                 this.formDatum_bak = $A.cloneJSON(this.formData);
+                $A.setStorage(`systemAibot.${this.type}`, data);
             }).catch(({msg}) => {
                 if (save) {
                     $A.modalError(msg);
