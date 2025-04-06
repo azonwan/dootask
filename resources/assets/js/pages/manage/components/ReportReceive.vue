@@ -416,8 +416,9 @@ export default {
                     this.$store.dispatch("updateDialogLastMsg", data.msgs);
                     $A.messageSuccess(msg);
                     resolve();
+                    //
                     if (data.msgs.length > 0) {
-                        this.$store.dispatch("openDialog", data.msgs[0].dialog_id);
+                        this.$store.dispatch("openDialog", data.msgs[data.msgs.length - 1].dialog_id);
                     }
                 }).catch(({msg}) => {
                     $A.modalError(msg);
