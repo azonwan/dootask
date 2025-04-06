@@ -3183,6 +3183,7 @@ class DialogController extends AbstractController
      * @apiName session_create
      *
      * @apiParam {Number} dialog_id         对话ID
+     * @apiParam {Number} [userid]          用户ID（与 dialog_id 二选一，userid 优先）
      *
      * @apiSuccess {Number} ret     返回状态码（1正确、0错误）
      * @apiSuccess {String} msg     返回信息（错误描述）
@@ -3190,11 +3191,16 @@ class DialogController extends AbstractController
      */
     public function session__create()
     {
-        User::auth();
+        $user = User::auth();
         //
         $dialog_id = intval(Request::input('dialog_id'));
+        $userid = intval(Request::input('userid'));
         //
-        $dialog = WebSocketDialog::checkDialog($dialog_id);
+        if ($userid) {
+            $dialog = WebSocketDialog::checkUserDialog($user, $userid);
+        } else {
+            $dialog = WebSocketDialog::checkDialog($dialog_id);
+        }
         //
         if ($dialog->type != 'user') {
             return Base::retError('当前对话不支持');
@@ -3208,9 +3214,7 @@ class DialogController extends AbstractController
             return Base::retError('当前对话不支持');
         }
         //
-        $session = WebSocketDialogSession::whereDialogId($dialog->id)
-            ->whereTitle('')
-            ->first();
+        $session = WebSocketDialogSession::whereDialogId($dialog->id)->whereTitle('')->first();
         if ($session) {
             $dialog->session_id = $session->id;
             $dialog->save();

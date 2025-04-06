@@ -61,13 +61,19 @@
                         :disabled="loading"
                         clearable/>
                 </div>
+                <ul class="radio-group">
+                    <li v-if="aiUser.length > 0" :class="{selected: ainew}">
+                        <Icon @click="onAinew" class="radio-icon" :type="ainew ? 'ios-checkmark-circle' : 'ios-radio-button-off'"/>
+                        <span class="radio-label">{{ $L('AI开启新会话') }}</span>
+                    </li>
+                    <li v-if="!senderHidden" :class="{selected: !sender}">
+                        <Icon @click="onSender" class="radio-icon" :type="sender ? 'ios-radio-button-off' : 'ios-checkmark-circle'"/>
+                        <span class="radio-label">{{ $L('不显示原发送者信息') }}</span>
+                    </li>
+                </ul>
             </div>
         </div>
         <template #footer>
-            <div v-if="!senderHidden" class="forwarder-wrapper-footer" :class="{selected: !sender}" @click="onSender">
-                <Icon class="user-modal-icon" :type="sender ? 'ios-radio-button-off' : 'ios-checkmark-circle'" />
-                <span class="forward-text-tip">{{$L('不显示原发送者信息')}}</span>
-            </div>
             <Button type="primary" :loading="loading" @click="onSubmit">
                 {{$L('确定')}}
                 <template v-if="forwardTo.length > 0">({{forwardTo.length}})</template>
@@ -79,6 +85,7 @@
 <script>
 import DialogItem from "../DialogItem.vue";
 import ChatInput from "../ChatInput/index.vue";
+import {mapState} from "vuex";
 
 export default {
     components: {ChatInput, DialogItem},
@@ -128,12 +135,21 @@ export default {
             loading: false,
 
             message: '',    // 留言
-            sender: true,  // 是否隐藏原发送者信息
+            ainew: true,    // 是否AI开启新会话
+            sender: true,   // 是否隐藏原发送者信息
         }
     },
 
     computed: {
+        ...mapState(['cacheUserBasic']),
 
+        aiUser({forwardTo, cacheUserBasic}) {
+            const users = forwardTo.filter(item => item.type !== 'group');
+            return users.filter(user => {
+                const cachedUser = cacheUserBasic.find(item => item.userid === user.userid);
+                return cachedUser && cachedUser.bot && /^ai-(.*?)@bot\.system/.test(cachedUser.email);
+            });
+        }
     },
 
     watch: {
@@ -145,6 +161,7 @@ export default {
             if (!val) {
                 this.loading = false;
                 this.message = '';
+                this.ainew = true;
                 this.sender = true;
             }
         }
@@ -167,6 +184,13 @@ export default {
             this.$emit('on-other', ...args);
         },
 
+        onAinew() {
+            if (this.loading) {
+                return
+            }
+            this.ainew = !this.ainew
+        },
+
         onSender() {
             if (this.loading) {
                 return
@@ -174,7 +198,7 @@ export default {
             this.sender = !this.sender
         },
 
-        onSubmit() {
+        async onSubmit() {
             if (this.loading) {
                 return
             }
@@ -188,9 +212,17 @@ export default {
             if (!this.senderHidden) {
                 data.sender = this.sender
             }
+            //
+            this.loading = true
+            try {
+                await this.onAiNew()
+            } catch (e) {
+                this.loading = false
+                return
+            }
+            //
             const before = this.beforeSubmit(data);
             if (before && before.then) {
-                this.loading = true
                 before.then(() => {
                     this.hide()
                 }).catch(_ => {
@@ -199,8 +231,39 @@ export default {
                     this.loading = false
                 })
             } else {
+                this.loading = false
                 this.hide()
             }
+        },
+
+        onAiNew() {
+            return new Promise((resolve, reject) => {
+                if (this.aiUser.length === 0 || !this.ainew) {
+                    return resolve();
+                }
+
+                const processQueue = async () => {
+                    try {
+                        for (const user of this.aiUser) {
+                            await this.$store.dispatch("call", {
+                                url: 'dialog/session/create',
+                                data: {
+                                    userid: user.userid,
+                                },
+                            });
+                        }
+                        resolve();
+                    } catch (error) {
+                        $A.modalError({
+                            language: false,
+                            content: this.$L("AI开启新会话失败") + `: ${error.msg || error}`,
+                        });
+                        reject(error);
+                    }
+                };
+
+                processQueue();
+            });
         },
 
         hide() {

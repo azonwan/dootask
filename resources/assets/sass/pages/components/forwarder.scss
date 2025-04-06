@@ -88,39 +88,42 @@
                             background: #f7f7f7;
                         }
                     }
-                }
-            }
-        }
 
-        .ivu-modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 20px;
+                    .radio-group {
+                        z-index: 2;
+                        display: flex;
+                        flex-direction: column;
 
-            .forwarder-wrapper-footer {
-                flex: 1;
-                width: 0;
-                display: flex;
-                line-height: 34px;
-                cursor: pointer;
+                        > li {
+                            display: flex;
+                            align-items: center;
+                            line-height: 22px;
+                            margin-bottom: 8px;
 
-                .user-modal-icon {
-                    flex-shrink: 0;
-                    font-size: 22px;
-                    margin-right: 5px;
-                    color: rgba($primary-desc-color, 0.7);
-                    margin-top: 6px;
-                }
+                            .radio-icon {
+                                flex-shrink: 0;
+                                font-size: 22px;
+                                color: rgba($primary-desc-color, 0.7);
+                                cursor: pointer;
+                            }
 
-                .forward-text-tip {
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
+                            .radio-label {
+                                padding-left: 6px;
+                                overflow: hidden;
+                                text-overflow: ellipsis;
+                                white-space: nowrap;
+                            }
 
-                &.selected {
-                    .user-modal-icon {
-                        color: $primary-color;
+                            &.selected {
+                                .radio-icon {
+                                    color: $primary-color;
+                                }
+                            }
+
+                            &:last-child {
+                                margin-bottom: 16px;
+                            }
+                        }
                     }
                 }
             }
