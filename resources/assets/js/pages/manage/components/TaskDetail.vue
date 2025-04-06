@@ -1603,6 +1603,12 @@ export default {
             if (this.sendLoad > 0 || this.openLoad > 0) {
                 return;
             }
+            //
+            if (this.taskDetail.dialog_id) {
+                this.openDialogBefore(this.taskDetail.dialog_id, msgText)
+                return;
+            }
+            //
             if (onlyOpen === true) {
                 this.openLoad++;
             } else {
@@ -1617,34 +1623,7 @@ export default {
             }).then(async ({data}) => {
                 await this.$store.dispatch("saveTask", {id: data.id, dialog_id: data.dialog_id});
                 await this.$store.dispatch("saveDialog", data.dialog_data);
-                //
-                if ($A.isSubElectron) {
-                    await this.resizeDialog()
-                    this.sendDialogMsg(msgText);
-                    return
-                }
-                this.$nextTick(() => {
-                    if (this.windowPortrait) {
-                        $A.onBlur();
-                        const transferData = {
-                            time: $A.dayjs().unix() + 10,
-                            msgRecord: this.msgRecord,
-                            msgFile: this.msgFile,
-                            msgText: typeof msgText === 'string' && msgText ? msgText : this.msgText,
-                            dialogId: data.dialog_id,
-                        };
-                        this.msgRecord = {};
-                        this.msgFile = [];
-                        this.msgText = "";
-                        this.$nextTick(_ => {
-                            this.$store.dispatch('openDialog', data.dialog_id).then(_ => {
-                                this.$store.state.dialogMsgTransfer = transferData
-                            })
-                        })
-                    } else {
-                        this.sendDialogMsg(msgText);
-                    }
-                });
+                await this.openDialogBefore(data.dialog_id, msgText)
             }).catch(({msg}) => {
                 $A.modalError(msg);
             }).finally(_ => {
@@ -1652,6 +1631,36 @@ export default {
                     this.openLoad--;
                 } else {
                     this.sendLoad--;
+                }
+            });
+        },
+
+        async openDialogBefore(dialogId, msgText) {
+            if ($A.isSubElectron) {
+                await this.resizeDialog()
+                this.sendDialogMsg(msgText);
+                return
+            }
+            this.$nextTick(() => {
+                if (this.windowPortrait) {
+                    $A.onBlur();
+                    const transferData = {
+                        time: $A.dayjs().unix() + 10,
+                        msgRecord: this.msgRecord,
+                        msgFile: this.msgFile,
+                        msgText: typeof msgText === 'string' && msgText ? msgText : this.msgText,
+                        dialogId,
+                    };
+                    this.msgRecord = {};
+                    this.msgFile = [];
+                    this.msgText = "";
+                    this.$nextTick(_ => {
+                        this.$store.dispatch('openDialog', dialogId).then(_ => {
+                            this.$store.state.dialogMsgTransfer = transferData
+                        })
+                    })
+                } else {
+                    this.sendDialogMsg(msgText);
                 }
             });
         },
