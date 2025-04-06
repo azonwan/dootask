@@ -58,7 +58,9 @@
                                 <img :src="item.avatar">
                             </div>
                             <div class="modal-item-info">
-                                <h4>{{ item.name }}</h4>
+                                <div class="modal-item-name">
+                                    <h4>{{ item.name }}</h4>
+                                </div>
                                 <div class="modal-item-mybot">
                                     <p><span>ID:</span>{{item.id}}</p>
                                     <p><span>{{$L('清理时间')}}:</span>{{item.clear_day}}</p>
@@ -118,11 +120,14 @@
                                 <img :src="item.src">
                             </div>
                             <div class="modal-item-info">
-                                <h4>{{ item.label }}</h4>
+                                <div class="modal-item-name">
+                                    <h4>{{ item.label }}</h4>
+                                    <div class="modal-item-tag" @click="applyClick({value: 'robot-setting'}, item.value)">
+                                        {{item.tag}}
+                                        <em v-if="item.tags.length > 1">+{{item.tags.length - 1}}</em>
+                                    </div>
+                                </div>
                                 <p class="modal-item-desc" @click="openDetail(item.desc)">{{ item.desc }}</p>
-                                <ul v-if="item.tags.length > 0" class="modal-item-tags">
-                                    <li v-for="(tag, index) in item.tags" :key="index">{{ tag }}</li>
-                                </ul>
                                 <div class="modal-item-btns">
                                     <Button icon="md-chatbubbles" :loading="aibotDialogSearchLoad == item.value" @click="onGoToChat(item.value)">{{ $L('开始聊天') }}</Button>
                                     <Button v-if="userIsAdmin" icon="md-settings" @click="applyClick({value: 'robot-setting'}, item.value)">{{ $L('设置') }}</Button>
@@ -196,7 +201,9 @@
                                 <div class="apply-icon no-dark-content meeting"></div>
                             </div>
                             <div class="modal-item-info">
-                                <h4>{{ $L('新会议') }}</h4>
+                                <div class="modal-item-name">
+                                    <h4>{{ $L('新会议') }}</h4>
+                                </div>
                                 <p class="modal-item-desc" @click="openDetail(meetingDescs.add)"> {{ meetingDescs.add }} </p>
                                 <div class="modal-item-btns">
                                     <Button @click="onMeeting('createMeeting')">{{ $L('新建会议') }}</Button>
@@ -208,7 +215,9 @@
                                 <div class="apply-icon no-dark-content meeting-join"></div>
                             </div>
                             <div class="modal-item-info">
-                                <h4>{{ $L('加入会议') }}</h4>
+                                <div class="modal-item-name">
+                                    <h4>{{ $L('加入会议') }}</h4>
+                                </div>
                                 <p class="modal-item-desc" @click="openDetail(meetingDescs.join)">{{ meetingDescs.join }}</p>
                                 <div class="modal-item-btns">
                                     <Button @click="onMeeting('joinMeeting')">{{ $L('加入会议') }}</Button>
@@ -618,7 +627,15 @@ export default {
                     const value = match[1];
                     this.aibotList.map(h => {
                         if (h.value == value) {
-                            h.tags = AIModelNames(data[key]).map(item => item.label);
+                            const items = AIModelNames(data[key])
+                            h.tags = items.map(item => item.label);
+                            h.tag = data[key.slice(0, -1)];
+                            items.some(item => {
+                                if (item.value == h.tag) {
+                                    h.tag = item.label;
+                                    return true;
+                                }
+                            })
                         }
                     });
                 }

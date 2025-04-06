@@ -359,12 +359,39 @@
                 .modal-item-info {
                     flex: 1;
 
-                    h4 {
-                        font-size: 18px;
-                        color: #333;
-                        margin: 0 0 10px 0;
-                        line-height: 1.2;
-                        font-weight: 500;
+                    .modal-item-name {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 8px;
+                        list-style-type: none;
+                        margin-bottom: 10px;
+
+                        h4 {
+                            font-size: 18px;
+                            color: #333;
+                            line-height: 26px;
+                            font-weight: 500;
+                            word-break: break-all;
+                        }
+
+                        .modal-item-tag {
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            padding: 4px 12px;
+                            line-height: 18px;
+                            background: #f5f5f5;
+                            border-radius: 12px;
+                            font-size: 12px;
+                            color: #666;
+                            border: none;
+                            margin: 0;
+
+                            > em {
+                                padding-left: 4px;
+                                font-style: normal;
+                            }
+                        }
                     }
 
                     .modal-item-desc {
@@ -384,32 +411,16 @@
                         row-gap: 4px;
                         flex-direction: column;
                         margin-bottom: 12px;
+
                         > p {
                             display: flex;
                             flex-wrap: wrap;
                             word-break: break-all;
+
                             > span {
                                 opacity: 0.8;
                                 padding-right: 6px;
                             }
-                        }
-                    }
-
-                    .modal-item-tags {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 8px;
-                        list-style-type: none;
-                        margin-bottom: 12px;
-
-                        > li {
-                            padding: 4px 12px;
-                            background: #f5f5f5;
-                            border-radius: 12px;
-                            font-size: 12px;
-                            color: #666;
-                            border: none;
-                            margin: 0;
                         }
                     }
 
@@ -420,7 +431,6 @@
                     }
                 }
             }
-
         }
 
         .ai-tabs {
@@ -468,7 +478,7 @@
             }
 
             @media (max-width: 500px) {
-                padding: 8px 0;
+                padding: 0;
 
                 .ivu-modal-wrap-ul {
                     margin: 0;
