@@ -496,7 +496,7 @@ export default {
         };
     },
     created() {
-        inputLoadAdd(this.dialogId, this._uid)
+        inputLoadAdd(this._uid)
     },
     mounted() {
         this.init();
@@ -530,7 +530,7 @@ export default {
         $A.loadScript('js/emoticon.all.js')
     },
     beforeDestroy() {
-        inputLoadRemove(this.dialogId, this._uid)
+        inputLoadRemove(this._uid)
         if (this.quill) {
             this.quill.getModule("mention")?.hideMentionList();
             this.quill = null
@@ -749,15 +749,13 @@ export default {
         },
 
         // Reset lists
-        dialogId(id1, id2) {
+        dialogId() {
             this.userList = null;
             this.userCache = null;
             this.taskList = null;
             this.fileList = {};
             this.reportList = {};
             this.loadInputDraft()
-            inputLoadAdd(id1, this._uid)
-            inputLoadRemove(id2, this._uid)
         },
         taskId() {
             this.userList = null;
@@ -990,6 +988,9 @@ export default {
 
             // Mark model as touched if editor lost focus
             this.quill.on('selection-change', range => {
+                if (!inputLoadIsLast(this._uid)) {
+                    return;
+                }
                 if (range) {
                     this.selectRange = range
                 } else if (this.selectRange && document.activeElement && /(ql-editor|ql-clipboard)/.test(document.activeElement.className)) {
@@ -1878,7 +1879,7 @@ export default {
             if (!this.quill) {
                 return;
             }
-            if (!inputLoadIsLast(this.dialogId, this._uid)) {
+            if (!inputLoadIsLast(this._uid)) {
                 return;
             }
             const {index} = this.quill.getSelection(true);

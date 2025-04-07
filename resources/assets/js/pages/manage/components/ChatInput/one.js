@@ -2,29 +2,30 @@ import Vue from 'vue';
 import Emoji from "./emoji.vue";
 import {Modal} from "view-design-hi";
 
-const inputLoadUid = {}
+// 加载中的输入框的uid，主要用于判断是否最后一个输入框
+const inputLoadUid = []
 
-function inputLoadAdd(dialogId, uid) {
-    if (!dialogId || typeof inputLoadUid[dialogId] === "undefined") {
-        inputLoadUid[dialogId] = [];
-    } else {
-        inputLoadUid[dialogId] = inputLoadUid[dialogId].filter(v => v !== uid)
+function inputLoadIsLast(uid) {
+    if (inputLoadUid.length === 0) {
+        return true
     }
-    inputLoadUid[dialogId].push(uid)
+    const index = inputLoadUid.indexOf(uid)
+    if (index === -1) {
+        return false
+    }
+    return index === inputLoadUid.length - 1
 }
 
-function inputLoadRemove(dialogId, uid) {
-    if (!dialogId || typeof inputLoadUid[dialogId] === "undefined") {
-        return;
+const inputLoadRemove = (uid) => {
+    const index = inputLoadUid.indexOf(uid)
+    if (index !== -1) {
+        inputLoadUid.splice(index, 1)
     }
-    inputLoadUid[dialogId] = inputLoadUid[dialogId].filter(v => v !== uid)
 }
 
-function inputLoadIsLast(dialogId, uid) {
-    if (typeof inputLoadUid[dialogId] === "undefined") {
-        return false;
-    }
-    return inputLoadUid[dialogId][inputLoadUid[dialogId].length - 1] === uid
+const inputLoadAdd = (uid) => {
+    inputLoadRemove(uid)
+    inputLoadUid.push(uid)
 }
 
 function choiceEmojiOne() {

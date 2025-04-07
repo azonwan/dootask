@@ -745,8 +745,6 @@ export default {
             'taskFiles',
             'taskPriority',
 
-            'dialogId',
-
             'formOptions'
         ]),
 
