@@ -1062,6 +1062,27 @@ export default {
                 return delta
             })
 
+            // Link handler
+            const toolbar = this.quill.getModule('toolbar')
+            if (toolbar?.handlers?.link) {
+                toolbar.addHandler('link', (value) => {
+                    if (value) {
+                        $A.modalInput({
+                            title: "插入链接",
+                            placeholder: "请输入完整的链接地址",
+                            onOk: (link) => {
+                                if (!link) {
+                                    return false;
+                                }
+                                this.quill.format('link', link);
+                            }
+                        })
+                    } else {
+                        this.quill.format('link', false);
+                    }
+                });
+            }
+
             // Set enterkeyhint
             this.$nextTick(_ => {
                 if (this.$isEEUiApp && this.cacheKeyboard.send_button_app === 'enter') {
