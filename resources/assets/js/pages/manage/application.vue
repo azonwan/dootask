@@ -759,8 +759,11 @@ export default {
                 }
                 const dialog_id = Number(this.sendData[0].replace('d:', ''))
                 this.$store.dispatch("openDialog", dialog_id).then(async () => {
-                    const type = this.sendType == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'
-                    this.$store.state[type] = {type: 'create', dialog_id: dialog_id}
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    requestAnimationFrame(_ => {
+                        const type = this.sendType == 'word-chain' ? 'dialogDroupWordChain' : 'dialogGroupVote'
+                        this.$store.state[type] = {type: 'create', dialog_id: dialog_id}
+                    })
                 })
                 resolve()
             })
