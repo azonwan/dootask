@@ -3,6 +3,7 @@
         ref="modal"
         v-model="show"
         :closable="escClosable"
+        :mask="!isFullscreen"
         :mask-closable="maskClosable"
         :footer-hide="true"
         :transition-names="[$A.isAndroid() ? '' : `drawer-slide-${transitionName}`, '']"
@@ -85,7 +86,7 @@ export default {
             return this.isFullscreen ? 'bottom' : this.placement
         },
         modalClass() {
-            if(this.isFullscreen){
+            if (this.isFullscreen) {
                 return "common-drawer-modal"
             }
             if (this.className) {

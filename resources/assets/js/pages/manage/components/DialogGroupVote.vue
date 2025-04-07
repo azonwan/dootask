@@ -1,6 +1,7 @@
 <template>
     <Modal class-name="dialog-droup-word-chain"
         v-model="show"
+        :mask="!isFullscreen"
         :mask-closable="false"
         :title="dialogGroupVote.type == 'create' ? $L('发起投票') : $L('投票结果')"
         :closable="!isFullscreen"

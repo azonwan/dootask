@@ -1,6 +1,7 @@
 <template>
     <Modal class-name="dialog-droup-word-chain"
         v-model="show"
+        :mask="!isFullscreen"
         :mask-closable="false"
         :title="dialogDroupWordChain.type == 'create' ? $L('发起接龙') : $L('接龙结果')"
         :closable="!isFullscreen"

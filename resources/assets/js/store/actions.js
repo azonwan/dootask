@@ -328,7 +328,7 @@ export default {
                     // 异常提示
                     reason.ret = -1001
                     reason.msg = params.checkNetwork !== false ? false : $A.L('网络异常，请稍后重试。')
-                    if (params.checkNetwork !== false) {
+                    if (params.checkNetwork !== false && $A.Ready !== false) {
                         state.ajaxNetworkException = $A.L("网络连接失败，请检查网络设置。")
                     }
                 }
