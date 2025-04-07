@@ -92,6 +92,7 @@
         args.images.forEach(src => {
             const img = document.createElement('img');
             img.src = thumbnailUrl(src);
+            img.setAttribute('alt', 'image');
             img.setAttribute('data-original', src);
             container.appendChild(img);
         });
