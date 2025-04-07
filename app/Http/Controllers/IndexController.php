@@ -324,7 +324,7 @@ class IndexController extends InvokeController
                 "file" => Request::file('file'),
                 "type" => 'publish',
                 "path" => $draftPath,
-                "fileName" => true,
+                "saveName" => true,
             ]);
         }
 

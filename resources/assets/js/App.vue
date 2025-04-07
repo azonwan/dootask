@@ -267,6 +267,10 @@ export default {
             if (this.isCtrlCommandPressed) {
                 return 1;
             }
+            // 应用协议链接
+            if (this.isApplicationProtocol(url)) {
+                return 1;
+            }
             // 常见会议链接
             if (this.isMeetingUrlStrict(url)) {
                 return 1;
@@ -298,6 +302,41 @@ export default {
                 } catch (e) { }
             }
             return 0;
+        },
+
+        isApplicationProtocol(url) {
+            const protocols = [
+                'thunder:',             // 迅雷专有链接
+                'ed2k:',                // 电驴链接
+                'magnet:',              // 磁力链接
+                'weixin:',              // 微信
+                'alipays:',             // 支付宝
+                'mqq:',                 // QQ
+                'dingtalk:',            // 钉钉
+                'baidumap:',            // 百度地图
+                'iosamap:',             // 高德地图iOS
+                'androidamap:',         // 高德地图Android
+                'tel:',                 // 电话
+                'sms:',                 // 短信
+                'mailto:',              // 邮件
+                'market:',              // 应用市场
+                'intent:',              // Android Intent
+                'taobao:',              // 淘宝
+                'tmall:',               // 天猫
+                'jd:',                  // 京东
+                'pinduoduo:',           // 拼多多
+                'vnd.youtube:',         // YouTube应用
+                'zhihu:',               // 知乎
+                'bilibili:',            // B站
+                'snssdk1128:',          // 抖音
+                'kwai:',                // 快手
+                'fb:',                  // Facebook
+                'twitter:',             // Twitter
+                'instagram:',           // Instagram
+                'linkedin:'             // LinkedIn
+            ];
+            const lowerUrl = `${url}`.toLowerCase()
+            return protocols.some(protocol => lowerUrl.startsWith(protocol));
         },
 
         isMeetingUrlStrict(url) {
@@ -360,9 +399,6 @@ export default {
                 'drive.google.com',     // Google Drive
                 'onedrive.live.com',    // OneDrive
                 'xunlei.com',           // 迅雷
-                'thunder://',           // 迅雷专有链接
-                'ed2k://',             // 电驴链接
-                'magnet:?',            // 磁力链接
 
                 // 即时通讯（需要系统通知和持久连接）
                 'wx.qq.com',            // 微信网页版
@@ -384,33 +420,6 @@ export default {
                 'instagram.com/live',   // Instagram直播
                 'youtube.com/live',     // YouTube直播
                 'twitch.tv/live',       // Twitch直播
-
-                // 专门的APP协议链接
-                'weixin://',            // 微信
-                'alipays://',           // 支付宝
-                'mqq://',               // QQ
-                'dingtalk://',          // 钉钉
-                'baidumap://',          // 百度地图
-                'iosamap://',           // 高德地图iOS
-                'androidamap://',       // 高德地图Android
-                'tel://',               // 电话
-                'sms://',               // 短信
-                'mailto://',            // 邮件
-                'market://',            // 应用市场
-                'intent://',            // Android Intent
-                'taobao://',            // 淘宝
-                'tmall://',             // 天猫
-                'jd://',                // 京东
-                'pinduoduo://',         // 拼多多
-                'vnd.youtube://',       // YouTube应用
-                'zhihu://',             // 知乎
-                'bilibili://',          // B站
-                'snssdk1128://',        // 抖音
-                'kwai://',              // 快手
-                'fb://',                // Facebook
-                'twitter://',           // Twitter
-                'instagram://',         // Instagram
-                'linkedin://'           // LinkedIn
             ];
             const lowerUrl = `${url}`.toLowerCase()
             return meetingDomains.some(domain => lowerUrl.indexOf(domain) !== -1);

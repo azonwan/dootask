@@ -185,11 +185,12 @@ function createMainWindow() {
     // 新窗口处理
     mainWindow.webContents.setWindowOpenHandler(({url}) => {
         if (allowedCalls.test(url)) {
-            return {action: 'allow'}
-        }
-        utils.onBeforeOpenWindow(mainWindow.webContents, url).then(() => {
             openExternal(url)
-        })
+        } else {
+            utils.onBeforeOpenWindow(mainWindow.webContents, url).then(() => {
+                openExternal(url)
+            })
+        }
         return {action: 'deny'}
     })
 
@@ -425,11 +426,12 @@ function createChildWindow(args) {
     // 新窗口处理
     browser.webContents.setWindowOpenHandler(({url}) => {
         if (allowedCalls.test(url)) {
-            return {action: 'allow'}
-        }
-        utils.onBeforeOpenWindow(browser.webContents, url).then(() => {
             openExternal(url)
-        })
+        } else {
+            utils.onBeforeOpenWindow(browser.webContents, url).then(() => {
+                openExternal(url)
+            })
+        }
         return {action: 'deny'}
     })
 
@@ -691,9 +693,10 @@ function createWebTabWindow(args) {
     })
     browserView.webContents.setWindowOpenHandler(({url}) => {
         if (allowedCalls.test(url)) {
-            return {action: 'allow'}
+            openExternal(url)
+        } else {
+            createWebTabWindow({url})
         }
-        createWebTabWindow({url})
         return {action: 'deny'}
     })
     browserView.webContents.on('page-title-updated', (event, title) => {
@@ -2483,10 +2486,9 @@ function windowAction(method) {
 function openExternal(url) {
     //Only open http(s), mailto, tel, and callto links
     if (allowedUrls.test(url)) {
-        shell.openExternal(url);
+        shell.openExternal(url).catch(_ => {});
         return true;
     }
-
     return false;
 }
 
