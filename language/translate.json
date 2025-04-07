@@ -29398,5 +29398,29 @@
         "fr": "Photos que vous pourriez vouloir envoyer",
         "id": "Foto yang mungkin ingin Anda kirim",
         "ru": "Фотографии, которые вы, возможно, хотите отправить"
+    },
+    {
+        "key": "AI开启新会话",
+        "zh": "",
+        "zh-CHT": "AI 開啟新會話",
+        "en": "AI starts a new session",
+        "ko": "AI 새로운 세션 시작",
+        "ja": "AIが新しいセッションを開始",
+        "de": "AI startet eine neue Sitzung",
+        "fr": "L'IA démarre une nouvelle session",
+        "id": "AI memulai sesi baru",
+        "ru": "ИИ начинает новый сеанс"
+    },
+    {
+        "key": "AI开启新会话失败",
+        "zh": "",
+        "zh-CHT": "AI 開啟新會話失敗",
+        "en": "Failed to start a new session with AI",
+        "ko": "AI 새로운 세션 시작 실패",
+        "ja": "AIが新しいセッションの開始に失敗しました",
+        "de": "Fehler beim Starten einer neuen Sitzung mit AI",
+        "fr": "Échec du démarrage d'une nouvelle session avec l'IA",
+        "id": "Gagal memulai sesi baru dengan AI",
+        "ru": "Не удалось начать новый сеанс с ИИ"
     }
 ]

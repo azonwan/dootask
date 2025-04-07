@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.45.52]
+
+### Features
+
+- 新增转发至AI开启新会话
+
+### Performance
+
+- 优化数据结构
+- 优化消息窗口显示
+- 优化目录结构
+- 优化日历
+- 优化任务时间范围选择
+
 ## [0.45.33]
 
 ### Bug Fixes
