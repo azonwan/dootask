@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.45.52]
+## [0.45.64]
+
+### Bug Fixes
+
+- 修复部分页面出现空白的情况
+- 修复输入框无法点击添加链接的情况
+- 修复AI机器人不存在的情况
 
 ### Features
 
@@ -11,6 +17,7 @@ All notable changes to this project will be documented in this file.
 ### Performance
 
 - 优化数据结构
+- 优化图片存储名
 - 优化消息窗口显示
 - 优化目录结构
 - 优化日历
