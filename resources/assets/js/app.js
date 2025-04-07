@@ -219,12 +219,16 @@ if (isElectron) {
 
 // 同步执行派遣
 const dispatchId = $A.randomString(6) + "_" + Date.now().toString()
+$A.syncPauses = new Map();
 $A.syncDispatch = (action, data) => {
     if (!$A.Ready) {
         return false
     }
     if (!isElectron) {
         return false
+    }
+    if ($A.syncPauses.has(action)) {
+        return false;
     }
     if (!$A.isJson(data)) {
         return false

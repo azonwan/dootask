@@ -2037,11 +2037,13 @@ export default {
         getMsgs(data) {
             return new Promise((resolve, reject) => {
                 setTimeout(_ => this.msgLoadIng++, 2000)
+                $A.isSubElectron && $A.syncPauses.set("saveDialogMsg", true)
                 this.$store.dispatch("getDialogMsgs", data)
                     .then(resolve)
                     .catch(reject)
                     .finally(_ => {
                         this.msgLoadIng--
+                        $A.isSubElectron && $A.syncPauses.delete("saveDialogMsg")
                     })
             })
         },
