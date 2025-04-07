@@ -319,7 +319,6 @@ export default {
                 resize: !isFull,
                 convert_urls: false,
                 toolbar_mode: 'sliding',
-                content_css: this.themeName === 'dark' ? 'dark' : 'default',
                 setup: (editor) => {
                     editor.ui.registry.addMenuButton('uploadImages', {
                         text: this.$L('图片'),
@@ -476,6 +475,9 @@ export default {
                     }
                 },
             };
+            if (!optionInfo.inline) {
+                optionInfo.content_css = this.themeName === 'dark' ? 'dark' : 'default';
+            }
             if (this.autoSize) {
                 optionInfo.plugins.push('autoresize')
             }
