@@ -439,7 +439,7 @@ function createChildWindow(args) {
     electronMenu.webContentsMenu(browser.webContents)
 
     // 加载地址
-    const hash = args.hash || args.path;
+    const hash = `${args.hash || args.path}`;
     if (/^https?:/i.test(hash)) {
         browser.loadURL(hash).then(_ => { }).catch(_ => { })
     } else if (isPreload) {

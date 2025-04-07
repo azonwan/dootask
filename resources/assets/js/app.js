@@ -341,7 +341,7 @@ const $preload = async () => {
     }
 
     await store.dispatch("preload");
-    const hash = (window.location[routeMode === 'history' ? 'pathname' : 'hash']).replace(/^[#\/\s]/, '');
+    const hash = (window.location[routeMode === 'history' ? 'pathname' : 'hash']).replace(/^[#\/\s]+/, '');
     if (hash !== 'preload') {
         await $init()
         return
@@ -354,6 +354,9 @@ const $preload = async () => {
                 return;
             }
             route = route.replace(/^https?:\/\/[^\/]+/, '');
+        }
+        if (routeMode === 'hash') {
+            route = `#/${route.replace(/^[#\/\s]+/, '')}`;
         }
         window.history.replaceState(null, '', route)
         await $init()
