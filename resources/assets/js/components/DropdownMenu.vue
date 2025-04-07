@@ -17,7 +17,7 @@
                         :key="key"
                         :command="item.value"
                         :divided="!!item.divided"
-                        :disabled="active === item.value || !!item.disabled">
+                        :disabled="(active === item.value && !activeClick) || !!item.disabled">
                         <div class="item-box">
                             <div class="item">{{item.label}}</div>
                             <div v-if="tickShow" class="tick">
@@ -40,6 +40,7 @@ export default {
 
             list: [],           // 数据列表: [{label: '', value: ''}]
             active: '',         // 当前选中的值
+            activeClick: false, // 当前选中的值是否可以被点击
             onUpdate: null,     // 选中后的回调函数
             scrollHide: true,   // 滚动立即隐藏
             tickShow: true,     // 是否显示打勾
@@ -81,6 +82,7 @@ export default {
                 }
                 this.list = data.list;
                 this.active = data.active && this.list.find(item => item.value === data.active) ? data.active : '';
+                this.activeClick = typeof data.activeClick === "boolean" ? data.activeClick : false;
                 this.onUpdate = typeof data.onUpdate === "function" ? data.onUpdate : null;
                 this.scrollHide = typeof data.scrollHide === "boolean" ? data.scrollHide : true;
                 this.tickShow = typeof data.tickShow === "boolean" ? data.tickShow : true;

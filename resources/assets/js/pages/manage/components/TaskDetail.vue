@@ -435,16 +435,26 @@
                 class="task-resize"
                 placement="right"
                 v-model="taskDialogWidth"
-                :min="220"
+                :min="300"
                 :max="900"
                 :reverse="true"/>
             <template v-if="hasOpenDialog">
-                <DialogWrapper v-if="taskId > 0" ref="dialog" :dialog-id="taskDetail.dialog_id">
+                <DialogWrapper
+                    v-if="taskId > 0"
+                    ref="dialog"
+                    :dialog-id="taskDetail.dialog_id"
+                    @on-type-change="onTypeChange">
                     <div slot="head" class="head">
                         <Icon class="icon" type="ios-chatbubbles-outline" />
                         <div class="nav">
-                            <p :class="{active:navActive=='dialog'}" @click="navActive='dialog'">{{$L('聊天')}}</p>
-                            <p :class="{active:navActive=='log'}" @click="navActive='log'">{{$L('动态')}}</p>
+                            <div class="nav-item nav-chat" :class="{active:navActive=='dialog'}" @click="navActive='dialog'">
+                                {{$L('聊天')}}
+                                <span v-if="msgTypes.length > 1" class="msg-type" @click.stop="openTypeClick">
+                                    <i class="taskfont">&#xe740;</i>
+                                    <em v-if="msgType">{{getTypeLabel(msgType)}}</em>
+                                </span>
+                            </div>
+                            <div class="nav-item" :class="{active:navActive=='log'}" @click="navActive='log'">{{$L('动态')}}</div>
                             <div v-if="navActive=='log'" class="refresh">
                                 <Loading v-if="logLoadIng"/>
                                 <Icon v-else type="ios-refresh" @click="getLogLists"></Icon>
@@ -663,6 +673,7 @@ export default {
             msgText: '',
             msgFile: [],
             msgRecord: {},
+            msgType: '',
             navActive: 'dialog',
             logLoadIng: false,
 
@@ -740,6 +751,7 @@ export default {
             'cacheProjects',
             'cacheColumns',
             'cacheTasks',
+            'cacheDialogs',
 
             'taskContents',
             'taskFiles',
@@ -966,7 +978,36 @@ export default {
                 && !taskDetail.complete_at
                 && taskDetail.end_at
                 && taskDetail.end_at != mainEndAt
-        }
+        },
+
+        dialogData({taskDetail}) {
+            if (!taskDetail.dialog_id) {
+                return {}
+            }
+            return this.cacheDialogs.find(({id}) => id == taskDetail.dialog_id) || {}
+        },
+
+        msgTypes({dialogData}) {
+            const array = [
+                {value: '', label: this.$L('全部')},
+            ];
+            if (dialogData.has_tag) {
+                array.push({value: 'tag', label: this.$L('标注')})
+            }
+            if (dialogData.has_todo) {
+                array.push({value: 'todo', label: this.$L('事项')})
+            }
+            if (dialogData.has_image) {
+                array.push({value: 'image', label: this.$L('图片')})
+            }
+            if (dialogData.has_file) {
+                array.push({value: 'file', label: this.$L('文件')})
+            }
+            if (dialogData.has_link) {
+                array.push({value: 'link', label: this.$L('链接')})
+            }
+            return array
+        },
     },
 
     watch: {
@@ -2043,6 +2084,36 @@ export default {
             ];
             // 触发更新
             this.updateData('tag', mergedTags);
+        },
+
+        getTypeLabel(type) {
+            this.msgTypes.some(item => {
+                if (item.value === type) {
+                    type = item.label
+                    return true
+                }
+            })
+            return type
+        },
+
+        onTypeChange(type) {
+            this.msgType = type
+        },
+
+        openTypeClick(event) {
+            if (this.msgTypes.length === 0) {
+                return
+            }
+            this.$store.state.menuOperation = {
+                event,
+                list: this.msgTypes,
+                active: this.msgType,
+                activeClick: true,
+                onUpdate: (type) => {
+                    this.navActive = 'dialog'
+                    this.$refs.dialog?.onMsgType(type)
+                }
+            }
         }
     }
 }

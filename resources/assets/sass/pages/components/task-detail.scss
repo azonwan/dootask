@@ -618,7 +618,7 @@
                 padding-left: 18px;
                 font-weight: 500;
                 color: $primary-text-color;
-                > p {
+                .nav-item {
                     display: flex;
                     align-items: center;
                     margin-right: 24px;
@@ -629,6 +629,32 @@
                         font-weight: 600;
                         color: #555555;
                         cursor: default;
+                    }
+                    &.nav-chat {
+                        .msg-type {
+                            display: flex;
+                            align-items: center;
+                            padding-left: 6px;
+                            opacity: 0.8;
+                            transition: opacity 0.2s;
+                            cursor: pointer;
+                            &:hover {
+                                opacity: 1;
+                            }
+                            .taskfont {
+                                display: inline-block;
+                                font-size: 12px;
+                                padding-top: 1px;
+                                font-weight: normal;
+                                opacity: 0.9;
+                            }
+                            > em {
+                                padding-left: 4px;
+                                font-style: normal;
+                                font-size: 12px;
+                                font-weight: normal;
+                            }
+                        }
                     }
                 }
                 .refresh {
@@ -801,7 +827,7 @@
                 }
                 .nav {
                     padding-left: 0;
-                    > p {
+                    .nav-item {
                         margin-right: 28px;
                         &.active {
                             font-size: 18px;

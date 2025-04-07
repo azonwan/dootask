@@ -54,9 +54,9 @@
                                     {{$L(dialogData.online_state === true ? '在线' : dialogData.online_state)}}
                                 </li>
                             </ul>
-                            <ul v-if="tagShow" class="title-tags scrollbar-hidden">
+                            <ul v-if="typeShow" class="title-types scrollbar-hidden">
                                 <li
-                                    v-for="item in msgTags"
+                                    v-for="item in msgTypes"
                                     :key="item.type"
                                     :class="{
                                         [item.type || 'msg']: true,
@@ -64,7 +64,7 @@
                                     }"
                                     @click="onMsgType(item.type)">
                                     <i class="no-dark-content"></i>
-                                    <span>{{$L(item.label)}}</span>
+                                    <span>{{item.label}}</span>
                                 </li>
                             </ul>
                         </div>
@@ -972,33 +972,33 @@ export default {
             return '发送文件'
         },
 
-        msgTags({dialogData}) {
+        msgTypes({dialogData}) {
             const array = [
-                {type: '', label: '消息'},
+                {type: '', label: this.$L('消息')},
             ];
             if (dialogData.has_tag) {
-                array.push({type: 'tag', label: '标注'})
+                array.push({type: 'tag', label: this.$L('标注')})
             }
             if (dialogData.has_todo) {
-                array.push({type: 'todo', label: '事项'})
+                array.push({type: 'todo', label: this.$L('事项')})
             }
             if (dialogData.has_image) {
-                array.push({type: 'image', label: '图片'})
+                array.push({type: 'image', label: this.$L('图片')})
             }
             if (dialogData.has_file) {
-                array.push({type: 'file', label: '文件'})
+                array.push({type: 'file', label: this.$L('文件')})
             }
             if (dialogData.has_link) {
-                array.push({type: 'link', label: '链接'})
+                array.push({type: 'link', label: this.$L('链接')})
             }
             if (dialogData.group_type === 'project') {
-                array.push({type: 'project', label: '打开项目'})
+                array.push({type: 'project', label: this.$L('打开项目')})
             }
             if (dialogData.group_type === 'task') {
-                array.push({type: 'task', label: '打开任务'})
+                array.push({type: 'task', label: this.$L('打开任务')})
             }
             if (dialogData.group_type === 'okr') {
-                array.push({type: 'okr', label: '打开OKR'})
+                array.push({type: 'okr', label: this.$L('打开OKR')})
             }
             return array
         },
@@ -1032,8 +1032,8 @@ export default {
             return this.todoList.length > 0 && this.isDefaultSize && this.quoteId === 0
         },
 
-        tagShow() {
-            return this.msgTags.length > 1 && this.isDefaultSize && !this.searchShow
+        typeShow() {
+            return this.msgTypes.length > 1 && this.isDefaultSize && !this.searchShow
         },
 
         topShow() {
@@ -1050,7 +1050,7 @@ export default {
         navClass() {
             return {
                 'completed': $A.dialogCompleted(this.dialogData),
-                'tagged': this.tagShow
+                'tagged': this.typeShow
             }
         },
 
@@ -1261,6 +1261,7 @@ export default {
 
         msgType() {
             this.onGetMsgClear()
+            this.$emit('on-type-change', this.msgType)
         },
 
         searchKey(key) {
