@@ -431,14 +431,14 @@
             <TaskUpload ref="upload" class="upload" @on-select-file="onSelectFile"/>
         </div>
         <div v-show="taskDetail.id > 0" class="task-dialog" :style="dialogStyle">
-            <ResizeLine
-                class="task-resize"
-                placement="right"
-                v-model="taskDialogWidth"
-                :min="300"
-                :max="900"
-                :reverse="true"/>
             <template v-if="hasOpenDialog">
+                <ResizeLine
+                    class="task-resize"
+                    placement="right"
+                    v-model="taskDialogWidth"
+                    :min="300"
+                    :max="900"
+                    :reverse="true"/>
                 <DialogWrapper
                     v-if="taskId > 0"
                     ref="dialog"
@@ -468,8 +468,8 @@
                 <div class="head">
                     <Icon class="icon" type="ios-chatbubbles-outline" />
                     <div class="nav">
-                        <p :class="{active:navActive=='dialog'}" @click="navActive='dialog'">{{$L('聊天')}}</p>
-                        <p :class="{active:navActive=='log'}" @click="navActive='log'">{{$L('动态')}}</p>
+                        <div class="nav-item" :class="{active:navActive=='dialog'}" @click="navActive='dialog'">{{$L('聊天')}}</div>
+                        <div class="nav-item" :class="{active:navActive=='log'}" @click="navActive='log'">{{$L('动态')}}</div>
                         <div v-if="navActive=='log'" class="refresh">
                             <Loading v-if="logLoadIng"/>
                             <Icon v-else type="ios-refresh" @click="getLogLists"></Icon>
