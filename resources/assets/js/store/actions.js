@@ -568,6 +568,16 @@ export default {
             $A.eeuiAppSendMessage({
                 action: 'updateTheme',
                 themeName: state.themeName,
+                themeDefault: {
+                    theme: {
+                        dark: '#131313',
+                        light: '#f8f8f8'
+                    },
+                    nav: {
+                        dark: '#cdcdcd',
+                        light: '#232323'
+                    }
+                }
             });
         } else if ($A.isElectron) {
             $A.Electron.sendMessage('setStore', {
@@ -3332,6 +3342,7 @@ export default {
             dialogDraftState.subTemp = {id, content, immediate: true}
             return
         }
+        $A.syncDispatch("saveDialogDraft", {id, content, immediate})
 
         // 清除已有的计时器
         if (dialogDraftState.timer[id]) {

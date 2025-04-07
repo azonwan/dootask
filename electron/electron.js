@@ -1029,6 +1029,16 @@ ipcMain.on('openChildWindow', (event, args) => {
 })
 
 /**
+ * 显示预加载窗口（用于调试）
+ */
+ipcMain.on('showPreloadWindow', (event) => {
+    if (preloadWindow) {
+        onShowWindow(preloadWindow)
+    }
+    event.returnValue = "ok"
+})
+
+/**
  * 更新路由窗口
  * @param args {?name, ?path} // name: 不是要更改的窗口名，是要把窗口名改成什么， path: 地址
  */
