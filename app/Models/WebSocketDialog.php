@@ -674,6 +674,9 @@ class WebSocketDialog extends AbstractModel
      */
     public static function checkDialog($dialog_id, $checkOwner = false)
     {
+        if ($dialog_id <= 0) {
+            throw new ApiException('参数错误');
+        }
         $dialog = WebSocketDialog::find($dialog_id);
         if (empty($dialog)) {
             throw new ApiException('对话不存在或已被删除', ['dialog_id' => $dialog_id], -4003);
@@ -687,18 +690,25 @@ class WebSocketDialog extends AbstractModel
             throw new ApiException('仅限群主操作');
         }
         //
-        if ($dialog->group_type === 'task') {
-            // 任务群对话校验是否在项目内
-            $project_id = intval(ProjectTask::whereDialogId($dialog->id)->value('project_id'));
-            if ($project_id > 0) {
-                if (ProjectUser::whereProjectId($project_id)->whereUserid($userid)->exists()) {
+        switch ($dialog->group_type) {
+            case 'project':
+            case 'task':
+                // 项目群、任务群对话校验是否在项目内
+                if ($dialog->group_type === 'project') {
+                    $projectId = intval(Project::whereDialogId($dialog->id)->value('id'));
+                } else {
+                    $projectId = intval(ProjectTask::whereDialogId($dialog->id)->value('project_id'));
+                }
+                if ($projectId > 0 && ProjectUser::whereProjectId($projectId)->whereUserid($userid)->exists()) {
                     return $dialog;
                 }
-            }
+                break;
+
+            case 'okr':
+                // OKR群对话不用校验
+                return $dialog;
         }
-        if ($dialog->group_type == 'okr') {
-            return $dialog;
-        }
+        //
         if (!WebSocketDialogUser::whereDialogId($dialog->id)->whereUserid($userid)->exists()) {
             WebSocketDialogMsgRead::forceRead($dialog_id, $userid);
             throw new ApiException('不在成员列表内', ['dialog_id' => $dialog_id], -4003);

@@ -241,17 +241,10 @@ class DialogController extends AbstractController
         //
         $dialog_id = intval(Request::input('dialog_id'));
         //
-        $item = DB::table('web_socket_dialog_users as u')
-            ->select(['d.*', 'u.top_at', 'u.last_at', 'u.mark_unread', 'u.silence', 'u.hide', 'u.color', 'u.updated_at as user_at'])
-            ->join('web_socket_dialogs as d', 'u.dialog_id', '=', 'd.id')
-            ->where('u.userid', $user->userid)
-            ->where('d.id', $dialog_id)
-            ->whereNull('d.deleted_at')
-            ->first();
-        if (empty($item)) {
-            return Base::retError('不在成员列表内');
-        }
-        return Base::retSuccess('success', WebSocketDialog::synthesizeData($item, $user->userid));
+        $dialog = WebSocketDialog::checkDialog($dialog_id);
+        $data = WebSocketDialog::synthesizeData($dialog, $user->userid);
+        //
+        return Base::retSuccess('success', $data);
     }
 
     /**
