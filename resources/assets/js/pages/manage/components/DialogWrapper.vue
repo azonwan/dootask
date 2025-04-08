@@ -1397,7 +1397,9 @@ export default {
 
         windowHeight() {
             this.androidKeyboardVisible = $A.isAndroid() && $A.eeuiAppKeyboardStatus()
-            requestAnimationFrame(this.$refs.input.updateTools)
+            requestAnimationFrame(_ => {
+                this.$refs.input?.updateTools()
+            })
         },
 
         dialogDrag(val) {
@@ -1416,7 +1418,7 @@ export default {
         footerPaddingBottom(val) {
             this.$refs.footer.style.paddingBottom = `${val}px`;
             requestAnimationFrame(_ => {
-                this.$refs.input.updateTools()
+                this.$refs.input?.updateTools()
             })
         },
 
@@ -2227,7 +2229,7 @@ export default {
 
         inputFocus() {
             this.$nextTick(_ => {
-                this.$refs.input && this.$refs.input.focus()
+                this.$refs.input?.focus()
             })
         },
 
@@ -3039,7 +3041,7 @@ export default {
         onMention(data) {
             const user = this.cacheUserBasic.find(({userid}) => userid == data.userid);
             if (user) {
-                this.$refs.input.addMention({
+                this.$refs.input?.addMention({
                     denotationChar: "@",
                     id: user.userid,
                     value: user.nickname,
