@@ -988,7 +988,7 @@ export default {
 
             // Mark model as touched if editor lost focus
             this.quill.on('selection-change', range => {
-                if (!inputLoadIsLast(this._uid)) {
+                if (!this.inputActivated()) {
                     return;
                 }
                 if (range) {
@@ -1247,6 +1247,10 @@ export default {
             }, 100)
         },
 
+        inputActivated() {
+            return !this.fullInput && inputLoadIsLast(this._uid)
+        },
+
         getEditor() {
             return this.fullInput ? this.fullQuill : this.quill
         },
@@ -1294,6 +1298,7 @@ export default {
         onClickEditor() {
             this.clearSearchKey()
             this.updateEmojiQuick(this.value)
+            inputLoadAdd(this._uid)
         },
 
         clearSearchKey() {
@@ -1731,7 +1736,15 @@ export default {
                         }
                     }, this.options))
                     this.fullQuill.on('selection-change', range => {
-                        this.fullSelection = range || {index: 0, length: 0};
+                        if (range) {
+                            this.fullSelection = range
+                        } else if (this.fullSelection && document.activeElement && /(ql-editor|ql-clipboard)/.test(document.activeElement.className)) {
+                            // 修复iOS光标会超出的问题
+                            this.selectTimer && clearTimeout(this.selectTimer)
+                            this.selectTimer = setTimeout(_ => {
+                                this.fullQuill.setSelection(this.fullSelection.index, this.fullSelection.length)
+                            }, 100)
+                        }
                     })
                     this.fullQuill.on('text-change', _ => {
                         this.fullSelection = this.fullQuill.getSelection()
@@ -1900,7 +1913,7 @@ export default {
             if (!this.quill) {
                 return;
             }
-            if (!inputLoadIsLast(this._uid)) {
+            if (!this.inputActivated()) {
                 return;
             }
             const {index} = this.quill.getSelection(true);
